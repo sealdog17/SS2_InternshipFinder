@@ -405,7 +405,7 @@ def job_detail(job_id):
 # ===================== TẠO DATABASE & DỮ LIỆU MẪU =====================
 with app.app_context():
     db.create_all()
-    print("✅ Database created successfully!")
+    print("[SUCCESS] Database created successfully!")
 
     if Job.query.count() == 0:
         sample_jobs = [
