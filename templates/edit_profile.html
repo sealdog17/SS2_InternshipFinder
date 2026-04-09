@@ -25,7 +25,7 @@
 
     /* Navbar */
     .navbar {
-      height: 130px; background: rgba(255,255,255,0.85); backdrop-filter: blur(16px);
+      height: 100px; background: rgba(255,255,255,0.85); backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--border);
       position: fixed; top: 0; width: 100%; z-index: 50;
       display: flex; align-items: center; padding: 0 40px; justify-content: space-between;
@@ -37,7 +37,7 @@
     .avatar { width: 35px; height: 35px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
     /* Builder Layout */
-    .builder-container { margin-top: 130px; display: flex; height: calc(100vh - 130px); }
+    .builder-container { margin-top: 100px; display: flex; height: calc(100vh - 100px); }
     
     /* Sidebar */
     .sidebar {
@@ -128,7 +128,7 @@
 <body>
 
   <nav class="navbar">
-    <a href="{{ url_for('job_list') }}" class="logo"><img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="height: 110px; vertical-align: middle;"></a>
+    <a href="{{ url_for('job_list') }}" class="logo"><img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="height: 75px; vertical-align: middle;"></a>
     <div class="nav-actions">
       <a href="{{ url_for('profile') }}" class="btn-exit"><i class="fas fa-times"></i> Đóng</a>
       <div class="avatar">{{ session.get('user_name', 'U')[0].upper() }}</div>
