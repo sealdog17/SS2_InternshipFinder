@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CV Builder - InternshipFinder</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --secondary: #ec4899;
+      --accent: #8b5cf6;
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --success: #10b981;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg-color); color: var(--text-main); overflow-x: hidden; }
+
+    /* Navbar */
+    .navbar {
+      height: 130px; background: rgba(255,255,255,0.85); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      position: fixed; top: 0; width: 100%; z-index: 50;
+      display: flex; align-items: center; padding: 0 40px; justify-content: space-between;
+    }
+    .logo { font-size: 22px; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-decoration: none;}
+    .nav-actions { display: flex; gap: 15px; align-items: center; }
+    .btn-exit { padding: 8px 16px; border-radius: 8px; font-weight: 600; text-decoration: none; color: var(--text-muted); border: 1px solid var(--border); transition: all 0.3s; font-size: 14px;}
+    .btn-exit:hover { background: #f1f5f9; color: var(--text-main); }
+    .avatar { width: 35px; height: 35px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+
+    /* Builder Layout */
+    .builder-container { margin-top: 130px; display: flex; height: calc(100vh - 130px); }
+    
+    /* Sidebar */
+    .sidebar {
+      width: 300px; background: var(--card-bg); border-right: 1px solid var(--border);
+      padding: 30px 20px; display: flex; flex-direction: column; gap: 12px;
+      overflow-y: auto; background: linear-gradient(180deg, #fff 0%, #f8fafc 100%);
+    }
+    .sidebar-title { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; padding-left: 10px; }
+    
+    .step-item {
+      display: flex; align-items: center; gap: 15px; padding: 12px 15px;
+      border-radius: 12px; cursor: pointer; transition: all 0.3s ease;
+      color: var(--text-muted); border: 1px solid transparent;
+    }
+    .step-item:hover { background: #f1f5f9; }
+    .step-item.active {
+      background: linear-gradient(to right, rgba(79,70,229,0.08), rgba(139,92,246,0.03));
+      border: 1px solid rgba(79,70,229,0.2); color: var(--primary); font-weight: 600;
+    }
+    .step-icon {
+      width: 36px; height: 36px; border-radius: 10px; background: #f1f5f9;
+      display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;
+    }
+    .step-item.active .step-icon {
+      background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(79,70,229,0.3);
+    }
+    .step-item.completed .step-icon { background: var(--success); color: white; }
+
+    /* Main Form Area */
+    .form-area {
+      flex: 1; padding: 40px; overflow-y: auto;
+      background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+    
+    .form-card {
+      max-width: 850px; margin: 0 auto; background: var(--card-bg);
+      border-radius: 20px; box-shadow: 0 20px 40px -15px rgba(0,0,0,0.05);
+      padding: 40px; border: 1px solid rgba(255,255,255,0.8);
+    }
+    
+    .section-title { font-size: 22px; font-weight: 700; margin-bottom: 30px; color: var(--text-main); display: flex; align-items: center; gap: 10px; padding-bottom: 15px; border-bottom: 1px solid var(--border); }
+    .section-title i { color: var(--primary); background: rgba(79,70,229,0.1); padding: 10px; border-radius: 10px; font-size: 18px; }
+
+    .form-row { display: flex; gap: 24px; margin-bottom: 24px; }
+    .form-group { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+    .form-group.full { width: 100%; }
+    
+    label { font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    
+    .input-wrapper { position: relative; }
+    .input-wrapper i { position: absolute; left: 16px; top: 16px; color: #94a3b8; transition: 0.3s; }
+    
+    input, select, textarea {
+      width: 100%; padding: 14px 16px 14px 45px; border: 1.5px solid var(--border);
+      border-radius: 12px; font-family: inherit; font-size: 15px;
+      transition: all 0.3s; background: #f8fafc; color: var(--text-main);
+    }
+    textarea { min-height: 140px; resize: vertical; padding-top: 14px; }
+    input:focus, select:focus, textarea:focus {
+      background: #fff; border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(79,70,229,0.1); outline: none;
+    }
+    input:focus + i, select:focus + i, textarea:focus + i { color: var(--primary); }
+    
+    /* Wizard Behavior */
+    .wizard-step { display: none; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    .wizard-step.active { display: block; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Footer buttons */
+    .form-footer { display: flex; justify-content: space-between; margin-top: 40px; padding-top: 25px; border-top: 1px solid var(--border); }
+    .btn { padding: 12px 28px; border-radius: 12px; font-weight: 600; font-size: 15px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 10px; border: none; font-family: inherit; }
+    .btn-prev { background: #f1f5f9; color: var(--text-main); }
+    .btn-prev:hover { background: #e2e8f0; }
+    .btn-next, .btn-save { background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; box-shadow: 0 4px 15px rgba(79,70,229,0.3); }
+    .btn-next:hover, .btn-save:hover { box-shadow: 0 6px 20px rgba(79,70,229,0.4); transform: translateY(-2px); }
+    
+    .hint { font-size: 13px; color: #94a3b8; margin-top: 5px; }
+
+    /* Flash */
+    .flash-wrap { margin-bottom: 20px; }
+    .flash { padding: 15px 20px; border-radius: 12px; font-weight: 500; font-size: 14px; border-left: 4px solid; display: flex; gap: 10px; align-items: center; }
+    .flash.success { background: #ecfdf5; color: #065f46; border-color: var(--success); }
+    .flash.danger { background: #fef2f2; color: #991b1b; border-color: #ef4444; }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="{{ url_for('job_list') }}" class="logo"><img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="height: 110px; vertical-align: middle;"></a>
+    <div class="nav-actions">
+      <a href="{{ url_for('profile') }}" class="btn-exit"><i class="fas fa-times"></i> Đóng</a>
+      <div class="avatar">{{ session.get('user_name', 'U')[0].upper() }}</div>
+    </div>
+  </nav>
+
+  <div class="builder-container">
+    <!-- Sidebar / Steps Navbar -->
+    <div class="sidebar">
+      <div class="sidebar-title">Tiến trình tạo CV</div>
+      
+      <div class="step-item active" onclick="showStep(1)" id="nav-step-1">
+        <div class="step-icon"><i class="fas fa-user"></i></div>
+        <div class="step-text">Thông tin cá nhân</div>
+      </div>
+      
+      <div class="step-item" onclick="showStep(2)" id="nav-step-2">
+        <div class="step-icon"><i class="fas fa-briefcase"></i></div>
+        <div class="step-text">Chuyên môn</div>
+      </div>
+      
+      <div class="step-item" onclick="showStep(3)" id="nav-step-3">
+        <div class="step-icon"><i class="fas fa-graduation-cap"></i></div>
+        <div class="step-text">Học vấn</div>
+      </div>
+      
+      <div class="step-item" onclick="showStep(4)" id="nav-step-4">
+        <div class="step-icon"><i class="fas fa-list-check"></i></div>
+        <div class="step-text">Kinh nghiệm</div>
+      </div>
+    </div>
+
+    <!-- Main Workspace -->
+    <div class="form-area">
+      <div class="form-card">
+        
+        <div class="flash-wrap">
+          {% with messages = get_flashed_messages(with_categories=true) %}
+          {% for category, message in messages %}
+          <div class="flash {{ category }}"><i class="fas fa-info-circle"></i> {{ message }}</div>
+          {% endfor %}
+          {% endwith %}
+        </div>
+
+        <form method="POST" id="cvForm">
+          
+          <!-- STEP 1: Personal Info -->
+          <div class="wizard-step active" id="step-1">
+            <div class="section-title"><i class="fas fa-address-card"></i> Thông tin liên hệ & Cá nhân</div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label>Email</label>
+                <div class="input-wrapper">
+                  <input type="email" value="{{ user.email }}" disabled style="cursor: not-allowed; opacity: 0.7;">
+                  <i class="fas fa-envelope"></i>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Số điện thoại</label>
+                <div class="input-wrapper">
+                  <input type="tel" name="phone" value="{{ user.phone or '' }}" placeholder="VD: +84 123 456 789">
+                  <i class="fas fa-phone"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Địa chỉ</label>
+                <div class="input-wrapper">
+                  <input type="text" name="address" value="{{ user.address or '' }}" placeholder="Thành phố, Tỉnh">
+                  <i class="fas fa-map-marker-alt"></i>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Ngày sinh</label>
+                <div class="input-wrapper">
+                  <input type="date" name="dob" value="{{ user.dob or '' }}">
+                  <i class="fas fa-calendar-alt"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Tình trạng hôn nhân</label>
+                <div class="input-wrapper">
+                  <select name="marital_status" style="padding-left: 45px;">
+                    <option value="">Chọn một giá trị</option>
+                    <option value="Độc thân" {% if user.marital_status == 'Độc thân' %}selected{% endif %}>Độc thân</option>
+                    <option value="Đã kết hôn" {% if user.marital_status == 'Đã kết hôn' %}selected{% endif %}>Đã kết hôn</option>
+                  </select>
+                  <i class="fas fa-heart"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-footer">
+              <div></div>
+              <button type="button" class="btn btn-next" onclick="nextStep(2)">Tiếp tục <i class="fas fa-arrow-right"></i></button>
+            </div>
+          </div>
+
+          <!-- STEP 2: Bio & Skills -->
+          <div class="wizard-step" id="step-2">
+            <div class="section-title"><i class="fas fa-laptop-code"></i> Chuyên môn & Định hướng</div>
+            
+            <div class="form-row">
+              <div class="form-group full">
+                <label>Vị trí mong muốn ứng tuyển</label>
+                <div class="input-wrapper">
+                  <input type="text" name="job_title" value="{{ user.job_title or '' }}" placeholder="VD: Frontend Developer / Data Analyst">
+                  <i class="fas fa-briefcase"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group full">
+                <label>Mục tiêu nghề nghiệp (Giới thiệu bản thân)</label>
+                <div class="input-wrapper">
+                  <textarea name="bio" placeholder="Hãy viết một đoạn ngắn giới thiệu về bản thân và mục tiêu trong 3 năm tới...">{{ user.bio or '' }}</textarea>
+                  <i class="fas fa-quote-left"></i>
+                </div>
+                <div class="hint">Nhà tuyển dụng rất thích đọc phần này để hiểu định hướng của bạn.</div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group full">
+                <label>Kỹ năng nổi bật</label>
+                <div class="input-wrapper">
+                  <textarea name="skills" placeholder="VD:&#10;Kỹ năng cứng: Python, Excel, SQL&#10;Kỹ năng mềm: Giao tiếp, Làm việc nhóm">{{ user.skills or '' }}</textarea>
+                  <i class="fas fa-star"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-footer">
+              <button type="button" class="btn btn-prev" onclick="prevStep(1)"><i class="fas fa-arrow-left"></i> Quay lại</button>
+              <button type="button" class="btn btn-next" onclick="nextStep(3)">Tiếp tục <i class="fas fa-arrow-right"></i></button>
+            </div>
+          </div>
+
+          <!-- STEP 3: Education & Lang -->
+          <div class="wizard-step" id="step-3">
+            <div class="section-title"><i class="fas fa-graduation-cap"></i> Học vấn & Ngôn ngữ</div>
+
+            <div class="form-row">
+              <div class="form-group full">
+                <label>Ngoại ngữ</label>
+                <div class="input-wrapper">
+                  <input type="text" name="languages" value="{{ user.languages or '' }}" placeholder="VD: Tiếng Anh (IELTS 7.0), Tiếng Nhật (N3)">
+                  <i class="fas fa-language"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group full">
+                <label>Lịch sử học vấn</label>
+                <div class="input-wrapper">
+                  <textarea name="education" placeholder="Ghi rõ trường đại học, loại bằng cấp và thời gian. VD:&#10;Đại học Tôn Đức Thắng (2021-2025)&#10;- Chuyên ngành: Công nghệ thông tin&#10;- GPA: 3.8/4.0">{{ user.education or '' }}</textarea>
+                  <i class="fas fa-university"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-footer">
+              <button type="button" class="btn btn-prev" onclick="prevStep(2)"><i class="fas fa-arrow-left"></i> Quay lại</button>
+              <button type="button" class="btn btn-next" onclick="nextStep(4)">Tiếp tục <i class="fas fa-arrow-right"></i></button>
+            </div>
+          </div>
+
+          <!-- STEP 4: Experience -->
+          <div class="wizard-step" id="step-4">
+            <div class="section-title"><i class="fas fa-rocket"></i> Kinh nghiệm làm việc & Dự án</div>
+
+            <div class="form-row">
+              <div class="form-group full">
+                <label>Quá trình công tác / Dự án nổi bật</label>
+                <div class="input-wrapper">
+                  <textarea name="experience" style="min-height: 250px" placeholder="VD:&#10;Dự án: Hệ thống quản lý Internship Finder (10/2025 - Nay)&#10;- Vị trí: Fullstack Developer&#10;- Mô tả: Xây dựng hệ thống web kết nối ứng viên...&#10;- Công nghệ sử dụng: Flask, SQLite, Bootstrap">{{ user.experience or '' }}</textarea>
+                  <i class="fas fa-building"></i>
+                </div>
+                <div class="hint">Hãy liệt kê các dự án cá nhân hoặc công việc làm thêm nếu chưa có công việc chính thức. Ghi rõ khoảng thời gian.</div>
+              </div>
+            </div>
+
+            <div class="form-footer">
+              <button type="button" class="btn btn-prev" onclick="prevStep(3)"><i class="fas fa-arrow-left"></i> Quay lại</button>
+              <button type="submit" class="btn btn-save"><i class="fas fa-check-circle"></i> Hoàn tất & Lưu CV</button>
+            </div>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentStep = 1;
+    const totalSteps = 4;
+
+    function showStep(step) {
+      // Ẩn tất cả nội dung
+      document.querySelectorAll('.wizard-step').forEach(el => {
+        el.classList.remove('active');
+      });
+      // Bỏ highlight sidebar
+      document.querySelectorAll('.step-item').forEach(el => {
+        el.classList.remove('active');
+        // Thêm class completed cho các step trước
+        const stepNum = parseInt(el.id.split('-')[2]);
+        if (stepNum < step) {
+          el.classList.add('completed');
+        } else {
+          el.classList.remove('completed');
+        }
+      });
+
+      // Hiển thị nội dung step hiện tại
+      document.getElementById(`step-${step}`).classList.add('active');
+      document.getElementById(`nav-step-${step}`).classList.add('active');
+      
+      currentStep = step;
+      // Scroll to top of form smoothly
+      document.querySelector('.form-area').scrollTo({top: 0, behavior: 'smooth'});
+    }
+
+    function nextStep(step) {
+      showStep(step);
+    }
+    
+    function prevStep(step) {
+      showStep(step);
+    }
+  </script>
+</body>
+</html>

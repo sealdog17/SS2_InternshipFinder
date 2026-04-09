@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hồ sơ của tôi - InternshipFinder</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1964d3; /* The exact blue from the buttons & nav */
+      --nav-bg: #ffffff;
+      --bg-color: #f6f7fa; /* The grey behind the preview */
+      --text-main: #212529;
+      --text-muted: #6b7280;
+      
+      /* CV Specific variables */
+      --cv-blue: #065ec9; /* Deep blue from cv sidebar */
+      --cv-text: #334155;
+      --cv-light-blue: #2374d6; /* top skills tags */
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg-color); color: var(--text-main); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+    /* Navbar exact matching */
+    .navbar {
+      height: 130px; background: var(--nav-bg); display: flex; justify-content: space-between; align-items: center; padding: 0 40px; border-bottom: 1px solid #e5e7eb; flex-shrink: 0;
+    }
+    .nav-center { display: flex; gap: 30px; height: 100%; align-items: center; }
+    .nav-link { text-decoration: none; color: #4b5563; font-size: 14px; font-weight: 500; height: 100%; display: flex; align-items: center; position: relative; }
+    .nav-link.active { color: var(--primary); font-weight: 600; }
+    .nav-link.active::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: var(--primary); border-top-left-radius: 3px; border-top-right-radius: 3px; }
+    .nav-right { display: flex; gap: 20px; align-items: center; }
+    .icon-btn { color: #6b7280; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; text-decoration: none; }
+    .avatar { width: 32px; height: 32px; border-radius: 50%; background: #1f2937; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; overflow: hidden; }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* Main Layout */
+    .app-body { display: flex; flex: 1; overflow: hidden; }
+
+    /* Toolbar Panel (Left) */
+    .panel-left { width: 360px; background: #ffffff; border-right: 1px solid #e5e7eb; padding: 40px; display: flex; flex-direction: column; overflow-y: auto; }
+    .back-btn { display: flex; align-items: center; gap: 6px; color: var(--primary); text-decoration: none; font-size: 14px; font-weight: 600; margin-bottom: 30px; }
+    
+    h1.template-title { font-size: 28px; font-weight: 800; color: #111827; margin-bottom: 20px; letter-spacing: -0.5px; }
+    p.template-desc { font-size: 14px; color: #4b5563; line-height: 1.6; margin-bottom: 30px; }
+    
+    .btn { width: 100%; padding: 14px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; text-align: center; border: none; transition: 0.2s; font-family: inherit; margin-bottom: 15px; text-decoration: none; display: inline-block; }
+    .btn-blue { background: var(--primary); color: white; }
+    .btn-blue:hover { background: #1555b5; }
+    .btn-light { background: #f3f4f6; color: #374151; }
+    .btn-light:hover { background: #e5e7eb; }
+    
+    .features-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
+    .feature-card { border: 1px solid #f3f4f6; background: #f9fafb; padding: 20px 15px; border-radius: 8px; display: flex; flex-direction: column; gap: 12px; }
+    .feature-icon { color: var(--primary); }
+    .feature-title { font-size: 12px; font-weight: 700; color: #111827; }
+    .feature-desc { font-size: 11px; color: #6b7280; line-height: 1.4; }
+
+    /* Preview Panel (Right) */
+    .panel-right { flex: 1; padding: 40px; display: flex; justify-content: center; align-items: flex-start; overflow-y: auto; }
+    
+    /* The CV Paper */
+    .cv-paper {
+      width: 794px; /* A4 aspect ratio representation */
+      min-height: 1123px;
+      background: white;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+      display: flex;
+      flex-direction: row;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    /* CV sidebar (Blue) */
+    .cv-aside {
+      width: 32%; background: var(--cv-blue); color: white; padding: 45px 30px;
+      display: flex; flex-direction: column; gap: 35px;
+    }
+    
+    .cv-avatar-wrap { text-align: center; }
+    .cv-avatar {
+      width: 130px; height: 130px; border-radius: 50%;
+      border: 3px solid rgba(255,255,255,0.2);
+      margin: 0 auto 20px; overflow: hidden;
+      background: #1e3a8a; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: bold;
+    }
+    .cv-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .cv-name { font-size: 22px; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.5px; }
+    .cv-job { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.7); }
+
+    .cv-section h3 { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px; color: white; }
+    
+    .cv-contact-item { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; font-size: 11px; color: rgba(255,255,255,0.9); line-height: 1.4; }
+    .cv-contact-item svg { width: 14px; height: 14px; flex-shrink: 0; color: rgba(255,255,255,0.6); }
+
+    .cv-skills-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
+    .cv-skill-tag { background: var(--cv-light-blue); padding: 5px 12px; border-radius: 3px; font-size: 10px; font-weight: 500; }
+
+    .cv-edu-item { margin-bottom: 12px; }
+    .cv-edu-school { font-size: 11px; font-weight: 700; margin-bottom: 4px; }
+    .cv-edu-degree { font-size: 10px; color: rgba(255,255,255,0.8); margin-bottom: 2px; }
+    .cv-edu-year { font-size: 9px; color: rgba(255,255,255,0.5); }
+
+    /* CV Main Body */
+    .cv-main {
+      width: 68%; padding: 50px 45px; background: white;
+      display: flex; flex-direction: column; gap: 40px;
+    }
+
+    .cv-head-title { display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--cv-blue); margin-bottom: 16px; }
+    .cv-head-title::before { content: ''; width: 25px; height: 2px; background: var(--cv-blue); }
+
+    .cv-profile-text { font-size: 12px; color: var(--cv-text); line-height: 1.7; }
+
+    .cv-exp-item { margin-bottom: 25px; position: relative; }
+    .cv-exp-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; position: relative; }
+    /* The blue dot on the left */
+    .cv-exp-header::before { content: ''; position: absolute; left: -22px; top: 6px; width: 6px; height: 6px; border-radius: 50%; background: var(--cv-blue); }
+    .cv-exp-role { font-size: 13.5px; font-weight: 700; color: #111827; }
+    .cv-exp-date { font-size: 9px; font-weight: 700; color: #6b7280; letter-spacing: 1px; background: #f3f4f6; padding: 4px 10px; border-radius: 12px; text-transform: uppercase; }
+    .cv-exp-company { font-size: 11px; font-weight: 700; color: var(--cv-blue); margin-bottom: 12px; }
+    
+    .cv-exp-desc { font-size: 11.5px; color: var(--cv-text); line-height: 1.6; margin-bottom: 8px; }
+
+    /* Achievements Grid */
+    .achieve-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .achieve-card { background: #f8fafc; padding: 16px; border-radius: 6px; }
+    .achieve-year { font-size: 10px; font-weight: 700; color: var(--cv-blue); margin-bottom: 4px; }
+    .achieve-title { font-size: 11.5px; font-weight: 700; color: #111827; margin-bottom: 4px; }
+    .achieve-desc { font-size: 10px; color: var(--cv-text); }
+
+    /* Modal Styles */
+    .modal-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.85); z-index: 1000; align-items: flex-start; justify-content: center;
+      overflow-y: auto; padding: 40px 0; backdrop-filter: blur(8px);
+    }
+    .modal-overlay.active { display: flex; animation: fadeIn 0.2s ease-out forwards; }
+    @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+    .modal-close {
+      position: fixed; top: 20px; right: 30px; color: white; font-size: 24px; cursor: pointer; z-index: 1001;
+      background: rgba(255,255,255,0.1); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.2s; border: 1px solid rgba(255,255,255,0.2);
+    }
+    .modal-close:hover { background: #ef4444; border-color: #ef4444; transform: rotate(90deg); }
+    .modal-content-wrap { margin-bottom: 40px; transform: scale(1.15); transform-origin: top center; transition: 0.3s; }
+
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="{{ url_for('job_list') }}" class="nav-logo"><img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="height: 110px; vertical-align: middle;"></a>
+    
+    <div class="nav-center">
+      <a href="{{ url_for('job_list') }}" class="nav-link">Tổng quan</a>
+      <a href="{{ url_for('profile') }}" class="nav-link active">Hồ sơ của tôi</a>
+      <a href="#" class="nav-link">Dự án khách hàng</a>
+      <a href="#" class="nav-link">Tài nguyên</a>
+    </div>
+
+    <div class="nav-right">
+      <div class="icon-btn" title="Thông báo">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20" height="20"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9zm-6 13a2 2 0 01-2-2h4a2 2 0 01-2 2z"></path></svg>
+      </div>
+      <a href="{{ url_for('edit_profile') }}" class="icon-btn" title="Cài đặt">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+      </a>
+      <div class="avatar">
+        {% if session.get('user_picture') %}<img src="{{ session.get('user_picture') }}">
+        {% else %}{{ (user.name or 'U')[0].upper() }}{% endif %}
+      </div>
+    </div>
+  </nav>
+
+  <div class="app-body">
+    <!-- Left Panel -->
+    <div class="panel-left">
+      <a href="{{ url_for('edit_profile') }}" class="back-btn">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16" height="16"><path d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        Quay lại Template
+      </a>
+      
+      <h1 class="template-title">Mẫu Hiện Đại</h1>
+      <p class="template-desc">Cấu trúc hai cột tinh tế được thiết kế cho các chuyên gia sáng tạo. Làm nổi bật chuyên môn kỹ thuật và kinh nghiệm, bố cục này cân bằng không gian mở với cấu trúc chặt chẽ.</p>
+      
+      <button onclick="downloadPDF()" class="btn btn-blue">Sử dụng mẫu này (Bản PDF)</button>
+      <button class="btn btn-light" onclick="openFullscreen()">Xem toàn màn hình</button>
+      
+      <div class="features-grid">
+        <div class="feature-card">
+          <svg class="feature-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20" height="20"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          <div>
+            <div class="feature-title">Tối ưu hóa ATS</div>
+            <div class="feature-desc">Được phân tích chính xác bởi 99% các nền tảng tuyển dụng.</div>
+          </div>
+        </div>
+        <div class="feature-card">
+          <svg class="feature-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20" height="20"><path d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+          <div>
+            <div class="feature-title">Thân thiện khi in ấn</div>
+            <div class="feature-desc">Được thiết kế để in ấn bằng mực chất lượng cao.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Panel (CV Area) -->
+    <div class="panel-right">
+      <div class="cv-paper" id="cv-paper-print">
+        
+        <!-- Sidebar -->
+        <div class="cv-aside">
+          <div class="cv-avatar-wrap">
+            <div class="cv-avatar">
+              {% if session.get('user_picture') %}<img src="{{ session.get('user_picture') }}" crossorigin="anonymous">
+              {% else %}{{ (user.name or 'A')[0].upper() }}{% endif %}
+            </div>
+            <div class="cv-name">{{ user.name or 'Nguyễn Văn A' }}</div>
+            <div class="cv-job">{{ user.job_title or 'THIẾT KẾ SẢN PHẨM' }}</div>
+          </div>
+
+          <div class="cv-section">
+            <h3>LIÊN HỆ</h3>
+            <div class="cv-contact-item">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+              <span>{{ user.email }}</span>
+            </div>
+            <div class="cv-contact-item">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+              <span>{{ user.phone or '0123 456 789' }}</span>
+            </div>
+            <div class="cv-contact-item">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+              <span>{{ user.address or 'Hà Nội, Việt Nam' }}</span>
+            </div>
+            <div class="cv-contact-item">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
+              <span>sterling.design</span>
+            </div>
+          </div>
+
+          <div class="cv-section">
+            <h3>KỸ NĂNG NỔI BẬT</h3>
+            <div class="cv-skills-wrap">
+              {% if user.skills %}
+                {% for skill in user.skills.replace(':',',').replace('\n',',').split(',') %}
+                  {% if skill.strip() %}
+                    <div class="cv-skill-tag">{{ skill.strip() }}</div>
+                  {% endif %}
+                {% endfor %}
+              {% else %}
+                <div class="cv-skill-tag">Chiến lược Sản phẩm</div>
+                <div class="cv-skill-tag">Nghiên cứu UX</div>
+                <div class="cv-skill-tag">Hệ thống Thiết kế</div>
+                <div class="cv-skill-tag">Làm Prototype</div>
+                <div class="cv-skill-tag">HTML/CSS</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="cv-section">
+            <h3>HỌC VẤN</h3>
+            <div class="cv-edu-item">
+              <div class="cv-edu-school">Đại học Quốc gia Hà Nội</div>
+              <div class="cv-edu-degree">Cử nhân Công nghệ Thông tin</div>
+              <div class="cv-edu-year">2018 - 2022</div>
+            </div>
+            {% if user.education %}
+               <!-- Add real user edu here if exist mapped -->
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Main Body -->
+        <div class="cv-main">
+          
+          <div>
+            <div class="cv-head-title">HỒ SƠ</div>
+            <p class="cv-profile-text">{{ user.bio or 'Nhà thiết kế sản phẩm có tầm nhìn với hơn 7 năm kinh nghiệm thiết kế trải nghiệm người dùng. Từng dẫn dắt thiết kế cho nền tảng SaaS cốt lõi của các startup phát triển nhanh và xây dựng hệ thống thiết kế cho doanh nghiệp. Đam mê kết nối tính thẩm mỹ và tiện lợi.' }}</p>
+          </div>
+
+          <div>
+            <div class="cv-head-title">KINH NGHIỆM</div>
+            
+            {% if user.experience %}
+                {% for exp in user.experience.split('\n') %}
+                    {% if exp.strip() %}
+                    <div class="cv-exp-item" style="padding-left: 20px;">
+                        <div class="cv-exp-desc">{{ exp.strip() }}</div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+              <div class="cv-exp-item" style="padding-left: 15px;">
+                <div class="cv-exp-header">
+                  <span class="cv-exp-role">Thiết kế Sản phẩm Cấp cao</span>
+                  <span class="cv-exp-date">2020 — HIỆN TẠI</span>
+                </div>
+                <div class="cv-exp-company">Lumina Tech Solutions</div>
+                <p class="cv-exp-desc">Dẫn dắt toàn bộ thiết kế lại cốt lõi nền tảng SaaS, tăng 35% tỷ lệ giữ chân khách hàng.</p>
+                <p class="cv-exp-desc">Đứng đầu dự án hệ thống Design System toàn công ty, giảm 50% thời gian code giao diện.</p>
+                <p class="cv-exp-desc">Quản lý đội ngũ 4 thiết kế viên và đào tạo thực tập sinh.</p>
+              </div>
+
+              <div class="cv-exp-item" style="padding-left: 15px;">
+                <div class="cv-exp-header">
+                  <span class="cv-exp-role">Thiết kế UX/UI</span>
+                  <span class="cv-exp-date">2017 — 2020</span>
+                </div>
+                <div class="cv-exp-company">Velo Studios</div>
+                <p class="cv-exp-desc">Phát triển các bản thiết kế app chi tiết bằng Figma và Framer.</p>
+                <p class="cv-exp-desc">Hợp tác cùng nhiều phòng ban phát triển tính năng cho các cty Fortune 500.</p>
+                <p class="cv-exp-desc">Tổ chức các buổi kiểm thử người dùng hàng tuần.</p>
+              </div>
+            {% endif %}
+          </div>
+
+          <div>
+            <div class="cv-head-title">THÀNH TỰU</div>
+            <div class="achieve-grid">
+              <div class="achieve-card">
+                <div class="achieve-year">2022</div>
+                <div class="achieve-title">Giải Thưởng Đặc Biệt</div>
+                <div class="achieve-desc">Thiết kế App Xuất sắc</div>
+              </div>
+              <div class="achieve-card">
+                <div class="achieve-year">2019</div>
+                <div class="achieve-title">Cố vấn Thiết kế UX</div>
+                <div class="achieve-desc">Cộng đồng Design Buddies</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Fullscreen Modal -->
+  <div id="cv-modal" class="modal-overlay" onclick="closeFullscreenOnOutside(event)">
+    <div class="modal-close" onclick="closeFullscreen()" title="Đóng toàn màn hình">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="24" height="24"><path d="M6 18L18 6M6 6l12 12"></path></svg>
+    </div>
+    <div class="modal-content-wrap" id="cv-modal-content">
+      <!-- CV will be cloned here -->
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script>
+    function downloadPDF() {
+      const element = document.getElementById('cv-paper-print');
+      
+      // Tùy chọn cấu hình để html2pdf chụp ảnh sắc nét toàn dải
+      const opt = {
+        margin:       0,
+        filename:     'CV_{{ user.name or "Sterling" }}.pdf',
+        image:        { type: 'jpeg', quality: 1 },
+        html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+        jsPDF:        { unit: 'px', format: [794, 1123], orientation: 'portrait' }
+      };
+      
+      const btn = document.querySelector('.btn-blue');
+      const oldText = btn.innerHTML;
+      btn.innerHTML = "Đang xuất định dạng PDF...";
+      btn.style.opacity = "0.7";
+      
+      // Ẩn bóng đổ (shadow) tạm thời để in không bị lem ở các cạnh
+      const oldShadow = element.style.boxShadow;
+      element.style.boxShadow = 'none';
+
+      html2pdf().set(opt).from(element).save().then(() => {
+        btn.innerHTML = oldText;
+        btn.style.opacity = "1";
+        element.style.boxShadow = oldShadow;
+      });
+    }
+
+    // Modal Fullscreen Logic
+    function openFullscreen() {
+      const modal = document.getElementById('cv-modal');
+      const content = document.getElementById('cv-modal-content');
+      const paper = document.getElementById('cv-paper-print');
+      
+      // Clear previous clone
+      content.innerHTML = '';
+      
+      // Clone CV
+      const clone = paper.cloneNode(true);
+      clone.id = 'cv-paper-fullscreen';
+      content.appendChild(clone);
+      
+      // Show modal
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden'; // prevent background scrolling
+    }
+
+    function closeFullscreen() {
+      const modal = document.getElementById('cv-modal');
+      modal.classList.remove('active');
+      document.body.style.overflow = 'auto'; // restore scrolling
+    }
+
+    // Close when clicking outside the CV (on the overlay background)
+    function closeFullscreenOnOutside(e) {
+      if (e.target.id === 'cv-modal') {
+        closeFullscreen();
+      }
+    }
+  </script>
+</body>
+</html>
