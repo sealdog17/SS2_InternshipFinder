@@ -1,4 +1,8 @@
 import os
+import sys
+import io
+if sys.stdout.encoding != 'utf-8':
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 import requests
 from bs4 import BeautifulSoup
 from app import app, db, Job
@@ -85,11 +89,35 @@ def scrape_careerviet():
             if Job.query.filter_by(apply_url=href).first():
                 continue
                 
+            # Cào dữ liệu chi tiết
+            description = "Chi tiết công việc đang được cập nhật."
+            required_skills = "Yêu cầu công việc chưa được cung cấp."
+            try:
+                detail_resp = requests.get(href, headers=headers, timeout=10)
+                if detail_resp.status_code == 200:
+                    detail_soup = BeautifulSoup(detail_resp.text, 'html.parser')
+                    detail_rows = detail_soup.find_all('div', class_='detail-row')
+                    
+                    for row in detail_rows:
+                        heading = row.find(['h2', 'h3', 'h4'])
+                        if heading:
+                            heading_text = heading.text.strip().lower()
+                            heading.extract() # Remove heading from the row element
+                            content = row.text.strip()
+                            content = ' '.join(content.split())
+                            
+                            if 'mô tả' in heading_text:
+                                description = content[:1500] if len(content) > 5 else description
+                            elif 'yêu cầu' in heading_text:
+                                required_skills = content[:1000] if len(content) > 5 else required_skills
+            except Exception as e:
+                pass
+                
             new_job = Job(
                 title=title,
                 company=company,
-                description="Xem chi tiết tại hệ thống cổng thông tin tuyển dụng.",
-                required_skills="Thương lượng",
+                description=description,
+                required_skills=required_skills,
                 salary_range=salary,
                 location=location.replace('\n', '').strip(),
                 job_type="full-time",
@@ -105,7 +133,7 @@ def scrape_careerviet():
         
     if jobs_added > 0:
         db.session.commit()
-        print(f"✅ Đã cào và lưu thành công {jobs_added} công việc mới từ CareerViet!")
+        print(f"[SUCCESS] Đã cào và lưu thành công {jobs_added} công việc mới từ CareerViet!")
     else:
         print("Không có công việc mới nào cần thêm.")
 
