@@ -1,0 +1,36 @@
+========================================================================
+            HƯỚNG DẪN CHẠY DỰ ÁN INTERNSHIPFINDER
+========================================================================
+
+Để chạy dự án này trên máy tính của bạn, vui lòng làm theo các bước sau:
+
+BƯỚC 1: KÍCH HOẠT MÔI TRƯỜNG ẢO (VENV)
+--------------------------------------
+Mở Terminal (PowerShell hoặc CMD) tại thư mục gốc của dự án và chạy:
+    .\venv\Scripts\activate
+
+(Khi thấy chữ (venv) hiện ở đầu dòng lệnh là bạn đã thành công)
+
+BƯỚC 2: CÀI ĐẶT CÁC THƯ VIỆN CẦN THIẾT
+--------------------------------------
+Chạy lệnh sau để cài đặt Flask và các công cụ liên quan:
+    pip install -r "requirement va readme/requirements.txt"
+
+BƯỚC 3: CẬP NHẬT DỮ LIỆU VIỆC LAM (SCRAPER)
+-------------------------------------------
+Để lấy danh sách việc làm mới nhất từ CareerViet về máy, chạy lệnh:
+    python scraper.py
+
+BƯỚC 4: CHẠY ỨNG DỤNG CHÍNH
+---------------------------
+Khởi động website bằng lệnh:
+    python app.py
+
+BƯỚC 5: TRUY CẬP WEBSITE
+------------------------
+Mở trình duyệt web (Chrome, Edge,...) và truy cập địa chỉ:
+    http://127.0.0.1:5000
+
+------------------------------------------------------------------------
+CHÚC BẠN TRẢI NGHIỆM DỰ ÁN VUI VẺ!
+------------------------------------------------------------------------
