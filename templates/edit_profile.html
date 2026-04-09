@@ -8,33 +8,34 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
     :root {
-      --primary: #4f46e5;
-      --primary-hover: #4338ca;
+      --primary: #1964d3;
+      --primary-hover: #1557b5;
       --secondary: #ec4899;
-      --accent: #8b5cf6;
-      --bg-color: #f8fafc;
+      --accent: #1e40af;
+      --bg-color: #f6f7fa;
       --card-bg: #ffffff;
-      --text-main: #0f172a;
-      --text-muted: #64748b;
-      --border: #e2e8f0;
+      --text-main: #212529;
+      --text-muted: #6b7280;
+      --border: #e5e7eb;
       --success: #10b981;
     }
     
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg-color); color: var(--text-main); overflow-x: hidden; }
+    body { font-family: 'Inter', 'Plus Jakarta Sans', sans-serif; background: var(--bg-color); color: var(--text-main); overflow-x: hidden; }
 
     /* Navbar */
     .navbar {
-      height: 110px; background: rgba(255,255,255,0.85); backdrop-filter: blur(16px);
+      height: 110px; background: #ffffff;
       border-bottom: 1px solid var(--border);
       position: fixed; top: 0; width: 100%; z-index: 50;
       display: flex; align-items: center; padding: 0 40px; justify-content: space-between;
     }
-    .logo { font-size: 22px; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-decoration: none;}
+    .logo { text-decoration: none; display: flex; align-items: center; }
     .nav-actions { display: flex; gap: 15px; align-items: center; }
-    .btn-exit { padding: 8px 16px; border-radius: 8px; font-weight: 600; text-decoration: none; color: var(--text-muted); border: 1px solid var(--border); transition: all 0.3s; font-size: 14px;}
-    .btn-exit:hover { background: #f1f5f9; color: var(--text-main); }
-    .avatar { width: 35px; height: 35px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .btn-exit { padding: 10px 20px; border-radius: 10px; font-weight: 600; text-decoration: none; color: var(--text-muted); border: 1px solid var(--border); transition: all 0.3s; font-size: 14px; background: white;}
+    .btn-exit:hover { background: #f1f5f9; color: var(--text-main); border-color: var(--text-muted); }
+    .avatar { width: 38px; height: 38px; border-radius: 50%; background: #1f2937; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; overflow: hidden; font-size: 14px; }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; }
 
     /* Builder Layout */
     .builder-container { margin-top: 110px; display: flex; height: calc(100vh - 110px); }
@@ -130,8 +131,11 @@
   <nav class="navbar">
     <a href="{{ url_for('job_list') }}" class="logo"><img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="height: 85px; vertical-align: middle;"></a>
     <div class="nav-actions">
-      <a href="{{ url_for('profile') }}" class="btn-exit"><i class="fas fa-times"></i> Đóng</a>
-      <div class="avatar">{{ session.get('user_name', 'U')[0].upper() }}</div>
+      <a href="{{ url_for('profile') }}" class="btn-exit"><i class="fas fa-times"></i> Thoát</a>
+      <div class="avatar">
+        {% if session.get('user_picture') %}<img src="{{ session.get('user_picture') }}" alt="avatar">
+        {% else %}{{ (session.get('user_name','U') or 'U')[0].upper() }}{% endif %}
+      </div>
     </div>
   </nav>
 
