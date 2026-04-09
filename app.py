@@ -388,7 +388,12 @@ def job_list():
     job_type = request.args.get('job_type', '')
     query = Job.query
     if keyword:
-        query = query.filter(Job.title.contains(keyword) | Job.description.contains(keyword))
+        query = query.filter(
+            Job.title.contains(keyword) | 
+            Job.description.contains(keyword) | 
+            Job.required_skills.contains(keyword) |
+            Job.company.contains(keyword)
+        )
     if location:
         query = query.filter(Job.location.contains(location))
     if job_type:
