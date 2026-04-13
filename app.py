@@ -246,6 +246,12 @@ def logout():
     session.clear()
     return redirect(url_for('index'))
 
+# --------------------- CLIENT PROJECTS ---------------------
+@app.route('/client-projects')
+@login_required
+def client_projects():
+    return render_template('client_projects.html')
+
 # --------------------- PROFILE & CV ---------------------
 @app.route('/profile')
 @login_required
