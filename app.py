@@ -3,7 +3,7 @@ import secrets
 from datetime import timedelta, date
 from io import BytesIO
 
-from flask import Flask, render_template, redirect, url_for, session, request, flash, send_file
+from flask import Flask, render_template, redirect, url_for, session, request, flash, send_file, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from authlib.integrations.flask_client import OAuth
 from dotenv import load_dotenv
@@ -369,13 +369,23 @@ def export_pdf():
         'languages': user.languages
     }
 
+    # Override with specific CV data if requested
+    if cv_id and cv_id.isdigit():
+        cv = CV.query.filter_by(id=int(cv_id), user_id=user.id).first()
+        if cv:
+            import json
+            saved_data = json.loads(cv.content)
+            cv_data.update(saved_data)
+            if 'template' in saved_data:
+                template_type = saved_data['template']
+
     from reportlab.pdfbase import pdfmetrics
     from reportlab.pdfbase.ttfonts import TTFont
     
-    # Register Times New Roman for Vietnamese support
+    # Register Times New Roman for Vietnamese support from local fonts folder
     try:
-        font_path = "C:/Windows/Fonts/times.ttf"
-        font_path_bold = "C:/Windows/Fonts/timesbd.ttf"
+        font_path = os.path.join(app.root_path, 'static', 'fonts', 'times.ttf')
+        font_path_bold = os.path.join(app.root_path, 'static', 'fonts', 'timesbd.ttf')
         if os.path.exists(font_path):
             pdfmetrics.registerFont(TTFont('TimesNewRoman', font_path))
             pdfmetrics.registerFont(TTFont('TimesNewRoman-Bold', font_path_bold))

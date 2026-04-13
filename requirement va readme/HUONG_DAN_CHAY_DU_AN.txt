@@ -2,35 +2,32 @@
             HƯỚNG DẪN CHẠY DỰ ÁN INTERNSHIPFINDER
 ========================================================================
 
-Để chạy dự án này trên máy tính của bạn, vui lòng làm theo các bước sau:
+Dự án này đã được cấu hình để hoạt động ngay lập tức sau khi bạn tải về.
 
-BƯỚC 1: KÍCH HOẠT MÔI TRƯỜNG ẢO (VENV)
---------------------------------------
-Mở Terminal (PowerShell hoặc CMD) tại thư mục gốc của dự án và chạy:
+BƯỚC 1: Cài đặt và Kích hoạt Môi trường ảo (Venv)
+-----------------------------------------------
+Mở Terminal (PowerShell hoặc CMD) tại thư mục gốc và chạy:
+    python -m venv venv
     .\venv\Scripts\activate
 
-(Khi thấy chữ (venv) hiện ở đầu dòng lệnh là bạn đã thành công)
-
-BƯỚC 2: CÀI ĐẶT CÁC THƯ VIỆN CẦN THIẾT
---------------------------------------
-Chạy lệnh sau để cài đặt Flask và các công cụ liên quan:
+BƯỚC 2: Cài đặt các thư viện
+---------------------------
+Chạy lệnh sau:
     pip install -r "requirement va readme/requirements.txt"
 
-BƯỚC 3: CẬP NHẬT DỮ LIỆU VIỆC LAM (SCRAPER)
--------------------------------------------
-Để lấy danh sách việc làm mới nhất từ CareerViet về máy, chạy lệnh:
-    python scraper.py
+BƯỚC 3: Đồng bộ dữ liệu (Đã có sẵn)
+-----------------------------------
+- File cấu hình Google (.env) và dữ liệu mẫu (jobfinder.db) đã được đi kèm.
+- Font chữ tiếng Việt đã được tích hợp sẵn trong thư mục static/fonts để hỗ trợ xuất PDF trên mọi máy tính (Windows, Mac, Linux).
 
-BƯỚC 4: CHẠY ỨNG DỤNG CHÍNH
----------------------------
-Khởi động website bằng lệnh:
+BƯỚC 4: Chạy ứng dụng
+---------------------
+Khởi động website:
     python app.py
 
-BƯỚC 5: TRUY CẬP WEBSITE
+BƯỚC 5: Truy cập Website
 ------------------------
-Mở trình duyệt web (Chrome, Edge,...) và truy cập địa chỉ:
-    http://127.0.0.1:5000
+Truy cập địa chỉ: http://127.0.0.1:5000
 
-------------------------------------------------------------------------
-CHÚC BẠN TRẢI NGHIỆM DỰ ÁN VUI VẺ!
-------------------------------------------------------------------------
+LƯU Ý: Nếu bạn thay đổi IP hoặc dùng máy khác, hãy đảm bảo cập nhật Redirect URI trong Google Cloud Console nếu muốn dùng tính năng Login Google.
+========================================================================
