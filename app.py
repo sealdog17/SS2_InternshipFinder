@@ -258,6 +258,20 @@ def profile():
 def edit_profile():
     user = User.query.get(session['user_id'])
     if request.method == 'POST':
+        # Lưu avatar nếu có
+        file = request.files.get('profile_picture')
+        if file and file.filename != '':
+            from werkzeug.utils import secure_filename
+            import os
+            filename = secure_filename(file.filename)
+            upload_path = os.path.join(app.root_path, 'static', 'uploads')
+            if not os.path.exists(upload_path):
+                os.makedirs(upload_path)
+            file.save(os.path.join(upload_path, filename))
+            user.picture = url_for('static', filename='uploads/' + filename)
+            session['user_picture'] = user.picture
+
+        user.name = request.form.get('name') or user.name
         user.phone = request.form.get('phone')
         user.address = request.form.get('address')
         user.bio = request.form.get('bio')
@@ -268,9 +282,10 @@ def edit_profile():
         user.dob = request.form.get('dob')
         user.marital_status = request.form.get('marital_status')
         user.languages = request.form.get('languages')
+        
         db.session.commit()
         flash('Cập nhật hồ sơ thành công!', 'success')
-        return redirect(url_for('profile'))
+        return redirect(url_for('edit_profile'))  # Ở lại trang edit để check kết quả
     return render_template('edit_profile.html', user=user)
 
 @app.route('/profile/export-pdf')

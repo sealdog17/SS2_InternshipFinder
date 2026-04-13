@@ -3,374 +3,754 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CV Builder - InternshipFinder</title>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>Tạo CV - InternshipFinder</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
     :root {
       --primary: #1964d3;
-      --primary-hover: #1557b5;
-      --secondary: #ec4899;
-      --accent: #1e40af;
-      --bg-color: #f6f7fa;
+      --primary-hover: #1555b5;
+      --bg-color: #f8fafc;
       --card-bg: #ffffff;
-      --text-main: #212529;
-      --text-muted: #6b7280;
+      --text-main: #1f2937;
+      --text-muted: #64748b;
       --border: #e5e7eb;
-      --success: #10b981;
+      --sidebar-width: 260px;
+      --navbar-height: 110px;
     }
-    
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Inter', 'Plus Jakarta Sans', sans-serif; background: var(--bg-color); color: var(--text-main); overflow-x: hidden; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg-color); color: var(--text-main); overflow: hidden; height: 100vh;}
+    
+    /* Không còn viền xanh blue chấm bi / nét liền */
+    .app-frame { height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-    /* Navbar */
-    .navbar {
-      height: 110px; background: #ffffff;
-      border-bottom: 1px solid var(--border);
-      position: fixed; top: 0; width: 100%; z-index: 50;
-      display: flex; align-items: center; padding: 0 40px; justify-content: space-between;
-    }
-    .logo { text-decoration: none; display: flex; align-items: center; }
-    .nav-actions { display: flex; gap: 15px; align-items: center; }
-    .btn-exit { padding: 10px 20px; border-radius: 10px; font-weight: 600; text-decoration: none; color: var(--text-muted); border: 1px solid var(--border); transition: all 0.3s; font-size: 14px; background: white;}
-    .btn-exit:hover { background: #f1f5f9; color: var(--text-main); border-color: var(--text-muted); }
-    .avatar { width: 38px; height: 38px; border-radius: 50%; background: #1f2937; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; overflow: hidden; font-size: 14px; }
+    /* Navbar giống job_list.html */
+    .navbar { height: var(--navbar-height); background: #ffffff; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 40px; flex-shrink: 0; }
+    .nav-left { display: flex; align-items: center; text-decoration: none;}
+    
+    .nav-center { display: flex; gap: 30px; height: 100%; align-items: center; }
+    .nav-link { text-decoration: none; color: #4b5563; font-size: 14px; font-weight: 500; height: 100%; display: flex; align-items: center; position: relative; }
+    .nav-link.active { color: var(--primary); font-weight: 600; }
+    .nav-link.active::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: var(--primary); border-top-left-radius: 3px; border-top-right-radius: 3px; }
+    
+    .nav-right { display: flex; gap: 20px; align-items: center; }
+    .icon-btn { color: #6b7280; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; text-decoration: none; }
+    .avatar { width: 32px; height: 32px; border-radius: 50%; background: #1f2937; color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; overflow: hidden; }
     .avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-    /* Builder Layout */
-    .builder-container { margin-top: 110px; display: flex; height: calc(100vh - 110px); }
+    /* Layout */
+    .builder-container { display: flex; flex: 1; overflow: hidden; }
     
-    /* Sidebar */
-    .sidebar {
-      width: 300px; background: var(--card-bg); border-right: 1px solid var(--border);
-      padding: 30px 20px; display: flex; flex-direction: column; gap: 12px;
-      overflow-y: auto; background: linear-gradient(180deg, #fff 0%, #f8fafc 100%);
-    }
-    .sidebar-title { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; padding-left: 10px; }
-    
-    .step-item {
-      display: flex; align-items: center; gap: 15px; padding: 12px 15px;
-      border-radius: 12px; cursor: pointer; transition: all 0.3s ease;
-      color: var(--text-muted); border: 1px solid transparent;
-    }
-    .step-item:hover { background: #f1f5f9; }
-    .step-item.active {
-      background: linear-gradient(to right, rgba(79,70,229,0.08), rgba(139,92,246,0.03));
-      border: 1px solid rgba(79,70,229,0.2); color: var(--primary); font-weight: 600;
-    }
-    .step-icon {
-      width: 36px; height: 36px; border-radius: 10px; background: #f1f5f9;
-      display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;
-    }
-    .step-item.active .step-icon {
-      background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(79,70,229,0.3);
-    }
-    .step-item.completed .step-icon { background: var(--success); color: white; }
+    /* Sidebar sửa viền thành 1px solid */
+    .sidebar { width: var(--sidebar-width); background: #ffffff; border-right: 1px solid var(--border); padding: 30px 0; display: flex; flex-direction: column; flex-shrink: 0; }
+    .sidebar-header { padding: 0 24px 20px 30px; }
+    .sidebar-header h2 { font-size: 16px; font-weight: 700; color: #1e3a8a; margin-bottom: 4px; display: flex; align-items: center; gap: 10px;}
+    .sidebar-header p { font-size: 11px; color: #64748b; font-weight: 600; padding-left: 26px; text-transform: uppercase; letter-spacing: 0.5px;}
 
-    /* Main Form Area */
-    .form-area {
-      flex: 1; padding: 40px; overflow-y: auto;
-      background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
-      background-size: 20px 20px;
-    }
+    .nav-menu { flex: 1; display: flex; flex-direction: column; margin-top: 15px; }
+    .menu-item { display: flex; align-items: center; gap: 12px; padding: 12px 24px 12px 30px; cursor: pointer; color: #64748b; font-size: 13px; font-weight: 600; text-decoration: none; transition: 0.2s; margin: 0 12px; border-radius: 8px; }
+    .menu-item i { font-size: 14px; width: 20px; text-align: center; }
+    .menu-item:hover { color: #1e293b; background: #f8fafc; }
+    .menu-item.active { background: #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.05); color: var(--primary); font-weight: 700; border: 1px solid #e2e8f0; }
     
-    .form-card {
-      max-width: 850px; margin: 0 auto; background: var(--card-bg);
-      border-radius: 20px; box-shadow: 0 20px 40px -15px rgba(0,0,0,0.05);
-      padding: 40px; border: 1px solid rgba(255,255,255,0.8);
-    }
-    
-    .section-title { font-size: 22px; font-weight: 700; margin-bottom: 30px; color: var(--text-main); display: flex; align-items: center; gap: 10px; padding-bottom: 15px; border-bottom: 1px solid var(--border); }
-    .section-title i { color: var(--primary); background: rgba(79,70,229,0.1); padding: 10px; border-radius: 10px; font-size: 18px; }
+    .sidebar-footer { padding: 20px 30px; border-top: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 16px; margin-top: auto; }
+    .sidebar-footer a { color: #64748b; text-decoration: none; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 12px; }
+    .sidebar-footer a:hover { color: #1e293b; }
 
-    .form-row { display: flex; gap: 24px; margin-bottom: 24px; }
-    .form-group { flex: 1; display: flex; flex-direction: column; gap: 8px; }
-    .form-group.full { width: 100%; }
-    
-    label { font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-    
-    .input-wrapper { position: relative; }
-    .input-wrapper i { position: absolute; left: 16px; top: 16px; color: #94a3b8; transition: 0.3s; }
-    
-    input, select, textarea {
-      width: 100%; padding: 14px 16px 14px 45px; border: 1.5px solid var(--border);
-      border-radius: 12px; font-family: inherit; font-size: 15px;
-      transition: all 0.3s; background: #f8fafc; color: var(--text-main);
-    }
-    textarea { min-height: 140px; resize: vertical; padding-top: 14px; }
-    input:focus, select:focus, textarea:focus {
-      background: #fff; border-color: var(--primary);
-      box-shadow: 0 0 0 4px rgba(79,70,229,0.1); outline: none;
-    }
-    input:focus + i, select:focus + i, textarea:focus + i { color: var(--primary); }
-    
-    /* Wizard Behavior */
-    .wizard-step { display: none; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-    .wizard-step.active { display: block; }
-    @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    /* Main Content */
+    .main-content { flex: 1; overflow-y: auto; display: flex; flex-direction: column; position: relative; background: var(--bg-color);}
+    .wizard-step { display: none; padding: 50px 70px; flex-direction: column; min-height: 100%; animation: fadeIn 0.3s; }
+    .wizard-step.active { display: flex; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-    /* Footer buttons */
-    .form-footer { display: flex; justify-content: space-between; margin-top: 40px; padding-top: 25px; border-top: 1px solid var(--border); }
-    .btn { padding: 12px 28px; border-radius: 12px; font-weight: 600; font-size: 15px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 10px; border: none; font-family: inherit; }
-    .btn-prev { background: #f1f5f9; color: var(--text-main); }
-    .btn-prev:hover { background: #e2e8f0; }
-    .btn-next, .btn-save { background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; box-shadow: 0 4px 15px rgba(79,70,229,0.3); }
-    .btn-next:hover, .btn-save:hover { box-shadow: 0 6px 20px rgba(79,70,229,0.4); transform: translateY(-2px); }
+    .page-header { margin-bottom: 35px; }
+    .page-header h1 { font-size: 26px; font-weight: 700; color: #111827; margin-bottom: 12px; letter-spacing: -0.5px; }
+    .page-header p { font-size: 15px; color: #64748b; max-width: 650px; line-height: 1.6; }
     
-    .hint { font-size: 13px; color: #94a3b8; margin-top: 5px; }
+    .form-card { background: var(--card-bg); border-radius: 12px; padding: 40px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.01); border: 1px solid rgba(226, 232, 240, 0.6); margin-bottom: 30px; }
 
-    /* Flash */
-    .flash-wrap { margin-bottom: 20px; }
-    .flash { padding: 15px 20px; border-radius: 12px; font-weight: 500; font-size: 14px; border-left: 4px solid; display: flex; gap: 10px; align-items: center; }
-    .flash.success { background: #ecfdf5; color: #065f46; border-color: var(--success); }
-    .flash.danger { background: #fef2f2; color: #991b1b; border-color: #ef4444; }
+    /* Inputs */
+    .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px;}
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    label { font-size: 11px; font-weight: 700; color: #4b5563; text-transform: uppercase; letter-spacing: 0.5px; }
+    .input-wrapper { position: relative; background: #f8fafc; border-radius: 6px; }
+    .input-wrapper i { position: absolute; left: 16px; top: 15px; color: #9ca3af; font-size: 15px; }
+    input { width: 100%; padding: 13px 16px 13px 44px; border: 1px solid #e5e7eb; border-radius: 6px; font-family: inherit; font-size: 14px; color: #111827; background: transparent; transition: 0.2s; font-weight: 500; }
+    input::placeholder { color: #9ca3af; font-weight: 400; }
+    input:focus { background: #ffffff; border-color: #3b82f6; outline: none; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+    input:focus + i { color: #3b82f6; }
+
+    /* Buttons */
+    .bottom-actions { display: flex; justify-content: space-between; align-items: center; margin-top: auto;}
+    .btn { padding: 11px 24px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; border: 1px solid transparent; transition: 0.2s; font-family: inherit; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none;}
+    .btn-outline { background: white; border: 1px solid #e5e7eb; color: var(--primary); box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
+    .btn-outline:hover { background: #f8fafc; border-color: #d1d5db; }
+    .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 6px rgba(25, 100, 211, 0.2); }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-light { background: #f1f5f9; color: #1e293b; }
+    .btn-light:hover { background: #e2e8f0; }
+
+    /* ------------- STEP 1: Personal Info ------------- */
+    .step1-body { display: flex; gap: 60px; }
+    .photo-section { display: flex; flex-direction: column; align-items: center; width: 150px; flex-shrink: 0; margin-top: 25px; }
+    .photo-box { width: 140px; height: 140px; border-radius: 12px; background: linear-gradient(180deg, #71bcd8 0%, #68aabf 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 20px rgba(113, 188, 216, 0.2); margin-bottom: 15px; position: relative; gap: 10px; }
+    .photo-box i.fa-camera { font-size: 28px; }
+    .photo-box .plus-badge { position: absolute; top: 48px; right: 52px; background: white; color: #68aabf; width: 14px; height: 14px; border-radius: 50%; font-size: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid #71bcd8; }
+    .photo-box span { font-size: 10px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; }
+    .photo-hint { font-size: 11px; color: #94a3b8; text-align: center; line-height: 1.6; }
+    .step1-form { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 0 30px; }
+    .invalid-feedback { font-size: 11px; color: #dc2626; margin-top: 6px; display: flex; align-items: center; gap: 4px; font-weight: 600;}
+    .input-wrapper.invalid input { border-color: #f87171; background: #fef2f2; color: #b91c1c; }
+
+    /* ------------- STEP 2: Education (Academic Journey) ------------- */
+    .edu-layout { display: flex; gap: 40px; }
+    .edu-form-side { flex: 6; }
+    .edu-widget-side { flex: 4; display: flex; flex-direction: column; gap: 30px; }
+    .dash-divider { height: 1px; background: repeating-linear-gradient(90deg, #cbd5e1, #cbd5e1 4px, transparent 4px, transparent 8px); margin: 30px 0; }
+    
+    .widget-box { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
+    .widget-title { font-size: 16px; font-weight: 700; color: #1e3a8a; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+    .badge-progress { background: #e0e7ff; color: #4f46e5; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 12px; }
+    .skill-bar { margin-bottom: 15px; }
+    .skill-bar-head { display: flex; justify-content: space-between; font-size: 10px; font-weight: 800; margin-bottom: 6px; letter-spacing: 0.5px; }
+    .bar-bg { width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
+    .bar-fill { height: 100%; background: #1e3a8a; border-radius: 3px; }
+    .skill-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+    .s-tag { padding: 6px 12px; border-radius: 16px; border: 1px solid #e2e8f0; font-size: 11px; font-weight: 600; color: #1e3a8a; }
+    .s-tag.add { background: #f8fafc; color: #94a3b8; border-style: dashed; cursor: pointer;}
+
+    .curator-tip { background: linear-gradient(135deg, rgba(15,23,42,0.95) 0%, rgba(30,58,138,0.9) 100%), url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80'); background-size: cover; border-radius: 16px; padding: 30px 24px; color: white; box-shadow: 0 10px 25px rgba(30,58,138,0.2); }
+    .curator-tip i { font-size: 20px; margin-bottom: 12px; color: #fbbf24; }
+    .curator-tip h3 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+    .curator-tip p { font-size: 12px; line-height: 1.6; color: #cbd5e1; }
+    
+    .quote-box { margin-top: 30px; border-left: 2px solid #3b82f6; padding-left: 20px; }
+    .quote-text { font-size: 13px; color: #64748b; line-height: 1.6; font-style: italic; margin-bottom: 10px;}
+    .quote-author { font-size: 10px; font-weight: 800; color: #1e3a8a; letter-spacing: 1px; text-transform: uppercase;}
+
+    /* ------------- STEP 5: Templates ------------- */
+    .template-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-bottom: 40px; }
+    .tpl-card { display: flex; flex-direction: column; background: transparent; }
+    .tpl-preview { background: white; border-radius: 12px; padding: 20px; height: 320px; border: 2px solid #e2e8f0; margin-bottom: 20px; position: relative; transition: 0.3s; cursor: pointer; overflow: hidden; display: flex; align-items: flex-start; justify-content: center; }
+    .tpl-card.selected .tpl-preview { border-color: var(--primary); box-shadow: 0 8px 25px rgba(25,100,211,0.15); }
+    .tag-pop { position: absolute; top: -1px; left: 50%; transform: translateX(-50%); background: #1e40af; color: white; font-size: 9px; font-weight: 800; padding: 4px 12px; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; }
+    .tag-rec { position: absolute; top: -1px; left: 50%; transform: translateX(-50%); background: #e0e7ff; color: #4f46e5; font-size: 9px; font-weight: 800; padding: 4px 12px; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; }
+    .tpl-title { font-size: 18px; font-weight: 700; color: #111827; margin-bottom: 8px; }
+    .tpl-desc { font-size: 12px; color: #64748b; line-height: 1.6; margin-bottom: 20px; flex: 1; }
+    
+    .tailor-banner { background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%); border-radius: 16px; padding: 40px; display: flex; justify-content: space-between; align-items: center; color: white; position: relative; overflow: hidden; }
+    .tailor-banner::after { content: '✦'; position: absolute; right: 40px; bottom: -20px; font-size: 150px; opacity: 0.1; line-height: 1; }
+    .tailor-content { position: relative; z-index: 2; max-width: 400px; }
+    .tailor-content h3 { font-size: 22px; font-weight: 700; margin-bottom: 12px; }
+    .tailor-content p { font-size: 14px; color: #e0e7ff; line-height: 1.6; margin-bottom: 20px;}
+    .btn-white { background: white; color: #2563eb; font-weight: 700; border-radius: 8px; padding: 10px 20px; display: inline-block; text-decoration: none; font-size: 13px;}
+    
+    .filler-box { width: 300px; background: #f8fafc; border-radius: 16px; padding: 30px; text-align: left; }
+    .filler-box i { font-size: 24px; color: #2563eb; background: white; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    .filler-box h4 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+    .filler-box p { font-size: 11px; color: #64748b; line-height: 1.6; }
+
+    /* ------------- Detail Template View (4.1 & 4.2) ------------- */
+    .template-detail-layout { display: flex; height: 100%; gap: 40px; }
+    .td-sidebar { width: 280px; display: flex; flex-direction: column; flex-shrink: 0; }
+    .back-link { font-size: 13px; font-weight: 700; color: #2563eb; text-decoration: none; display: flex; align-items: center; gap: 8px; margin-bottom: 30px; cursor: pointer; }
+    .td-title { font-size: 28px; font-weight: 800; color: #111827; margin-bottom: 20px; line-height: 1.2; }
+    .td-desc { font-size: 14px; color: #4b5563; line-height: 1.7; margin-bottom: 30px; }
+    .td-preview-area { flex: 1; background: #f1f5f9; border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: auto; padding: 40px; border: 1px solid #e2e8f0; }
+
+    /* ------------- STEP 6: Preview & Download ------------- */
+    #step-preview { padding: 0; }
+    .preview-header { padding: 30px 40px; border-bottom: 1px solid #e2e8f0; background: white; display: flex; justify-content: space-between; align-items: center; }
+    .preview-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+    .preview-header p { font-size: 13px; color: #64748b; }
+    .preview-body { display: flex; flex: 1; overflow: hidden; background: #f8fafc; }
+    .cv-wrapper { flex: 1; overflow-y: auto; display: flex; justify-content: center; padding: 40px; }
+    .cv-paper { width: 700px; min-height: 990px; background: white; box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 40px; border: 1px solid #e2e8f0; }
+    
+    .ai-optimizer { width: 320px; background: white; border-left: 1px solid #e2e8f0; padding: 30px 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
+    .opt-header { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 10px; margin-bottom: 10px; color: #111827;}
+    .opt-header i { color: #3b82f6; }
+    
+    .opt-card { background: #f8fafc; border-radius: 12px; padding: 16px; border-left: 3px solid; }
+    .opt-card.yellow { border-color: #f59e0b; }
+    .opt-card.blue { border-color: #3b82f6; }
+    .opt-card.green { border-color: #10b981; background: #f0fdf4; }
+    .opt-title { font-size: 12px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; color: #111827; }
+    .opt-desc { font-size: 11px; color: #4b5563; line-height: 1.5; }
+    
+    .score-card { background: #1d4ed8; border-radius: 12px; padding: 24px; color: white; display: flex; flex-direction: column; gap: 15px; margin-top: 20px;}
+    .score-top { display: flex; justify-content: space-between; align-items: flex-end; }
+    .score-label { font-size: 13px; font-weight: 600; }
+    .score-num { font-size: 24px; font-weight: 800; }
+    .score-num span { font-size: 12px; font-weight: 600; opacity: 0.7;}
+    .score-bar { width: 100%; height: 6px; background: rgba(255,255,255,0.2); border-radius: 3px; }
+    .score-fill { width: 88%; height: 100%; background: white; border-radius: 3px; }
+    .score-text { font-size: 11px; line-height: 1.5; opacity: 0.9; }
+
   </style>
 </head>
 <body>
 
+<div class="app-frame">
+  <!-- Navbar như cũ (job_list style) -->
   <nav class="navbar">
-    <a href="{{ url_for('job_list') }}" class="logo"><img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="height: 85px; vertical-align: middle;"></a>
-    <div class="nav-actions">
-      <a href="{{ url_for('profile') }}" class="btn-exit"><i class="fas fa-times"></i> Thoát</a>
+    <a href="{{ url_for('job_list') }}" class="nav-left">
+      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" style="height: 85px; vertical-align: middle;">
+    </a>
+    
+    <div class="nav-center">
+      <a href="{{ url_for('job_list') }}" class="nav-link">Tổng quan</a>
+      <a href="{{ url_for('profile') }}" class="nav-link active">Hồ sơ của tôi</a>
+      <a href="#" class="nav-link">Dự án khách hàng</a>
+      <a href="#" class="nav-link">Tài nguyên</a>
+    </div>
+
+    <div class="nav-right">
+      <div class="icon-btn" title="Thông báo">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20" height="20"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9zm-6 13a2 2 0 01-2-2h4a2 2 0 01-2 2z"></path></svg>
+      </div>
+      <a href="{{ url_for('edit_profile') }}" class="icon-btn" title="Cài đặt">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+      </a>
       <div class="avatar">
-        {% if session.get('user_picture') %}<img src="{{ session.get('user_picture') }}" alt="avatar">
-        {% else %}{{ (session.get('user_name','U') or 'U')[0].upper() }}{% endif %}
+        {% if session.get('user_picture') %}<img src="{{ session.get('user_picture') }}">
+        {% else %}{{ (session.get('user_name', 'U') or 'U')[0].upper() }}{% endif %}
       </div>
     </div>
   </nav>
 
   <div class="builder-container">
-    <!-- Sidebar / Steps Navbar -->
+    <!-- Sidebar -->
     <div class="sidebar">
-      <div class="sidebar-title">Tiến trình tạo CV</div>
-      
-      <div class="step-item active" onclick="showStep(1)" id="nav-step-1">
-        <div class="step-icon"><i class="fas fa-user"></i></div>
-        <div class="step-text">Thông tin cá nhân</div>
+      <div class="sidebar-header">
+        <h2><i class="far fa-file-alt"></i> Tạo Hồ Sơ</h2>
+        <p id="step-indicator">Bước 1 trên 6</p>
       </div>
       
-      <div class="step-item" onclick="showStep(2)" id="nav-step-2">
-        <div class="step-icon"><i class="fas fa-briefcase"></i></div>
-        <div class="step-text">Chuyên môn</div>
+      <div class="nav-menu">
+        <div class="menu-item active" id="nav-step1" onclick="showStep(1)">
+          <i class="far fa-user"></i> Thông tin cá nhân
+        </div>
+        <div class="menu-item" id="nav-step2" onclick="showStep(2)">
+          <i class="fas fa-graduation-cap"></i> Học vấn
+        </div>
+        <div class="menu-item" id="nav-step3" onclick="showStep(3)">
+          <i class="fas fa-briefcase"></i> Kinh nghiệm
+        </div>
+        <div class="menu-item" id="nav-step5" onclick="showStep(5)">
+          <i class="far fa-file"></i> Mẫu CV
+        </div>
+        <div class="menu-item" id="nav-step6" onclick="showStep(6)">
+          <i class="far fa-eye"></i> Xem trước
+        </div>
       </div>
-      
-      <div class="step-item" onclick="showStep(3)" id="nav-step-3">
-        <div class="step-icon"><i class="fas fa-graduation-cap"></i></div>
-        <div class="step-text">Học vấn</div>
-      </div>
-      
-      <div class="step-item" onclick="showStep(4)" id="nav-step-4">
-        <div class="step-icon"><i class="fas fa-list-check"></i></div>
-        <div class="step-text">Kinh nghiệm</div>
+
+      <div class="sidebar-footer">
+        <a href="#"><i class="far fa-question-circle"></i> Trung tâm trợ giúp</a>
+        <a href="/logout"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
       </div>
     </div>
 
-    <!-- Main Workspace -->
-    <div class="form-area">
-      <div class="form-card">
+    <!-- Main Content -->
+    <div class="main-content">
+      
+      <!-- ================= STEP 1: Personal Info ================= -->
+      <div class="wizard-step active" id="step_1">
+        <div class="page-header">
+          <h1>Thông tin cá nhân của bạn</h1>
+          <p>Bắt đầu xây dựng hồ sơ chuyên nghiệp của bạn với các thông tin liên lạc cốt lõi. Thông tin này sẽ giúp các nhà tuyển dụng dễ dàng liên hệ với bạn.</p>
+        </div>
         
-        <div class="flash-wrap">
-          {% with messages = get_flashed_messages(with_categories=true) %}
-          {% for category, message in messages %}
-          <div class="flash {{ category }}"><i class="fas fa-info-circle"></i> {{ message }}</div>
-          {% endfor %}
-          {% endwith %}
+        <div class="form-card step1-body">
+          <div class="photo-section">
+            <input type="file" id="photo-upload" style="display: none;">
+            <div class="photo-box" onclick="document.getElementById('photo-upload').click()">
+              <i class="fas fa-camera"></i>
+              <div class="plus-badge">+</div>
+              <span>CẬP NHẬT ẢNH</span>
+            </div>
+            <div class="photo-hint">JPG, PNG hoặc GIF.<br>Tối đa 5MB.</div>
+          </div>
+          
+          <div class="step1-form">
+            <div class="form-group row-2" style="grid-column: span 2;">
+                <div>
+                    <label>HỌ TÊN</label>
+                    <div class="input-wrapper"><i class="far fa-user"></i><input type="text" placeholder="Ví dụ: Nguyễn Văn A" value="{{ user.name if user else '' }}"></div>
+                </div>
+            </div>
+            <div class="form-group row-2" style="grid-column: span 2;">
+                <div>
+                    <label>ĐỊA CHỈ EMAIL</label>
+                    <div class="input-wrapper">
+                        <i class="far fa-envelope"></i>
+                        <input type="email" placeholder="email@vi-du.com" value="{{ user.email if user else '' }}">
+                    </div>
+                    <div class="invalid-feedback" style="display:none;"><i class="fas fa-exclamation-circle"></i> Sai định dạng</div>
+                </div>
+                <div>
+                    <label>SỐ ĐIỆN THOẠI</label>
+                    <div class="input-wrapper"><i class="fas fa-phone"></i><input type="tel" placeholder="+84 900 000 000" value="{{ user.phone if user else '' }}"></div>
+                </div>
+            </div>
+            <div class="form-group" style="grid-column: span 2; margin-bottom: 0;">
+              <label>ĐỊA CHỈ TRÚ QUÁN</label>
+              <div class="input-wrapper"><i class="fas fa-map-marker-alt"></i><input type="text" placeholder="Thành phố, Tỉnh" value="{{ user.address if user else '' }}"></div>
+              <div style="font-size: 11px; color: #94a3b8; margin-top: 6px;">Nhà tuyển dụng thường tìm kiếm những ứng viên gần khu vực văn phòng.</div>
+            </div>
+          </div>
         </div>
 
-        <form method="POST" id="cvForm">
-          
-          <!-- STEP 1: Personal Info -->
-          <div class="wizard-step active" id="step-1">
-            <div class="section-title"><i class="fas fa-address-card"></i> Thông tin liên hệ & Cá nhân</div>
-            
-            <div class="form-row">
-              <div class="form-group">
-                <label>Email</label>
-                <div class="input-wrapper">
-                  <input type="email" value="{{ user.email }}" disabled style="cursor: not-allowed; opacity: 0.7;">
-                  <i class="fas fa-envelope"></i>
-                </div>
-              </div>
-              <div class="form-group">
-                <label>Số điện thoại</label>
-                <div class="input-wrapper">
-                  <input type="tel" name="phone" value="{{ user.phone or '' }}" placeholder="VD: +84 123 456 789">
-                  <i class="fas fa-phone"></i>
-                </div>
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label>Địa chỉ</label>
-                <div class="input-wrapper">
-                  <input type="text" name="address" value="{{ user.address or '' }}" placeholder="Thành phố, Tỉnh">
-                  <i class="fas fa-map-marker-alt"></i>
-                </div>
-              </div>
-              <div class="form-group">
-                <label>Ngày sinh</label>
-                <div class="input-wrapper">
-                  <input type="date" name="dob" value="{{ user.dob or '' }}">
-                  <i class="fas fa-calendar-alt"></i>
-                </div>
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label>Tình trạng hôn nhân</label>
-                <div class="input-wrapper">
-                  <select name="marital_status" style="padding-left: 45px;">
-                    <option value="">Chọn một giá trị</option>
-                    <option value="Độc thân" {% if user.marital_status == 'Độc thân' %}selected{% endif %}>Độc thân</option>
-                    <option value="Đã kết hôn" {% if user.marital_status == 'Đã kết hôn' %}selected{% endif %}>Đã kết hôn</option>
-                  </select>
-                  <i class="fas fa-heart"></i>
-                </div>
-              </div>
-            </div>
-
-            <div class="form-footer">
-              <div></div>
-              <button type="button" class="btn btn-next" onclick="nextStep(2)">Tiếp tục <i class="fas fa-arrow-right"></i></button>
-            </div>
+        <div class="bottom-actions">
+          <button class="btn btn-outline">Lưu nháp</button>
+          <div style="display: flex; align-items: center; gap: 20px;">
+            <span style="font-size: 13px; color: #94a3b8; font-weight: 500;">Bước tiếp theo: Học vấn</span>
+            <button class="btn btn-primary" onclick="showStep(2)">Tiếp theo: Học vấn <i class="fas fa-arrow-right"></i></button>
           </div>
+        </div>
 
-          <!-- STEP 2: Bio & Skills -->
-          <div class="wizard-step" id="step-2">
-            <div class="section-title"><i class="fas fa-laptop-code"></i> Chuyên môn & Định hướng</div>
-            
-            <div class="form-row">
-              <div class="form-group full">
-                <label>Vị trí mong muốn ứng tuyển</label>
-                <div class="input-wrapper">
-                  <input type="text" name="job_title" value="{{ user.job_title or '' }}" placeholder="VD: Frontend Developer / Data Analyst">
-                  <i class="fas fa-briefcase"></i>
-                </div>
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group full">
-                <label>Mục tiêu nghề nghiệp (Giới thiệu bản thân)</label>
-                <div class="input-wrapper">
-                  <textarea name="bio" placeholder="Hãy viết một đoạn ngắn giới thiệu về bản thân và mục tiêu trong 3 năm tới...">{{ user.bio or '' }}</textarea>
-                  <i class="fas fa-quote-left"></i>
-                </div>
-                <div class="hint">Nhà tuyển dụng rất thích đọc phần này để hiểu định hướng của bạn.</div>
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group full">
-                <label>Kỹ năng nổi bật</label>
-                <div class="input-wrapper">
-                  <textarea name="skills" placeholder="VD:&#10;Kỹ năng cứng: Python, Excel, SQL&#10;Kỹ năng mềm: Giao tiếp, Làm việc nhóm">{{ user.skills or '' }}</textarea>
-                  <i class="fas fa-star"></i>
-                </div>
-              </div>
-            </div>
-
-            <div class="form-footer">
-              <button type="button" class="btn btn-prev" onclick="prevStep(1)"><i class="fas fa-arrow-left"></i> Quay lại</button>
-              <button type="button" class="btn btn-next" onclick="nextStep(3)">Tiếp tục <i class="fas fa-arrow-right"></i></button>
-            </div>
-          </div>
-
-          <!-- STEP 3: Education & Lang -->
-          <div class="wizard-step" id="step-3">
-            <div class="section-title"><i class="fas fa-graduation-cap"></i> Học vấn & Ngôn ngữ</div>
-
-            <div class="form-row">
-              <div class="form-group full">
-                <label>Ngoại ngữ</label>
-                <div class="input-wrapper">
-                  <input type="text" name="languages" value="{{ user.languages or '' }}" placeholder="VD: Tiếng Anh (IELTS 7.0), Tiếng Nhật (N3)">
-                  <i class="fas fa-language"></i>
-                </div>
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group full">
-                <label>Lịch sử học vấn</label>
-                <div class="input-wrapper">
-                  <textarea name="education" placeholder="Ghi rõ trường đại học, loại bằng cấp và thời gian. VD:&#10;Đại học Tôn Đức Thắng (2021-2025)&#10;- Chuyên ngành: Công nghệ thông tin&#10;- GPA: 3.8/4.0">{{ user.education or '' }}</textarea>
-                  <i class="fas fa-university"></i>
-                </div>
-              </div>
-            </div>
-
-            <div class="form-footer">
-              <button type="button" class="btn btn-prev" onclick="prevStep(2)"><i class="fas fa-arrow-left"></i> Quay lại</button>
-              <button type="button" class="btn btn-next" onclick="nextStep(4)">Tiếp tục <i class="fas fa-arrow-right"></i></button>
-            </div>
-          </div>
-
-          <!-- STEP 4: Experience -->
-          <div class="wizard-step" id="step-4">
-            <div class="section-title"><i class="fas fa-rocket"></i> Kinh nghiệm làm việc & Dự án</div>
-
-            <div class="form-row">
-              <div class="form-group full">
-                <label>Quá trình công tác / Dự án nổi bật</label>
-                <div class="input-wrapper">
-                  <textarea name="experience" style="min-height: 250px" placeholder="VD:&#10;Dự án: Hệ thống quản lý Internship Finder (10/2025 - Nay)&#10;- Vị trí: Fullstack Developer&#10;- Mô tả: Xây dựng hệ thống web kết nối ứng viên...&#10;- Công nghệ sử dụng: Flask, SQLite, Bootstrap">{{ user.experience or '' }}</textarea>
-                  <i class="fas fa-building"></i>
-                </div>
-                <div class="hint">Hãy liệt kê các dự án cá nhân hoặc công việc làm thêm nếu chưa có công việc chính thức. Ghi rõ khoảng thời gian.</div>
-              </div>
-            </div>
-
-            <div class="form-footer">
-              <button type="button" class="btn btn-prev" onclick="prevStep(3)"><i class="fas fa-arrow-left"></i> Quay lại</button>
-              <button type="submit" class="btn btn-save"><i class="fas fa-check-circle"></i> Hoàn tất & Lưu CV</button>
-            </div>
-          </div>
-
-        </form>
+        <div style="margin-top: auto; padding-top: 40px; border-top: 1px solid #e5e7eb; display: flex; justify-content: space-between; font-size: 11px; color: #9ca3af; font-weight: 500; margin-left: -70px; margin-right: -70px; padding-left: 70px; padding-right: 70px;">
+          <div>© 2026 Internship Finder. All rights reserved.</div>
+          <div style="display: flex; gap: 25px;"><a href="#" style="color:#9ca3af; text-decoration:none;">Điều khoản dịch vụ</a><a href="#" style="color:#9ca3af; text-decoration:none;">Chính sách bảo mật</a></div>
+        </div>
       </div>
+
+      <!-- ================= STEP 2: Education ================= -->
+      <div class="wizard-step" id="step_2">
+        <div class="page-header">
+          <h1>Hồ sơ học vấn</h1>
+          <p>Liệt kê quá trình đào tạo bài bản của bạn để chứng minh nền tảng chuyên môn học thuật rõ ràng.</p>
+        </div>
+        
+        <div class="edu-layout">
+          <div class="edu-form-side">
+            <div class="form-card" style="padding: 30px; margin-bottom: 0;">
+                <div class="form-group">
+                    <label>TRƯỜNG ĐẠI HỌC / CAO ĐẲNG</label>
+                    <div class="input-wrapper"><i class="fas fa-graduation-cap"></i><input type="text" placeholder="Đại học Công Nghệ TP.HCM"></div>
+                </div>
+                <div class="form-group">
+                    <label>CHUYÊN NGÀNH</label>
+                    <div class="input-wrapper"><i class="fas fa-book"></i><input type="text" placeholder="Công nghệ phần mềm"></div>
+                </div>
+                <div class="row-2">
+                    <div class="form-group">
+                        <label>ĐIỂM TRUNG BÌNH (GPA)</label>
+                        <div class="input-wrapper"><i class="far fa-star"></i><input type="text" placeholder="3.8 / 4.0"></div>
+                        <div style="font-size:10px; color:#9ca3af; margin-top:4px;">Định dạng: X.X / 4.0 hoặc Hệ 10</div>
+                    </div>
+                    <div class="form-group">
+                        <label>NGÀY BẮT ĐẦU</label>
+                        <div class="input-wrapper"><i class="far fa-calendar"></i><input type="text" placeholder="Tháng / Năm"></div>
+                    </div>
+                </div>
+                <div class="row-2">
+                    <div class="form-group">
+                        <label>NGÀY KẾT THÚC (DỰ KIẾN)</label>
+                        <div class="input-wrapper"><i class="far fa-calendar"></i><input type="text" placeholder="Tháng / Năm"></div>
+                        <div style="font-size:10px; color:#9ca3af; margin-top:4px;">Để trống nếu bạn vẫn đang theo học</div>
+                    </div>
+                </div>
+            </div>
+          </div>
+
+          <div class="edu-widget-side">
+             <div class="widget-box">
+                 <div class="widget-title">
+                     <span>Kỹ năng nổi bật</span>
+                     <span class="badge-progress">Đang cập nhật</span>
+                 </div>
+                 <div class="skill-bar">
+                     <div class="skill-bar-head"><span>NỀN TẢNG HỌC THUẬT</span><span>85%</span></div>
+                     <div class="bar-bg"><div class="bar-fill" style="width: 85%;"></div></div>
+                 </div>
+                 <div class="skill-bar">
+                     <div class="skill-bar-head"><span>NĂNG LỰC KỸ THUẬT</span><span>40%</span></div>
+                     <div class="bar-bg"><div class="bar-fill" style="width: 40%; background: #60a5fa;"></div></div>
+                 </div>
+                 <div class="skill-tags">
+                     <div class="s-tag">Cấu trúc dữ liệu</div>
+                     <div class="s-tag">Phân tích dữ liệu</div>
+                     <div class="s-tag">UI Design</div>
+                     <div class="s-tag add">+ Thêm mới</div>
+                 </div>
+             </div>
+
+             <div class="curator-tip">
+                 <i class="far fa-lightbulb"></i>
+                 <h3>Mẹo nhỏ từ chuyên gia</h3>
+                 <p>Các nhà tuyển dụng hàng đầu rất chú ý đến GPA, nhưng dự án đồ án và các chứng chỉ mới thực sự chứng minh năng lực thực tế. Đừng quên liệt kê chi tiết trong phần Kinh nghiệm làm việc ở Bước 3!</p>
+             </div>
+
+             <div class="quote-box">
+                 <div class="quote-text">"Giáo dục là tấm vé thông hành đến tương lai, bởi ngày mai thuộc về những người sẵn sàng chuẩn bị cho nó từ hôm nay."</div>
+                 <div class="quote-author">— MALCOLM X</div>
+             </div>
+          </div>
+        </div>
+
+        <div class="bottom-actions" style="margin-top: 40px; justify-content: center; gap: 20px;">
+          <button class="btn btn-outline" onclick="showStep(1)"><i class="fas fa-arrow-left"></i> Quay lại</button>
+          <button class="btn btn-light" style="padding: 11px 40px;">Lưu nháp</button>
+          <button class="btn btn-primary" onclick="showStep(3)">Bước tiếp theo <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div>
+
+      <!-- ================= STEP 3: Experience ================= -->
+      <div class="wizard-step" id="step_3">
+        <div class="page-header">
+          <h1>Kinh nghiệm làm việc</h1>
+          <p>Nêu bật những thành tựu sự nghiệp và lịch sử làm việc của bạn.</p>
+        </div>
+        <div class="form-card" style="text-align: center; padding: 60px;">
+           <i class="fas fa-briefcase" style="font-size: 40px; color: #cbd5e1; margin-bottom: 20px;"></i>
+           <h3>Mục Kinh Nghiệm</h3>
+           <p style="color: #64748b; margin-top: 10px;">Giao diện nhập liệu tương tự bước Học vấn.</p>
+        </div>
+        <div class="bottom-actions">
+           <button class="btn btn-outline" onclick="showStep(2)"><i class="fas fa-arrow-left"></i> Quay lại</button>
+           <button class="btn btn-primary" onclick="showStep(5)">Bước tiếp theo <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div>
+
+      <!-- ================= STEP 5: Templates Gallery ================= -->
+      <div class="wizard-step" id="step_5">
+        <div class="page-header">
+          <h1>Chọn một mẫu CV.</h1>
+          <p>Lựa chọn kiểu thiết kế phản ánh đúng phong thái chuyên nghiệp. Trí tuệ tự động đã chọn trước những thiết kế tốt nhất với ngành của bạn.</p>
+        </div>
+        
+        <div style="display: flex; justify-content: flex-end; margin-top: -60px; margin-bottom: 20px;">
+            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 20px; padding: 6px 12px; display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 700; color: var(--primary);">
+                Tối ưu hóa bằng AI <div style="width: 36px; height: 18px; background: var(--primary); border-radius: 9px; position:relative;"><div style="width:14px; height:14px; background:white; border-radius:50%; position:absolute; right:2px; top:2px;"></div></div>
+            </div>
+        </div>
+
+        <div class="template-gallery">
+            <!-- Tpl 1 -->
+            <div class="tpl-card">
+                <div class="tpl-preview" onclick="showTemplateDetail('minimalist')">
+                    <div class="tag-rec">AI ĐỀ XUẤT CHO KỸ THUẬT</div>
+                    <div style="width: 80%; margin-top: 20px; display: flex; flex-direction: column; gap: 15px;">
+                        <div style="width: 80%; height: 8px; background: #1f2937;"></div>
+                        <div style="width: 100%; height: 2px; background: #e2e8f0;"></div>
+                        <div style="width: 100%; height: 4px; background: #f1f5f9; margin-top:10px;"></div>
+                        <div style="width: 90%; height: 4px; background: #f1f5f9;"></div>
+                        <div style="width: 50%; height: 4px; background: #e2e8f0; margin-top:20px;"></div>
+                        <div style="width: 100%; height: 4px; background: #f1f5f9;"></div>
+                    </div>
+                </div>
+                <div class="tpl-title">Mẫu Tối Giản</div>
+                <div class="tpl-desc">Siêu cực gọn gàng, thân thiện chuẩn chỉnh với công nghệ quét CV bằng AI. Tối ưu cho IT.</div>
+                <button class="btn btn-light" onclick="showTemplateDetail('minimalist')">Chọn Mẫu Này</button>
+            </div>
+            
+            <!-- Tpl 2 (Selected) -->
+            <div class="tpl-card selected">
+                <div class="tpl-preview" onclick="showTemplateDetail('contemporary')">
+                    <div class="tag-pop">RẤT PHỔ BIẾN <i class="fas fa-check-circle" style="color:white; margin-left: 2px;"></i></div>
+                    <div style="width: 100%; height:100%; display: flex; gap: 10px; margin-top:10px;">
+                        <div style="width: 35%; background:#f1f5f9; border-radius:4px; display:flex; flex-direction:column; align-items:center; padding-top:10px; gap:8px;">
+                            <div style="width:20px; height:20px; border-radius:50%; background:#cbd5e1;"></div>
+                            <div style="width:60%; height:3px; background:#e2e8f0;"></div>
+                        </div>
+                        <div style="width: 65%; display:flex; flex-direction:column; gap:8px; padding-top:20px;">
+                             <div style="width: 80%; height:5px; background:#1e3a8a;"></div>
+                             <div style="width: 50%; height:3px; background:#cbd5e1;"></div>
+                             <div style="width: 40%; height:4px; background:#64748b; margin-top:15px;"></div>
+                             <div style="width: 90%; height:3px; background:#f1f5f9;"></div>
+                             <div style="width: 85%; height:3px; background:#f1f5f9;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tpl-title">Mẫu Đương Đại</div>
+                <div class="tpl-desc">Bố cục chia hai cột thanh lịch với điểm nhấn xanh navy chuyên nghiệp dành cho dân văn phòng.</div>
+                <button class="btn btn-primary" onclick="showTemplateDetail('contemporary')">Đã Chọn</button>
+            </div>
+
+            <!-- Tpl 3 -->
+            <div class="tpl-card">
+                <div class="tpl-preview">
+                    <div style="width: 100%; margin-top:20px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div style="width: 60%; height: 12px; background: #1f2937;"></div>
+                            <div style="width: 24px; height: 24px; border-radius: 50%; border:2px solid #e2e8f0;"></div>
+                        </div>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:30px;">
+                            <div style="background:#f8fafc; padding:10px; border-radius:4px;">
+                                <div style="width:10px; height:10px; border-radius:50%; background:#bfdbfe; margin-bottom:8px;"></div>
+                                <div style="width:80%; height:3px; background:#e2e8f0;"></div>
+                            </div>
+                            <div style="background:#f8fafc; padding:10px; border-radius:4px;">
+                                <div style="width:10px; height:10px; border-radius:50%; background:#bfdbfe; margin-bottom:8px;"></div>
+                                <div style="width:80%; height:3px; background:#e2e8f0;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tpl-title">Mẫu Sáng Tạo</div>
+                <div class="tpl-desc">Thiết kế hiện đại mang tính thẩm mỹ cao ứng dụng hệ icon và card layout phù hợp với khối Marketing.</div>
+                <button class="btn btn-light">Chọn Mẫu Này</button>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 30px;">
+            <div class="tailor-banner" style="flex: 2;">
+                <div class="tailor-content">
+                    <h3>Cần một thiết kế tùy chỉnh?</h3>
+                    <p>Các chuyên gia nghề nghiệp của chúng tôi sẽ cùng đánh giá phiên bản CV nháp của bạn và góp ý thêm góc nhìn từ nhà tuyển dụng.</p>
+                    <a href="#" class="btn-white">Đặt Lịch Ngay</a>
+                </div>
+            </div>
+            <div class="filler-box" style="flex: 1;">
+                <i class="fas fa-bolt"></i>
+                <h4>Điền Tự Động Toàn Diện</h4>
+                <p>Mỗi khi đổi giao diện bộ cung cấp, nội dung thông tin sẽ được tự động đổ xuống không cần phải chỉnh sửa lại.</p>
+            </div>
+        </div>
+
+        <div class="bottom-actions" style="margin-top: 40px;">
+          <button class="btn btn-outline" onclick="showStep(3)"><i class="fas fa-arrow-left"></i> Quay lại</button>
+          <button class="btn btn-primary" onclick="showStep(6)" style="font-size: 14px; padding: 14px 40px;">Xem Trước CV <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div>
+
+      <!-- ================= STEP 5 Detail (Minimalist 4.1) ================= -->
+      <div class="wizard-step" id="step_5_minimalist">
+        <div class="template-detail-layout">
+            <div class="td-sidebar">
+                <a class="back-link" onclick="showStep(5)"><i class="fas fa-arrow-left"></i> Về danh sách Mẫu CV</a>
+                <h1 class="td-title">Mẫu Tối Giản</h1>
+                <p class="td-desc">Một thiết kế cực kỳ liền mạch và dễ chịu nhờ font nét mỏng. Mẫu này vượt qua hầu hết các bộ test của máy đọc và giữ được vẻ ngoài trang trọng, học thuật cho bạn.</p>
+                <button class="btn btn-primary" style="margin-bottom: 15px; font-size:14px; padding:12px; justify-content:center;">Sử dụng Mẫu Này</button>
+                <button class="btn btn-light" style="margin-bottom: 30px; font-size:14px; padding:12px; justify-content:center; color:var(--primary); background:#f8fafc; border:1px solid #e2e8f0;">Xem Toàn Màn Hình</button>
+                
+                <div style="display: flex; gap: 10px;">
+                    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; flex: 1;">
+                        <i class="far fa-file-alt" style="color: var(--primary); margin-bottom: 10px; font-size: 18px;"></i>
+                        <div style="font-size: 12px; font-weight: 700; margin-bottom: 4px;">Tối ưu hệ thống ATS</div>
+                        <div style="font-size: 10px; color: #64748b;">Khả năng đọc hiểu đạt 99%.</div>
+                    </div>
+                    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; flex: 1;">
+                        <i class="fas fa-print" style="color: var(--primary); margin-bottom: 10px; font-size: 18px;"></i>
+                        <div style="font-size: 12px; font-weight: 700; margin-bottom: 4px;">Chuẩn hóa In Ấn</div>
+                        <div style="font-size: 10px; color: #64748b;">Định dạng chuẩn cho máy in màu kĩ thuật.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="td-preview-area">
+                <div style="width: 500px; height: 700px; background: white; box-shadow: 0 10px 40px rgba(0,0,0,0.08); padding: 50px; display:flex; flex-direction:column;">
+                     <div style="text-align: center; margin-bottom: 20px;">
+                         <div style="font-size: 20px; font-weight: 400; letter-spacing: 2px;">NGUYỄN VĂN A</div>
+                         <div style="font-size: 8px; color: #64748b; margin-top: 5px; text-transform: uppercase;">TP. Hồ Chí Minh • nguyenvana@email.com • +84 900 123 456</div>
+                     </div>
+                     <div style="width:100%; height:1px; background:black; margin-bottom: 20px;"></div>
+                     
+                     <div style="font-size: 10px; font-weight: 700; letter-spacing: 1px; margin-bottom: 10px;">THÔNG TIN CÁ NHÂN</div>
+                     <div style="font-size: 9px; line-height: 1.6; margin-bottom: 25px;">Chuyên gia Thiết kế Sản phẩm với 8+ năm dẫn dắt các nền tảng thiết kế quy chuẩn quy mô lớn. Làm việc gắn kết những hạn chế kỹ thuật và tạo ra một trải nghiệm siêu chân thực cho các doanh nghiệp mảng Giáo dục.</div>
+
+                     <div style="font-size: 10px; font-weight: 700; letter-spacing: 1px; margin-bottom: 10px;">KINH NGHIỆM LÀM VIỆC</div>
+                     <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                         <div style="font-size: 9px; font-weight: 700;">Chuyên viên Sản Phẩm | Tập Đoàn Lumina</div>
+                         <div style="font-size: 8px; color:#64748b; font-style:italic;">2020 - Hiện tại</div>
+                     </div>
+                     <div style="font-size: 9px; line-height: 1.6; margin-bottom: 25px; padding-left:10px;">
+                         - Tái thiết kế toàn bộ hệ thống bán hàng, tăng trưởng khách hàng trong 1 tháng đạt đỉnh điểm 35%.<br>
+                         - Tối ưu hóa UI React-base cho đội ngũ phát triển sản phẩm của 12 phòng ban chức năng.
+                     </div>
+                </div>
+            </div>
+        </div>
+      </div>
+
+      <!-- ================= STEP 5 Detail (Contemporary 4.2) ================= -->
+      <div class="wizard-step" id="step_5_contemporary">
+        <div class="template-detail-layout">
+            <div class="td-sidebar">
+                <a class="back-link" onclick="showStep(5)"><i class="fas fa-arrow-left"></i> Về danh sách Mẫu CV</a>
+                <h1 class="td-title">Mẫu Đương Đại</h1>
+                <p class="td-desc">Cấu trúc 2 dãy với khoảng trống xanh viền lớn nhắm trực diện đến các công việc đòi hỏi sáng tạo, chuyên nghiệp và truyền thông giao tiếp. Trọng thái chia khoảng trắng cũng đem đến tỷ lệ đọc hiểu siêu tốc.</p>
+                <button class="btn btn-primary" style="margin-bottom: 15px; font-size:14px; padding:12px; justify-content:center;">Sử dụng Mẫu Này</button>
+                <button class="btn btn-light" style="margin-bottom: 30px; font-size:14px; padding:12px; justify-content:center; color:var(--primary); background:#f8fafc; border:1px solid #e2e8f0;">Xem Toàn Màn Hình</button>
+            </div>
+            
+            <div class="td-preview-area">
+                <div style="width: 500px; height: 700px; background: white; box-shadow: 0 10px 40px rgba(0,0,0,0.08); display:flex;">
+                     <div style="width: 38%; background: var(--primary); padding: 30px 20px; color:white; display:flex; flex-direction:column; align-items:center;">
+                         <img src="https://i.pravatar.cc/150?img=11" alt="Avatar" style="width: 80px; height: 80px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); margin-bottom: 15px;">
+                         <div style="font-size: 14px; font-weight: 700; text-align: center; margin-bottom: 4px;">Nguyễn Văn A</div>
+                         <div style="font-size: 8px; letter-spacing: 1px; color: rgba(255,255,255,0.7); margin-bottom: 30px;">CHUYÊN VIÊN PHÂN TÍCH</div>
+                         
+                         <div style="width: 100%;">
+                             <div style="font-size: 9px; font-weight: 700; letter-spacing: 1px; margin-bottom: 10px;">LIÊN HỆ</div>
+                             <div style="font-size: 8px; margin-bottom: 6px;"><i class="fas fa-envelope" style="margin-right:6px;"></i> nguyenvana@email.com</div>
+                             <div style="font-size: 8px; margin-bottom: 6px;"><i class="fas fa-phone" style="margin-right:6px;"></i> +84 900 123 456</div>
+                             <div style="font-size: 8px; margin-bottom: 20px;"><i class="fas fa-map-marker-alt" style="margin-right:8px;"></i> TP. Hồ Chí Minh</div>
+                         </div>
+                     </div>
+                     <div style="width: 62%; padding: 30px 20px;">
+                          <div style="font-size: 10px; font-weight: 700; letter-spacing: 1px; color:var(--primary); margin-bottom: 6px;">THÔNG TIN CÁ NHÂN</div>
+                          <div style="font-size: 8px; line-height: 1.6; margin-bottom: 25px; color:#1f2937;">Kỹ sư phát triển xuất sắc với 7 năm xây dựng dịch vụ kĩ thuật nội bộ số hóa cho các startup hàng đầu ở Việt Nam...</div>
+                          
+                          <div style="font-size: 10px; font-weight: 700; letter-spacing: 1px; color:var(--primary); margin-bottom: 10px;">KINH NGHIỆM LÀM VIỆC</div>
+                          <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                              <div style="font-size: 9px; font-weight: 700;">Chuyên Viên Cấp Cao</div>
+                              <div style="font-size: 7px; color:var(--primary); background:#e0e7ff; padding:2px 4px; border-radius:8px;">2020 — HIỆN TẠI</div>
+                          </div>
+                          <div style="font-size: 7px; color:var(--primary); margin-bottom: 6px; font-weight:700;">Tập Đoàn Lumina</div>
+                          <div style="font-size: 8px; line-height: 1.6; margin-bottom: 15px; padding-left:8px; border-left:1px solid #e2e8f0;">
+                              Dẫn đầu quy trình tái định hình cấu trúc dữ liệu nền tảng làm tăng khả năng lưu trữ lên 80%.
+                          </div>
+                     </div>
+                </div>
+            </div>
+        </div>
+      </div>
+
+      <!-- ================= STEP 6: Preview & Download ================= -->
+      <div class="wizard-step" id="step_6">
+          <div class="preview-header">
+              <div>
+                  <h1>Xem trước & Tải xuống</h1>
+                  <p>Bản CV của bạn đã quá tuyệt hảo. Hãy duyệt lại trước khi xuất file PDF chất lượng cao nhất nhé.</p>
+              </div>
+              <div style="display: flex; gap: 10px;">
+                  <button class="btn btn-outline" style="border:1px solid #e2e8f0;" onclick="showStep(5)"><i class="fas fa-pencil-alt"></i> Sửa lại Thiết Kế</button>
+                  <button class="btn btn-primary" onclick="window.location.href='/profile/export-pdf'"><i class="fas fa-download"></i> Tải Dạng PDF</button>
+              </div>
+          </div>
+
+          <div class="preview-body">
+              <div class="cv-wrapper">
+                  <div class="cv-paper" style="padding: 60px;">
+                      <div style="display: flex; justify-content: space-between; align-items:flex-end;">
+                          <div>
+                              <div style="font-size: 32px; font-weight: 800; line-height: 1.1; margin-bottom: 10px;">Nguyễn<br>Văn A</div>
+                              <div style="font-size: 11px; font-weight: 700; color: var(--primary); letter-spacing: 2px;">CHUYÊN VIÊN PHÂN TÍCH<br>KINH DOANH</div>
+                          </div>
+                          <div style="text-align: right; color: #4b5563; font-size: 10px; line-height: 1.8;">
+                              nguyenvana@email.com<br>
+                              +84 900 123 456<br>
+                              Thành phố Hồ Chí Minh<br>
+                              <span style="color:var(--primary); font-weight:600;">linkedin.com/in/nguyenvana</span>
+                          </div>
+                      </div>
+                      <div style="width: 100%; height: 2px; background: #e0e7ff; margin: 30px 0;"></div>
+                      
+                      <div style="font-size: 11px; font-weight: 700; letter-spacing: 1px; color:#60a5fa; margin-bottom: 15px;">MỤC TIÊU NGHỀ NGHIỆP</div>
+                      <div style="font-size: 11px; color:#4b5563; line-height: 1.6; margin-bottom: 30px;">Tốt nghiệp chuyên ngành Hệ thống thông tin có nền tảng phân tích tốt. Khả năng chịu sức ép cao ở khối văn phòng ngân hàng kinh tế. Thích ứng rất nhanh với công nghệ và mong muốn trở thành quản lý dự án lâu dài cho khối tổ chức tín dụng.</div>
+
+                      <div style="font-size: 11px; font-weight: 700; letter-spacing: 1px; color:#60a5fa; margin-bottom: 15px;">KINH NGHIỆM LÀM VIỆC ĐIỂN HÌNH</div>
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                          <div style="font-size: 12px; font-weight: 700; color:#111827;">Thực Tập Sinh Chiến Lược</div>
+                          <div style="font-size: 10px; color:#6b7280;">Tháng 06/2023 - Tháng 08/2023</div>
+                      </div>
+                      <div style="font-size: 10px; color:var(--primary); font-weight:600; margin-bottom: 10px;">Ngân hàng Morgan Stanley | Chi nhánh TP.HCM</div>
+                      <div style="font-size: 11px; color:#4b5563; line-height:1.6; padding-left:15px; margin-bottom:20px;">
+                          Đã phân tích các chỉ số rủi ro cho chuỗi quỹ đầu tư dự án trị giá $5 triệu USD, phát hiện ra 2 quy trình xử lý thiếu sót đem lại cơ hội xử lý an toàn kịp thời.<br>
+                          Phối hợp phân tích nền tảng cạnh tranh trực tuyến của ngân hàng và tư vấn tự động hóa qua AI, tiết kiệm quy trình nội bộ 10 tiếng mỗi tuần.
+                      </div>
+                  </div>
+              </div>
+
+              <div class="ai-optimizer">
+                  <div class="opt-header"><i class="fas fa-magic"></i> Phân tích bởi AI</div>
+                  
+                  <div class="opt-card yellow">
+                      <div class="opt-title"><i class="far fa-lightbulb" style="color:#f59e0b;"></i> Số liệu định lượng</div>
+                      <div class="opt-desc">Hãy bổ sung các con số biết nói vào thành tựu kinh nghiệm của bạn. Ví dụ: Hãy viết "Phân tích số liệu cho danh mục đầu tư $5 triệu <b>giúp thay đổi tỷ suất bảo mật được cải thiện 12%</b>."</div>
+                  </div>
+
+                  <div class="opt-card blue">
+                      <div class="opt-title"><i class="fas fa-font" style="color:var(--primary);"></i> Tối ưu hóa Từ Cốt Lõi</div>
+                      <div class="opt-desc">Nhiều hệ thống AI của bộ phận Tuyển sinh hiện tại rất chú ý chữ "Quản Trị Dự Án" hay "Mô Hình Agile", hãy ghi rõ ràng bộ thông số này nếu bạn định nộp vào chức Quản Trị.</div>
+                  </div>
+
+                  <div class="opt-card green">
+                      <div class="opt-title"><i class="far fa-check-circle" style="color:#10b981;"></i> Phần Nền tảng học thuật</div>
+                      <div class="opt-desc">Thành tích đại học và chỉ số GPA của bạn đang nằm trong top xuất sắc ưu tiên cho tuyển dụng C-Level.</div>
+                  </div>
+
+                  <button class="btn btn-light" style="width:100%; justify-content:center; margin-top:10px;">Chạy Máy Quét Lại</button>
+
+                  <div class="score-card">
+                      <div class="score-top">
+                          <div class="score-label">Đánh Giá Tổng Quan</div>
+                          <div class="score-num">88<span>/100</span></div>
+                      </div>
+                      <div class="score-bar"><div class="score-fill"></div></div>
+                      <div class="score-text">Định dạng CV này của bạn thuộc <b>Nhóm 5% cao nhất</b> và phù hợp đắc lực cho những vị trí của Chuyên viên phân tích khởi điểm.</div>
+                  </div>
+              </div>
+          </div>
+      </div>
+
     </div>
   </div>
+</div>
 
-  <script>
-    let currentStep = 1;
-    const totalSteps = 4;
-
-    function showStep(step) {
-      // Ẩn tất cả nội dung
-      document.querySelectorAll('.wizard-step').forEach(el => {
-        el.classList.remove('active');
-      });
-      // Bỏ highlight sidebar
-      document.querySelectorAll('.step-item').forEach(el => {
-        el.classList.remove('active');
-        // Thêm class completed cho các step trước
-        const stepNum = parseInt(el.id.split('-')[2]);
-        if (stepNum < step) {
-          el.classList.add('completed');
-        } else {
-          el.classList.remove('completed');
-        }
-      });
-
-      // Hiển thị nội dung step hiện tại
-      document.getElementById(`step-${step}`).classList.add('active');
-      document.getElementById(`nav-step-${step}`).classList.add('active');
-      
-      currentStep = step;
-      // Scroll to top of form smoothly
-      document.querySelector('.form-area').scrollTo({top: 0, behavior: 'smooth'});
-    }
-
-    function nextStep(step) {
-      showStep(step);
-    }
+<script>
+  function showStep(stepName) {
+    document.querySelectorAll('.wizard-step').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
     
-    function prevStep(step) {
-      showStep(step);
+    if(stepName === 'minimalist') {
+      document.getElementById('step_5_minimalist').classList.add('active');
+      document.getElementById('nav-step5').classList.add('active');
+      document.getElementById('step-indicator').innerText = "Bước 5 trên 6";
+      return;
     }
-  </script>
+    if(stepName === 'contemporary') {
+      document.getElementById('step_5_contemporary').classList.add('active');
+      document.getElementById('nav-step5').classList.add('active');
+      document.getElementById('step-indicator').innerText = "Bước 5 trên 6";
+      return;
+    }
+
+    let el = document.getElementById('step_' + stepName);
+    if(el) el.classList.add('active');
+    
+    let nav = document.getElementById('nav-step' + stepName);
+    if(nav) nav.classList.add('active');
+
+    let displayStep = stepName;
+    if(stepName === 5) displayStep = 5;
+    if(stepName === 6) displayStep = 6;
+    document.getElementById('step-indicator').innerText = "Bước " + displayStep + " trên 6";
+  }
+
+  function showTemplateDetail(type) {
+    showStep(type);
+  }
+
+  document.getElementById('photo-upload').addEventListener('change', function(event) {
+    if (event.target.files && event.target.files[0]) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const box = document.querySelector('.photo-box');
+        box.style.backgroundImage = 'url(' + e.target.result + ')';
+        box.style.backgroundSize = 'cover';
+        box.style.backgroundPosition = 'center';
+        box.querySelector('.fa-camera').style.display = 'none';
+        box.querySelector('.plus-badge').style.display = 'none';
+        box.querySelector('span').style.display = 'none';
+      };
+      reader.readAsDataURL(event.target.files[0]);
+    }
+  });
+
+  const emailInput = document.querySelector('input[type="email"]');
+  const emailWrapper = emailInput.closest('.input-wrapper');
+  emailInput.addEventListener('input', function() {
+    if(this.value && !this.value.includes('@')) {
+      emailWrapper.classList.add('invalid');
+      emailWrapper.nextElementSibling.style.display = 'flex';
+    } else {
+      emailWrapper.classList.remove('invalid');
+      emailWrapper.nextElementSibling.style.display = 'none';
+    }
+  });
+</script>
 </body>
 </html>
