@@ -220,7 +220,8 @@
     </div>
 
     <!-- Main Content -->
-    <div class="main-content" style="padding:0;"> <!-- 0 padding to allow full screens for Preview mode -->
+    <div class="main-content" style="padding:0;"><form id="cvForm" action="{{ url_for('edit_profile') }}" method="POST" enctype="multipart/form-data" style="display:contents;">
+ <!-- 0 padding to allow full screens for Preview mode -->
       
       <!-- ================= STEP: Danh sách Hồ Sơ (NEW) ================= -->
       <div class="wizard-step active" id="step_list_cvs" style="padding: 50px 70px;">
@@ -229,7 +230,7 @@
                 <h1>Danh sách hồ sơ</h1>
                 <p>Quản lý các tài liệu CV bạn đã tạo. Cập nhật và tinh chỉnh để sẵn sàng cho mùa ứng tuyển ngay hôm nay.</p>
             </div>
-            <button class="btn btn-primary" onclick="toggleCreateCvMenu(true); showStep(1);"><i class="fas fa-plus"></i> Tạo hồ sơ mới</button>
+            <button type="button" class="btn btn-primary" onclick="toggleCreateCvMenu(true); showStep(1);"><i class="fas fa-plus"></i> Tạo hồ sơ mới</button>
         </div>
         
         <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap:30px; margin-top:20px;">
@@ -259,9 +260,9 @@
                        </div>
                        <div style="font-size:12px; color:#64748b; margin-bottom:20px;"><i class="far fa-clock"></i> Cập nhật: 2 ngày trước</div>
                        <div style="display:flex; gap:10px;">
-                           <button class="btn btn-outline" style="flex:1; padding:10px;" onclick="window.location.href='/profile/export-pdf'" title="Tải PDF"><i class="fas fa-download"></i></button>
-                           <button class="btn btn-outline" style="flex:1; padding:10px;" title="Chia sẻ"><i class="fas fa-link"></i></button>
-                           <button class="btn btn-primary" style="flex:3; padding:10px;" onclick="toggleCreateCvMenu(true); showStep(1);"><i class="fas fa-pen" style="margin-right:6px;"></i> Sửa</button>
+                           <button type="button" class="btn btn-outline" style="flex:1; padding:10px;" onclick="window.location.href='/profile/export-pdf'" title="Tải PDF"><i class="fas fa-download"></i></button>
+                           <button type="button" class="btn btn-outline" style="flex:1; padding:10px;" title="Chia sẻ"><i class="fas fa-link"></i></button>
+                           <button type="button" class="btn btn-primary" style="flex:3; padding:10px;" onclick="toggleCreateCvMenu(true); showStep(1);"><i class="fas fa-pen" style="margin-right:6px;"></i> Sửa</button>
                        </div>
                   </div>
              </div>
@@ -287,9 +288,9 @@
                        </div>
                        <div style="font-size:12px; color:#64748b; margin-bottom:20px;"><i class="far fa-clock"></i> Cập nhật: 1 tuần trước</div>
                        <div style="display:flex; gap:10px;">
-                           <button class="btn btn-outline" style="flex:1; padding:10px;" onclick="window.location.href='/profile/export-pdf'" title="Tải PDF"><i class="fas fa-download"></i></button>
-                           <button class="btn btn-outline" style="flex:1; padding:10px;" title="Chia sẻ"><i class="fas fa-link"></i></button>
-                           <button class="btn btn-primary" style="flex:3; padding:10px;" onclick="toggleCreateCvMenu(true); showStep(1);"><i class="fas fa-pen" style="margin-right:6px;"></i> Sửa</button>
+                           <button type="button" class="btn btn-outline" style="flex:1; padding:10px;" onclick="window.location.href='/profile/export-pdf'" title="Tải PDF"><i class="fas fa-download"></i></button>
+                           <button type="button" class="btn btn-outline" style="flex:1; padding:10px;" title="Chia sẻ"><i class="fas fa-link"></i></button>
+                           <button type="button" class="btn btn-primary" style="flex:3; padding:10px;" onclick="toggleCreateCvMenu(true); showStep(1);"><i class="fas fa-pen" style="margin-right:6px;"></i> Sửa</button>
                        </div>
                   </div>
              </div>
@@ -314,8 +315,8 @@
         
         <div class="form-card step1-body">
           <div class="photo-section">
-            <input type="file" id="photo-upload" style="display: none;">
-            <div class="photo-box" onclick="document.getElementById('photo-upload').click()">
+            <input type="file" id="photo-upload" name="profile_picture" style="display: none;" onchange="previewAvatar(this)">
+            <div class="photo-box" id="avatarPreviewBox" onclick="document.getElementById('photo-upload').click()"{% if user and user.picture %} style="background: url('{{ user.picture }}') center/cover;" {% endif %}>
               <i class="fas fa-camera"></i>
               <div class="plus-badge">+</div>
               <span>CẬP NHẬT ẢNH</span>
@@ -324,10 +325,17 @@
           </div>
           
           <div class="step1-form">
+            
+            <div class="form-group row-2" style="grid-column: span 2;">
+                <div>
+                    <label>CHỨC DANH ỨNG TUYỂN</label>
+                    <div class="input-wrapper"><i class="fas fa-briefcase"></i><input type="text" name="job_title" placeholder="VD: Data Scientist, Kế toán..." value="{{ user.job_title if user else '' }}"></div>
+                </div>
+            </div>
             <div class="form-group row-2" style="grid-column: span 2;">
                 <div>
                     <label>HỌ TÊN</label>
-                    <div class="input-wrapper"><i class="far fa-user"></i><input type="text" placeholder="Ví dụ: Nguyễn Văn A" value="{{ user.name if user else '' }}"></div>
+                    <div class="input-wrapper"><i class="far fa-user"></i><input type="text" name="name" placeholder="Ví dụ: Nguyễn Văn A" value="{{ user.name if user else '' }}"></div>
                 </div>
             </div>
             <div class="form-group row-2" style="grid-column: span 2;">
@@ -335,28 +343,28 @@
                     <label>ĐỊA CHỈ EMAIL</label>
                     <div class="input-wrapper">
                         <i class="far fa-envelope"></i>
-                        <input type="email" placeholder="email@vi-du.com" value="{{ user.email if user else '' }}">
+                        <input type="email" name="email" placeholder="email@vi-du.com" value="{{ user.email if user else '' }}">
                     </div>
                     <div class="invalid-feedback" style="display:none;"><i class="fas fa-exclamation-circle"></i> Sai định dạng</div>
                 </div>
                 <div>
                     <label>SỐ ĐIỆN THOẠI</label>
-                    <div class="input-wrapper"><i class="fas fa-phone"></i><input type="tel" placeholder="+84 900 000 000" value="{{ user.phone if user else '' }}"></div>
+                    <div class="input-wrapper"><i class="fas fa-phone"></i><input type="tel" name="phone" placeholder="+84 900 000 000" value="{{ user.phone if user else '' }}"></div>
                 </div>
             </div>
             <div class="form-group" style="grid-column: span 2; margin-bottom: 0;">
               <label>ĐỊA CHỈ TRÚ QUÁN</label>
-              <div class="input-wrapper"><i class="fas fa-map-marker-alt"></i><input type="text" placeholder="Thành phố, Tỉnh" value="{{ user.address if user else '' }}"></div>
+              <div class="input-wrapper"><i class="fas fa-map-marker-alt"></i><input type="text" name="address" placeholder="Thành phố, Tỉnh" value="{{ user.address if user else '' }}"></div>
               <div style="font-size: 11px; color: #94a3b8; margin-top: 6px;">Nhà tuyển dụng thường tìm kiếm những ứng viên gần khu vực văn phòng.</div>
             </div>
           </div>
         </div>
 
         <div class="bottom-actions">
-          <button class="btn btn-outline" onclick="showStep('list_cvs')"><i class="fas fa-arrow-left"></i> Quay lại</button>
+          <button type="button" class="btn btn-outline" onclick="showStep('list_cvs')"><i class="fas fa-arrow-left"></i> Quay lại</button>
           <div style="display: flex; align-items: center; gap: 20px;">
             <span style="font-size: 13px; color: #94a3b8; font-weight: 500;">Bước tiếp theo: Học vấn</span>
-            <button class="btn btn-primary" onclick="showStep(2)">Tiếp theo: Học vấn <i class="fas fa-arrow-right"></i></button>
+            <button type="button" id="ajax-save-btn" class="btn btn-primary" onclick="saveProfileData()"><i class="fas fa-save"></i> Cập nhật vào Hồ sơ</button> <button type="button" class="btn btn-light" onclick="showStep(2)">Tiếp theo: Học vấn <i class="fas fa-arrow-right"></i></button>
           </div>
         </div>
       </div>
@@ -373,16 +381,16 @@
             <div class="form-card" style="padding: 30px; margin-bottom: 0;">
                 <div class="form-group">
                     <label>TRƯỜNG ĐẠI HỌC / CAO ĐẲNG</label>
-                    <div class="input-wrapper"><i class="fas fa-graduation-cap"></i><input type="text" placeholder="Đại học Công Nghệ TP.HCM"></div>
+                    <div class="input-wrapper"><i class="fas fa-graduation-cap"></i><input type="text" name="education" placeholder="Đại học Công Nghệ TP.HCM" value="{{ user.education if user else '' }}"></div>
                 </div>
                 <div class="form-group">
                     <label>CHUYÊN NGÀNH</label>
-                    <div class="input-wrapper"><i class="fas fa-book"></i><input type="text" placeholder="Công nghệ phần mềm"></div>
+                    <div class="input-wrapper"><i class="fas fa-book"></i><input type="text" name="education_major" placeholder="Công nghệ phần mềm"></div>
                 </div>
                 <div class="row-2">
                     <div class="form-group">
                         <label>ĐIỂM TRUNG BÌNH (GPA)</label>
-                        <div class="input-wrapper"><i class="far fa-star"></i><input type="text" placeholder="3.8 / 4.0"></div>
+                        <div class="input-wrapper"><i class="far fa-star"></i><input type="text" name="education_gpa" placeholder="3.8 / 4.0"></div>
                     </div>
                 </div>
             </div>
@@ -394,6 +402,11 @@
                      <span>Kỹ năng nổi bật</span>
                      <span class="badge-progress">Đang cập nhật</span>
                  </div>
+                 
+                 <div style="margin-top:20px;">
+                     <label style="font-size:10px;">CÁC KỸ NĂNG CHÍNH (CÁCH NHAU DẤU PHẨY)</label>
+                     <input type="text" name="skills" placeholder="Java, Python, Leadership..." value="{{ user.skills if user else '' }}" style="width:100%; border-bottom:1px solid #e2e8f0; border-radius:0; padding:10px 5px; outline:none; font-size:13px; font-weight:600; font-family:inherit;">
+                 </div>
                  <div class="skill-bar">
                      <div class="skill-bar-head"><span>NỀN TẢNG HỌC THUẬT</span><span>85%</span></div>
                      <div class="bar-bg"><div class="bar-fill" style="width: 85%;"></div></div>
@@ -403,28 +416,38 @@
         </div>
 
         <div class="bottom-actions" style="margin-top: 40px; justify-content: center; gap: 20px;">
-          <button class="btn btn-outline" onclick="showStep(1)"><i class="fas fa-arrow-left"></i> Quay lại</button>
-          <button class="btn btn-primary" onclick="showStep(3)">Bước tiếp theo <i class="fas fa-arrow-right"></i></button>
+          <button type="button" class="btn btn-outline" onclick="showStep(1)"><i class="fas fa-arrow-left"></i> Quay lại</button>
+          <button type="button" id="ajax-save-btn" class="btn btn-primary" onclick="saveProfileData()"><i class="fas fa-save"></i> Cập nhật vào Hồ sơ</button> <button type="button" class="btn btn-light" onclick="showStep(3)">Tiếp theo <i class="fas fa-arrow-right"></i></button>
         </div>
       </div>
 
+      
       <!-- ================= STEP 3: Experience ================= -->
       <div class="wizard-step" id="step_3" style="padding: 50px 70px;">
         <div class="page-header">
           <h1>Kinh nghiệm làm việc</h1>
           <p>Nêu bật những thành tựu sự nghiệp và lịch sử làm việc của bạn.</p>
         </div>
-        <div class="form-card" style="text-align: center; padding: 60px;">
-           <i class="fas fa-briefcase" style="font-size: 40px; color: #cbd5e1; margin-bottom: 20px;"></i>
-           <h3>Mục Kinh Nghiệm đang được phát triển giao diện</h3>
+        
+        <div class="form-card" style="padding: 30px;">
+            <div class="form-group">
+                <label>TÓM TẮT KINH NGHIỆM CHI TIẾT</label>
+                <textarea name="experience" style="width: 100%; height: 200px; padding: 15px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; outline: none; margin-top: 5px; resize:vertical; font-weight:500;" placeholder="Thời gian | Tên Công Ty | Vị Trí&#10;&#10;Mô tả công việc và thành tựu cá nhân nổi bật...">{{ user.experience if user else '' }}</textarea>
+                <div style="font-size:11px; color:#64748b; margin-top:10px;"><i class="fas fa-magic"></i> Mẹo AI: Dùng động từ mạnh (Hoàn thành, Tối ưu, Đạt được số liệu X) sẽ giúp vượt qua hệ thống quét lọc ATS dễ hơn.</div>
+            </div>
+            
+            <div class="form-group" style="margin-top:20px;">
+                <label>NGÔN NGỮ NGOẠI NGỮ</label>
+                <div class="input-wrapper"><i class="fas fa-language"></i><input type="text" name="languages" placeholder="English (IELTS 7.0), Tiếng Nhật (N3)..." value="{{ user.languages if user else '' }}"></div>
+            </div>
         </div>
-        <div class="bottom-actions">
-           <button class="btn btn-outline" onclick="showStep(2)"><i class="fas fa-arrow-left"></i> Quay lại</button>
-           <button class="btn btn-primary" onclick="showStep(5)">Bước tiếp theo <i class="fas fa-arrow-right"></i></button>
+
+        <div class="bottom-actions" style="margin-top: 20px;">
+           <button type="button" class="btn btn-outline" onclick="showStep(2)"><i class="fas fa-arrow-left"></i> Quay lại</button>
+           <button type="button" id="ajax-save-btn" class="btn btn-primary" onclick="saveProfileData()"><i class="fas fa-save"></i> Cập nhật vào Hồ sơ</button> <button type="button" class="btn btn-light" onclick="showStep(5)">Tiếp theo <i class="fas fa-arrow-right"></i></button>
         </div>
       </div>
-
-      <!-- ================= STEP 5: Templates ================= -->
+<!-- ================= STEP 5: Templates ================= -->
       <div class="wizard-step" id="step_5" style="padding: 50px 70px;">
         <div class="page-header">
           <h1>Chọn một mẫu CV.</h1>
@@ -458,8 +481,8 @@
         </div>
 
         <div class="bottom-actions" style="margin-top: 40px;">
-          <button class="btn btn-outline" onclick="showStep(3)"><i class="fas fa-arrow-left"></i> Quay lại</button>
-          <button class="btn btn-primary" onclick="showStep(6)">Xem Trước CV <i class="fas fa-arrow-right"></i></button>
+          <button type="button" class="btn btn-outline" onclick="showStep(3)"><i class="fas fa-arrow-left"></i> Quay lại</button>
+          <button type="button" id="ajax-save-btn" class="btn btn-primary" onclick="saveProfileData()"><i class="fas fa-save"></i> Cập nhật vào Hồ sơ</button> <button type="button" class="btn btn-light" onclick="showStep(6)">Hiển thị CV <i class="fas fa-arrow-right"></i></button>
         </div>
       </div>
 
@@ -469,7 +492,7 @@
                 <div class="td-sidebar">
                     <a class="back-link" onclick="showStep(5)"><i class="fas fa-arrow-left"></i> Về danh sách Mẫu CV</a>
                     <h1 class="td-title">Mẫu Tối Giản</h1>
-                    <button class="btn btn-primary" style="margin-bottom: 15px; font-size:14px; padding:12px;" onclick="showStep(6)">Sử dụng Mẫu Này</button>
+                    <button type="button" class="btn btn-primary" style="margin-bottom: 15px; font-size:14px; padding:12px;" onclick="showStep(6)">Sử dụng Mẫu Này</button>
                 </div>
                 <div class="td-preview-area">
                     <div style="width: 400px; height: 500px; background: white; box-shadow: 0 10px 40px rgba(0,0,0,0.08); padding:40px;">
@@ -487,8 +510,8 @@
                   <p style="color:#64748b; font-size:13px;">Bản CV của bạn đã quá tuyệt hảo. Hãy duyệt lại trước khi tải về.</p>
               </div>
               <div style="display: flex; gap: 10px;">
-                  <button class="btn btn-outline" onclick="showStep(5)"><i class="fas fa-pencil-alt"></i> Mẫu CV Khác</button>
-                  <button class="btn btn-primary" onclick="window.location.href='/profile/export-pdf'"><i class="fas fa-download"></i> Tải PDF (.pdf)</button>
+                  <button type="button" class="btn btn-outline" onclick="showStep(5)"><i class="fas fa-pencil-alt"></i> Mẫu CV Khác</button>
+                  <button type="button" class="btn btn-primary" onclick="window.location.href='/profile/export-pdf'"><i class="fas fa-download"></i> Tải PDF (.pdf)</button>
               </div>
           </div>
 
@@ -522,7 +545,8 @@
           </div>
       </div>
 
-    </div>
+    </form>
+</div>
   </div>
 </div>
 
@@ -592,5 +616,51 @@
        // It's already default active in HTML
   }
 </script>
+
+<script>
+  function previewAvatar(input) {
+      if (input.files && input.files[0]) {
+          var reader = new FileReader();
+          reader.onload = function(e) {
+              const bg = "url('" + e.target.result + "') center/cover no-repeat";
+              const box = document.getElementById('avatarPreviewBox');
+              box.style.background = bg;
+              box.innerHTML = ''; // Hide internal icons safely
+          }
+          reader.readAsDataURL(input.files[0]);
+      }
+  }
+
+  function saveProfileData() {
+      let form = document.getElementById('cvForm');
+      let formData = new FormData(form);
+      let btn = document.getElementById('ajax-save-btn');
+      
+      if(btn) btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
+      
+      fetch('{{ url_for("edit_profile") }}', {
+          method: 'POST',
+          body: formData
+      }).then(res => {
+          if(res.ok) {
+             if(btn) {
+                 btn.innerHTML = '<i class="fas fa-check"></i> Đã lưu thành công';
+                 btn.classList.add('btn-light');
+                 btn.classList.remove('btn-primary');
+             }
+             setTimeout(() => { 
+                 if(btn) {
+                     btn.innerHTML = '<i class="fas fa-save"></i> Cập nhật vào Hồ sơ'; 
+                     btn.classList.remove('btn-light');
+                     btn.classList.add('btn-primary');
+                 }
+             }, 2000);
+          } else {
+             if(btn) btn.innerHTML = '<i class="fas fa-times"></i> Lỗi lưu';
+          }
+      });
+  }
+</script>
+
 </body>
 </html>
