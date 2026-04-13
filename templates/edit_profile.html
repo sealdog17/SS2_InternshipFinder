@@ -6,7 +6,7 @@
   <title>Tạo CV - InternshipFinder</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-  <style>
+ <style>
     :root {
       --primary: #1964d3;
       --primary-hover: #1555b5;
@@ -158,6 +158,14 @@
 
     /* List CV Dynamic */
     .cv-list-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap:30px; margin-top:20px; }
+    .cv-card-thumb { height: 120px; background: #e0e7ff; display:flex; align-items:center; justify-content:center; }
+    .cv-card-icon { font-size:50px; color:#c7d2fe; }
+    .cv-card-info { padding:20px; }
+    .score-label { font-size:13px; font-weight:600; }
+    .score-small { font-size:12px; opacity:0.7; }
+    .score-inner { height:100%; background:white; border-radius:3px; }
+    .score-fill { width: 85%; }
+    .flex-1 { flex: 1; }
 
     /* Photo Upload UI */
     .step1-body { display: flex; gap: 40px; align-items: flex-start; }
@@ -177,7 +185,6 @@
       align-items: center; justify-content: center; font-size: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
     .step1-form { flex: 1; }
-
   </style>
 </head>
 <body>
@@ -202,7 +209,7 @@
       
       <div class="user-dropdown">
         <div class="avatar" id="userAvatarBtn" onclick="toggleUserMenu()">
-          {% if session.get('user_picture') %}<img src="{{ session.get('user_picture') }}">
+          {% if session.get('user_picture') %}<img src="{{ session.get('user_picture') }}" alt="User Avatar">
           {% else %}{{ (session.get('user_name', 'U') or 'U')[0].upper() }}{% endif %}
         </div>
         <div class="dropdown-menu" id="userDropdownMenu">
@@ -270,16 +277,16 @@
           <div class="cv-list-grid" id="cv-items-container">
                {% for cv in cvs %}
                <div class="form-card" style="padding:0; overflow:hidden;" id="cv-card-{{ cv.id }}">
-                    <div style="height: 120px; background: #e0e7ff; display:flex; align-items:center; justify-content:center;">
-                         <i class="fas fa-file-alt" style="font-size:50px; color:#c7d2fe;"></i>
+                    <div class="cv-card-thumb">
+                         <i class="fas fa-file-alt cv-card-icon"></i>
                     </div>
-                    <div style="padding:20px;">
+                    <div class="cv-card-info">
                          <h3 style="font-size:16px; font-weight:700; color:#111827;">Hồ sơ Phiên bản {{ cv.version }}</h3>
-                         <div style="font-size:12px; color:#64748b; margin-top:5px;">Ngày tạo: {{ cv.created_at.strftime('%d/%m/%Y') }}</div>
+                         <div class="score-label" style="font-size:12px; color:#64748b; margin-top:5px;">Ngày tạo: {{ cv.created_at.strftime('%d/%m/%Y') }}</div>
                          <div style="display:flex; gap:8px; margin-top:20px;">
-                             <button type="button" class="btn btn-primary" style="flex:1;" onclick="loadCv({{ cv.id }})">Sửa</button>
-                             <button type="button" class="btn btn-outline" style="flex:1;" onclick="exportPdfSpecific({{ cv.id }})"><i class="fas fa-download"></i></button>
-                             <button type="button" class="btn btn-light" style="padding:10px; color:#ef4444;" onclick="deleteCv({{ cv.id }})"><i class="fas fa-trash"></i></button>
+                             <button type="button" class="btn btn-primary flex-1" onclick="loadCv('{{ cv.id }}')">Sửa</button>
+                             <button type="button" class="btn btn-outline flex-1" onclick="exportPdfSpecific('{{ cv.id }}')"><i class="fas fa-download"></i></button>
+                             <button type="button" class="btn btn-light" style="padding:10px; color:#ef4444;" onclick="deleteCv('{{ cv.id }}')"><i class="fas fa-trash"></i></button>
                          </div>
                     </div>
                </div>
@@ -303,7 +310,7 @@
             <div class="form-card step1-body">
               <div class="photo-section">
                 <input type="file" id="photo-upload" name="profile_picture" style="display: none;" onchange="previewAvatar(this)">
-                <div class="photo-box" id="avatarPreviewBox" onclick="document.getElementById('photo-upload').click()"{% if user and user.picture %} style="background: url('{{ user.picture }}') center/cover;" {% endif %}>
+                <div class="photo-box" id="avatarPreviewBox" onclick="document.getElementById('photo-upload').click()" data-bg="{{ user.picture or '' }}">
                   <i class="fas fa-camera"></i>
                   <div class="plus-badge">+</div>
                   <span>CẬP NHẬT ẢNH</span>
@@ -311,17 +318,17 @@
               </div>
               <div class="step1-form">
                 <div class="form-group row-2" style="grid-column: span 2;">
-                    <div><label>CHỨC DANH ỨNG TUYỂN</label><div class="input-wrapper"><i class="fas fa-briefcase"></i><input type="text" name="job_title" data-sync="preview-job" value="{{ user.job_title or '' }}"></div></div>
+                    <div><label for="f-job">CHỨC DANH ỨNG TUYỂN</label><div class="input-wrapper"><i class="fas fa-briefcase"></i><input type="text" id="f-job" name="job_title" data-sync="preview-job" value="{{ user.job_title or '' }}"></div></div>
                 </div>
                 <div class="form-group row-2" style="grid-column: span 2;">
-                    <div><label>HỌ TÊN</label><div class="input-wrapper"><i class="far fa-user"></i><input type="text" name="name" data-sync="preview-name" value="{{ user.name or '' }}"></div></div>
+                    <div><label for="f-name">HỌ TÊN</label><div class="input-wrapper"><i class="far fa-user"></i><input type="text" id="f-name" name="name" data-sync="preview-name" value="{{ user.name or '' }}"></div></div>
                 </div>
                 <div class="form-group row-2" style="grid-column: span 2;">
-                    <div><label>EMAIL</label><div class="input-wrapper"><i class="far fa-envelope"></i><input type="email" name="email" data-sync="preview-email" value="{{ user.email or '' }}"></div></div>
-                    <div><label>ĐIỆN THOẠI</label><div class="input-wrapper"><i class="fas fa-phone"></i><input type="tel" name="phone" data-sync="preview-phone" value="{{ user.phone or '' }}"></div></div>
+                    <div><label for="f-email">EMAIL</label><div class="input-wrapper"><i class="far fa-envelope"></i><input type="email" id="f-email" name="email" data-sync="preview-email" value="{{ user.email or '' }}"></div></div>
+                    <div><label for="f-phone">ĐIỆN THOẠI</label><div class="input-wrapper"><i class="fas fa-phone"></i><input type="tel" id="f-phone" name="phone" data-sync="preview-phone" value="{{ user.phone or '' }}"></div></div>
                 </div>
                 <div class="form-group" style="grid-column: span 2;">
-                  <label>ĐỊA CHỈ</label><div class="input-wrapper"><i class="fas fa-map-marker-alt"></i><input type="text" name="address" data-sync="preview-address" value="{{ user.address or '' }}"></div>
+                  <label for="f-address">ĐỊA CHỈ</label><div class="input-wrapper"><i class="fas fa-map-marker-alt"></i><input type="text" id="f-address" name="address" data-sync="preview-address" value="{{ user.address or '' }}"></div>
                 </div>
               </div>
             </div>
@@ -336,10 +343,10 @@
             <div class="page-header"><h1>Học vấn & Kỹ năng</h1><p>Nêu bật các bằng cấp và kỹ năng của bạn.</p></div>
             <div class="edu-layout">
                 <div class="edu-form-side">
-                    <div class="form-card"><div class="form-group"><label>THÔNG TIN HỌC VẤN (TRƯỜNG, NGÀNH...)</label><textarea name="education" data-sync="preview-education" placeholder="VD: 2020 - 2024 tại ĐH Bách Khoa..." style="height:150px; padding-left:15px; padding-top:10px;">{{ user.education or '' }}</textarea></div></div>
+                    <div class="form-card"><div class="form-group"><label for="f-education">THÔNG TIN HỌC VẤN (TRƯỜNG, NGÀNH...)</label><textarea id="f-education" name="education" data-sync="preview-education" placeholder="VD: 2020 - 2024 tại ĐH Bách Khoa..." style="height:150px; padding-left:15px; padding-top:10px;">{{ user.education or '' }}</textarea></div></div>
                 </div>
                 <div class="edu-widget-side">
-                    <div class="form-card"><div class="form-group"><label>KỸ NĂNG (CÁCH NHAU DẤU PHẨY)</label><input type="text" name="skills" data-sync="preview-skills" value="{{ user.skills or '' }}" style="padding-left:15px;"></div></div>
+                    <div class="form-card"><div class="form-group"><label for="f-skills">KỸ NĂNG (CÁCH NHAU DẤU PHẨY)</label><input type="text" id="f-skills" name="skills" data-sync="preview-skills" value="{{ user.skills or '' }}" style="padding-left:15px;"></div></div>
                 </div>
             </div>
             <div class="bottom-actions">
@@ -352,9 +359,9 @@
         <div class="wizard-step" id="step_3" style="padding: 50px 70px;">
             <div class="page-header"><h1>Kinh nghiệm & Giới thiệu</h1><p>Mô tả những thành tựu bạn đã đạt được.</p></div>
             <div class="form-card">
-                <div class="form-group"><label>TÓM TẮT BẢN THÂN</label><textarea name="bio" data-sync="preview-bio" style="height:100px; padding-left:15px;" placeholder="Giới thiệu ngắn gọn về thế mạnh bản thân...">{{ user.bio or '' }}</textarea></div>
-                <div class="form-group"><label>KINH NGHIỆM CHI TIẾT</label><textarea name="experience" data-sync="preview-experience" style="height:200px; padding-left:15px;" placeholder="Thời gian | Công ty | Vị trí...">{{ user.experience or '' }}</textarea></div>
-                <div class="form-group"><label>NGOẠI NGỮ</label><input type="text" name="languages" data-sync="preview-languages" value="{{ user.languages or '' }}" style="padding-left:15px;"></div>
+                <div class="form-group"><label for="f-bio">TÓM TẮT BẢN THÂN</label><textarea id="f-bio" name="bio" data-sync="preview-bio" style="height:100px; padding-left:15px;" placeholder="Giới thiệu ngắn gọn về thế mạnh bản thân...">{{ user.bio or '' }}</textarea></div>
+                <div class="form-group"><label for="f-experience">KINH NGHIỆM CHI TIẾT</label><textarea id="f-experience" name="experience" data-sync="preview-experience" style="height:200px; padding-left:15px;" placeholder="Thời gian | Công ty | Vị trí...">{{ user.experience or '' }}</textarea></div>
+                <div class="form-group"><label for="f-languages">NGOẠI NGỮ</label><input type="text" id="f-languages" name="languages" data-sync="preview-languages" value="{{ user.languages or '' }}" style="padding-left:15px;"></div>
             </div>
             <div class="bottom-actions">
               <button type="button" class="btn btn-outline" onclick="showStep(2)"><i class="fas fa-arrow-left"></i> Quay lại</button>
@@ -426,7 +433,7 @@
                     <!-- Contemporary layout -->
                     <div class="cv-contemporary" id="preview-contemporary" style="display:none;">
                         <div class="sidebar">
-                            <div class="avatar-rect" id="preview-avatar" style="background-image: url('{{ user.picture or "" }}')"></div>
+                            <div class="avatar-rect" id="preview-avatar" data-bg="{{ user.picture or '' }}"></div>
                             <div class="side-name preview-name">Họ và Tên</div>
                             <div class="side-job preview-job">Chức danh</div>
                             <div class="side-section">
@@ -462,7 +469,11 @@
               <div class="ai-optimizer">
                   <div class="opt-header"><i class="fas fa-magic"></i> Tối ưu hóa CV</div>
                   <div class="opt-card yellow"><div class="opt-title">Mẹo AI</div><div class="opt-desc">Kinh nghiệm nên thêm các con số đo lường hiệu quả (VD: Tăng 20% doanh thu).</div></div>
-                  <div class="score-card"><div style="font-size:13px; font-weight:600;">Điểm CV</div><div class="score-num">85<span style="font-size:12px; opacity:0.7;">/100</span></div><div class="score-bar"><div style="width:85%; height:100%; background:white; border-radius:3px;"></div></div></div>
+                  <div class="score-card">
+                      <div class="score-label">Điểm CV</div>
+                      <div class="score-num">85<span class="score-small">/100</span></div>
+                      <div class="score-bar"><div class="score-inner score-fill"></div></div>
+                  </div>
               </div>
           </div>
         </div>
@@ -649,6 +660,17 @@
   function exportPdfSpecific(cvId) {
       window.location.href = '{{ url_for("export_pdf") }}?cv_id=' + cvId;
   }
+
+  document.addEventListener('DOMContentLoaded', function() {
+      // Initialize dynamic background images from data-bg to avoid linter issues
+      document.querySelectorAll('[data-bg]').forEach(el => {
+          const bg = el.getAttribute('data-bg');
+          if (bg && bg !== 'None' && bg !== '') {
+              el.style.backgroundImage = "url('" + bg + "')";
+          }
+      });
+      showStep(1);
+  });
 
   document.querySelectorAll('[data-sync]').forEach(input => {
       input.addEventListener('input', syncPreview);
