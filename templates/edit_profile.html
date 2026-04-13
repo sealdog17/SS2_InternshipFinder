@@ -35,8 +35,46 @@
     .nav-right { display: flex; gap: 20px; align-items: center; }
     .icon-btn { color: #6b7280; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; text-decoration: none; background: #f1f5f9; border-radius: 50%; }
     .icon-btn:hover { background: #e2e8f0; }
-    .avatar { width: 32px; height: 32px; border-radius: 50%; background: #1f2937; color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; overflow: hidden; }
+    .avatar { width: 32px; height: 32px; border-radius: 50%; background: #1f2937; color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; overflow: hidden; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
+    .avatar:hover { border-color: var(--primary); }
     .avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* Dropdown UI */
+    .user-dropdown { position: relative; display: flex; align-items: center; }
+    .dropdown-menu { 
+      position: absolute; top: calc(100% + 15px); right: 0; width: 220px; 
+      background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+      border: 1px solid var(--border); display: none; flex-direction: column; z-index: 1000; padding: 8px 0;
+      animation: slideIn 0.2s ease;
+    }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .dropdown-menu.show { display: flex; }
+    .menu-header { padding: 12px 20px; border-bottom: 1px solid #f1f5f9; margin-bottom: 8px; }
+    .menu-header strong { display: block; font-size: 14px; color: #111827; }
+    .menu-header span { font-size: 12px; color: #64748b; }
+    .dropdown-menu a { 
+      padding: 10px 20px; font-size: 13px; color: #4b5563; text-decoration: none; 
+      display: flex; align-items: center; gap: 10px; transition: 0.2s;
+    }
+    .dropdown-menu a i { width: 16px; text-align: center; font-size: 14px; color: #94a3b8; }
+    .dropdown-menu a:hover { background: #f8fafc; color: var(--primary); }
+    .menu-divider { height: 1px; background: #f1f5f9; margin: 8px 0; }
+
+    /* Fullscreen Modal */
+    .fullscreen-modal { 
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+      background: rgba(15, 23, 42, 0.9); z-index: 2000; overflow-y: auto; 
+      padding: 40px 20px; backdrop-filter: blur(8px);
+    }
+    .fullscreen-modal.active { display: flex; flex-direction: column; align-items: center; }
+    .fullscreen-modal .cv-paper { transform: scale(1.1); transform-origin: top center; margin-bottom: 50px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+    .close-fullscreen { 
+      position: fixed; top: 20px; right: 30px; width: 44px; height: 44px; 
+      background: white; border-radius: 50%; display: flex; align-items: center; 
+      justify-content: center; cursor: pointer; color: #1e293b; font-size: 20px; z-index: 2100;
+      transition: 0.2s; border: none;
+    }
+    .close-fullscreen:hover { background: #ef4444; color: white; transform: rotate(90deg); }
 
     /* Layout */
     .builder-container { display: flex; flex: 1; overflow: hidden; }
@@ -73,90 +111,73 @@
     
     .form-card { background: var(--card-bg); border-radius: 12px; padding: 40px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.01); border: 1px solid rgba(226, 232, 240, 0.6); margin-bottom: 30px; }
 
-    /* Inputs */
+    /* Inputs & Selectors */
     .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px;}
     .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
     label { font-size: 11px; font-weight: 700; color: #4b5563; text-transform: uppercase; letter-spacing: 0.5px; }
     .input-wrapper { position: relative; background: #f8fafc; border-radius: 6px; }
     .input-wrapper i { position: absolute; left: 16px; top: 15px; color: #9ca3af; font-size: 15px; }
-    input { width: 100%; padding: 13px 16px 13px 44px; border: 1px solid #e5e7eb; border-radius: 6px; font-family: inherit; font-size: 14px; color: #111827; background: transparent; transition: 0.2s; font-weight: 500; }
-    input::placeholder { color: #9ca3af; font-weight: 400; }
-    input:focus { background: #ffffff; border-color: #3b82f6; outline: none; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
-    input:focus + i { color: #3b82f6; }
+    input, textarea, select { width: 100%; padding: 13px 16px 13px 44px; border: 1px solid #e5e7eb; border-radius: 6px; font-family: inherit; font-size: 14px; color: #111827; background: transparent; transition: 0.2s; font-weight: 500; }
+    input::placeholder, textarea::placeholder { color: #9ca3af; font-weight: 400; }
+    input:focus, textarea:focus { background: #ffffff; border-color: #3b82f6; outline: none; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
 
-    /* Buttons */
-    .bottom-actions { display: flex; justify-content: space-between; align-items: center; margin-top: auto;}
-    .btn { padding: 11px 24px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; border: 1px solid transparent; transition: 0.2s; font-family: inherit; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none;}
-    .btn-outline { background: white; border: 1px solid #e5e7eb; color: var(--primary); box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
-    .btn-outline:hover { background: #f8fafc; border-color: #d1d5db; }
-    .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 6px rgba(25, 100, 211, 0.2); }
-    .btn-primary:hover { background: var(--primary-hover); }
-    .btn-light { background: #f1f5f9; color: #1e293b; }
-    .btn-light:hover { background: #e2e8f0; }
-
-    /* STEP 1 */
-    .step1-body { display: flex; gap: 60px; }
-    .photo-section { display: flex; flex-direction: column; align-items: center; width: 150px; flex-shrink: 0; margin-top: 25px; }
-    .photo-box { width: 140px; height: 140px; border-radius: 12px; background: linear-gradient(180deg, #71bcd8 0%, #68aabf 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 20px rgba(113, 188, 216, 0.2); margin-bottom: 15px; position: relative; gap: 10px; }
-    .photo-box i.fa-camera { font-size: 28px; }
-    .photo-box .plus-badge { position: absolute; top: 48px; right: 52px; background: white; color: #68aabf; width: 14px; height: 14px; border-radius: 50%; font-size: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid #71bcd8; }
-    .photo-box span { font-size: 10px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; }
-    .photo-hint { font-size: 11px; color: #94a3b8; text-align: center; line-height: 1.6; }
-    .step1-form { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 0 30px; }
-    .invalid-feedback { font-size: 11px; color: #dc2626; margin-top: 6px; display: flex; align-items: center; gap: 4px; font-weight: 600;}
-    .input-wrapper.invalid input { border-color: #f87171; background: #fef2f2; color: #b91c1c; }
-
-    /* STEP 2 */
-    .edu-layout { display: flex; gap: 40px; }
-    .edu-form-side { flex: 6; }
-    .edu-widget-side { flex: 4; display: flex; flex-direction: column; gap: 30px; }
+    /* Templates UI */
+    .template-gallery { display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px; margin-bottom: 40px; }
+    .tpl-card { display: flex; flex-direction: column; cursor: pointer; border: 2px solid transparent; border-radius: 16px; transition: 0.2s; padding: 10px; }
+    .tpl-card:hover { background: #f1f5f9; }
+    .tpl-card.selected { border-color: var(--primary); background: #eff6ff; }
+    .tpl-preview-box { background: white; border-radius: 12px; height: 350px; border: 1px solid #e2e8f0; margin-bottom: 15px; overflow: hidden; position: relative; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
     
-    .widget-box { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
-    .widget-title { font-size: 16px; font-weight: 700; color: #1e3a8a; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
-    .badge-progress { background: #e0e7ff; color: #4f46e5; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 12px; }
-    .skill-bar { margin-bottom: 15px; }
-    .skill-bar-head { display: flex; justify-content: space-between; font-size: 10px; font-weight: 800; margin-bottom: 6px; letter-spacing: 0.5px; }
-    .bar-bg { width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
-    .bar-fill { height: 100%; background: #1e3a8a; border-radius: 3px; }
-    .skill-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
-    .s-tag { padding: 6px 12px; border-radius: 16px; border: 1px solid #e2e8f0; font-size: 11px; font-weight: 600; color: #1e3a8a; }
-    .s-tag.add { background: #f8fafc; color: #94a3b8; border-style: dashed; cursor: pointer;}
-    .curator-tip { background: linear-gradient(135deg, rgba(15,23,42,0.95) 0%, rgba(30,58,138,0.9) 100%), url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80'); background-size: cover; border-radius: 16px; padding: 30px 24px; color: white; box-shadow: 0 10px 25px rgba(30,58,138,0.2); }
-    .curator-tip h3 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
-    .curator-tip p { font-size: 12px; line-height: 1.6; color: #cbd5e1; }
-
-    /* STEP 5 */
-    .template-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-bottom: 40px; }
-    .tpl-card { display: flex; flex-direction: column; background: transparent; }
-    .tpl-preview { background: white; border-radius: 12px; padding: 20px; height: 320px; border: 2px solid #e2e8f0; margin-bottom: 20px; position: relative; transition: 0.3s; cursor: pointer; overflow: hidden; display: flex; align-items: flex-start; justify-content: center; }
-    .tpl-card.selected .tpl-preview { border-color: var(--primary); box-shadow: 0 8px 25px rgba(25,100,211,0.15); }
-    .tag-pop { position: absolute; top: -1px; left: 50%; transform: translateX(-50%); background: #1e40af; color: white; font-size: 9px; font-weight: 800; padding: 4px 12px; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; }
-    .tpl-title { font-size: 18px; font-weight: 700; color: #111827; margin-bottom: 8px; }
-    .tpl-desc { font-size: 12px; color: #64748b; line-height: 1.6; margin-bottom: 20px; flex: 1; }
-
-    /* STEP 5 Detail View */
-    .template-detail-layout { display: flex; height: 100%; gap: 40px; }
-    .td-sidebar { width: 280px; display: flex; flex-direction: column; flex-shrink: 0; }
-    .back-link { font-size: 13px; font-weight: 700; color: #2563eb; text-decoration: none; display: flex; align-items: center; gap: 8px; margin-bottom: 30px; cursor: pointer; }
-    .td-title { font-size: 28px; font-weight: 800; color: #111827; margin-bottom: 20px; line-height: 1.2; }
-    .td-desc { font-size: 14px; color: #4b5563; line-height: 1.7; margin-bottom: 30px; }
-    .td-preview-area { flex: 1; background: #f1f5f9; border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: auto; padding: 40px; border: 1px solid #e2e8f0; }
-
-    /* STEP 6: Preview */
-    .preview-header { padding: 30px 40px; border-bottom: 1px solid #e2e8f0; background: white; display: flex; justify-content: space-between; align-items: center; }
-    .preview-body { display: flex; flex: 1; overflow: hidden; background: #f8fafc; }
-    .cv-wrapper { flex: 1; overflow-y: auto; display: flex; justify-content: center; padding: 40px; }
-    .cv-paper { width: 700px; min-height: 990px; background: white; box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 40px; border: 1px solid #e2e8f0; }
+    /* PREVIEW TEMPLATE STYLES (BROWSER) */
+    .cv-paper { width: 100%; max-width: 800px; min-height: 1100px; background: white; box-shadow: 0 10px 40px rgba(0,0,0,0.05); margin: 0 auto 40px; border: 1px solid #e2e8f0; overflow: hidden; display: flex; flex-direction: column; }
     
-    .ai-optimizer { width: 320px; background: white; border-left: 1px solid #e2e8f0; padding: 30px 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
-    .opt-header { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 10px; margin-bottom: 10px; color: #111827;}
-    .opt-card { background: #f8fafc; border-radius: 12px; padding: 16px; border-left: 3px solid; }
-    .opt-card.yellow { border-color: #f59e0b; }
-    .opt-title { font-size: 12px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; color: #111827; }
-    .opt-desc { font-size: 11px; color: #4b5563; line-height: 1.5; }
-    .score-card { background: #1d4ed8; border-radius: 12px; padding: 24px; color: white; display: flex; flex-direction: column; gap: 15px; margin-top: 20px;}
-    .score-num { font-size: 24px; font-weight: 800; }
-    .score-bar { width: 100%; height: 6px; background: rgba(255,255,255,0.2); border-radius: 3px; }
+    /* Minimalist (Default) */
+    .cv-minimalist { padding: 60px; }
+    .cv-minimalist .header { text-align: center; margin-bottom: 30px; }
+    .cv-minimalist .name { font-size: 32px; font-weight: 800; color: #111827; margin-bottom: 8px; }
+    .cv-minimalist .job { font-size: 14px; font-weight: 700; color: var(--primary); letter-spacing: 2px; text-transform: uppercase; }
+    .cv-minimalist .contact { font-size: 12px; color: #64748b; margin-top: 15px; }
+    .cv-minimalist .section { margin-top: 35px; }
+    .cv-minimalist .section-title { font-size: 14px; font-weight: 800; color: #111827; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
+    .cv-minimalist .content { font-size: 14px; line-height: 1.6; color: #374151; white-space: pre-wrap; }
+
+    /* Contemporary (Two Column) */
+    .cv-contemporary { display: flex; height: 100%; min-height: 1100px; }
+    .cv-contemporary .sidebar { width: 35%; background: #1964d3; color: white; padding: 40px 25px; display: flex; flex-direction: column; align-items: center; text-align: center; height: auto; position: static; }
+    .cv-contemporary .main { flex: 1; padding: 50px 40px; background: white; }
+    .cv-contemporary .avatar-rect { width: 120px; height: 160px; border-radius: 6px; border: 3px solid rgba(255,255,255,0.2); margin-bottom: 25px; background-size: cover; background-position: center; background-color: rgba(255,255,255,0.1); }
+    .cv-contemporary .side-name { font-size: 22px; font-weight: 800; margin-bottom: 5px; }
+    .cv-contemporary .side-job { font-size: 12px; color: #bfdbfe; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 30px; }
+    .cv-contemporary .side-section { width: 100%; text-align: left; margin-bottom: 30px; }
+    .cv-contemporary .side-title { font-size: 11px; font-weight: 800; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 6px; margin-bottom: 12px; letter-spacing: 1px; }
+    .cv-contemporary .side-content { font-size: 12px; line-height: 1.5; color: #dbeafe; text-align: left; word-break: break-all; }
+    .cv-contemporary .main-section { margin-bottom: 35px; }
+    .cv-contemporary .main-title { font-size: 14px; font-weight: 800; color: #1e40af; margin-bottom: 15px; letter-spacing: 1px; display: flex; align-items: center; gap: 10px; }
+    .cv-contemporary .main-title::after { content: ""; flex: 1; height: 1px; background: #e2e8f0; }
+    .cv-contemporary .main-content { font-size: 14px; line-height: 1.6; color: #1f2937; white-space: pre-wrap; }
+
+    /* List CV Dynamic */
+    .cv-list-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap:30px; margin-top:20px; }
+
+    /* Photo Upload UI */
+    .step1-body { display: flex; gap: 40px; align-items: flex-start; }
+    .photo-section { display: flex; flex-direction: column; align-items: center; gap: 15px; width: 160px; flex-shrink: 0; }
+    .photo-box { 
+      width: 130px; height: 170px; background: #f8fafc; border: 2px dashed #cbd5e1; 
+      border-radius: 8px; display: flex; flex-direction: column; align-items: center; 
+      justify-content: center; cursor: pointer; position: relative; overflow: hidden;
+      background-size: cover; background-position: center; transition: 0.2s;
+    }
+    .photo-box:hover { border-color: var(--primary); background: #f1f5f9; }
+    .photo-box i { font-size: 24px; color: #94a3b8; margin-bottom: 10px; }
+    .photo-box span { font-size: 10px; font-weight: 700; color: #64748b; letter-spacing: 0.5px; }
+    .plus-badge { 
+      position: absolute; bottom: 8px; right: 8px; width: 22px; height: 22px; 
+      background: var(--primary); color: white; border-radius: 50%; display: flex; 
+      align-items: center; justify-content: center; font-size: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .step1-form { flex: 1; }
+
   </style>
 </head>
 <body>
@@ -175,14 +196,26 @@
       <a href="#" class="nav-link">Tài nguyên</a>
     </div>
 
-    <!-- Unified Nav Right Block for All Pages -->
     <div class="nav-right">
       <div class="icon-btn" title="Thông báo"><i class="far fa-bell" style="font-size: 16px;"></i></div>
       <a href="{{ url_for('edit_profile') }}" class="icon-btn" title="Cài đặt"><i class="fas fa-cog" style="font-size: 16px;"></i></a>
-      <a href="{{ url_for('logout') }}" class="icon-btn" title="Đăng xuất"><i class="fas fa-sign-out-alt" style="font-size: 16px; color: #ef4444;"></i></a>
-      <div class="avatar">
-        {% if session.get('user_picture') %}<img src="{{ session.get('user_picture') }}">
-        {% else %}{{ (session.get('user_name', 'U') or 'U')[0].upper() }}{% endif %}
+      
+      <div class="user-dropdown">
+        <div class="avatar" id="userAvatarBtn" onclick="toggleUserMenu()">
+          {% if session.get('user_picture') %}<img src="{{ session.get('user_picture') }}">
+          {% else %}{{ (session.get('user_name', 'U') or 'U')[0].upper() }}{% endif %}
+        </div>
+        <div class="dropdown-menu" id="userDropdownMenu">
+          <div class="menu-header">
+            <strong>{{ session.get('user_name', 'Người dùng') }}</strong>
+            <span>{{ session.get('user_email', '') }}</span>
+          </div>
+          <div class="menu-divider"></div>
+          <a href="{{ url_for('profile') }}"><i class="far fa-user"></i> Hồ sơ của tôi</a>
+          <a href="{{ url_for('edit_profile') }}"><i class="fas fa-cog"></i> Cài đặt tài khoản</a>
+          <div class="menu-divider"></div>
+          <a href="{{ url_for('logout') }}" style="color: #ef4444;"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+        </div>
       </div>
     </div>
   </nav>
@@ -219,448 +252,408 @@
       </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="main-content" style="padding:0;"><form id="cvForm" action="{{ url_for('edit_profile') }}" method="POST" enctype="multipart/form-data" style="display:contents;">
- <!-- 0 padding to allow full screens for Preview mode -->
-      
-      <!-- ================= STEP: Danh sách Hồ Sơ (NEW) ================= -->
-      <div class="wizard-step active" id="step_list_cvs" style="padding: 50px 70px;">
-        <div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-end;">
-            <div>
-                <h1>Danh sách hồ sơ</h1>
-                <p>Quản lý các tài liệu CV bạn đã tạo. Cập nhật và tinh chỉnh để sẵn sàng cho mùa ứng tuyển ngay hôm nay.</p>
-            </div>
-            <button type="button" class="btn btn-primary" onclick="toggleCreateCvMenu(true); showStep(1);"><i class="fas fa-plus"></i> Tạo hồ sơ mới</button>
-        </div>
-        
-        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap:30px; margin-top:20px;">
-             <!-- CV Card 1 -->
-             <div class="form-card" style="padding:0; overflow:hidden; position:relative; box-shadow:0 10px 25px rgba(0,0,0,0.02);">
-                  <div style="height: 180px; background: #e0e7ff; position:relative; overflow:hidden; border-bottom: 1px solid #e2e8f0; display:flex; align-items:center; justify-content:center;">
-                       <i class="fas fa-file-invoice" style="font-size:80px; color:#c7d2fe; position:absolute; right:-15px; bottom:-15px; opacity:0.6;"></i>
-                       <!-- Mini Document Preview -->
-                       <div style="background:white; padding:20px 15px; border-radius:6px; box-shadow:0 10px 30px rgba(0,0,0,0.08); width:50%; height:90%; border:1px solid #e2e8f0;">
-                            <div style="width:40%; height:6px; background:#1e3a8a; margin-bottom:12px;"></div>
-                            <div style="width:100%; height:3px; background:#f1f5f9; margin-bottom:8px;"></div>
-                            <div style="width:80%; height:3px; background:#f1f5f9; margin-bottom:15px;"></div>
-                            
-                            <div style="display:flex; gap:10px;">
-                                <div style="width:30%; height:30px; background:#f1f5f9; border-radius:4px;"></div>
-                                <div style="width:70%;">
-                                    <div style="width:100%; height:3px; background:#f1f5f9; margin-bottom:6px;"></div>
-                                    <div style="width:60%; height:3px; background:#f1f5f9;"></div>
-                                </div>
-                            </div>
-                       </div>
-                  </div>
-                  <div style="padding:25px;">
-                       <div style="display:flex; justify-content:space-between; margin-bottom:10px; align-items:center;">
-                          <h3 style="font-size:16px; font-weight:700; color:#111827;">CV IT - Tối Giản</h3>
-                          <span style="font-size:10px; background:#f0fdf4; color:#16a34a; padding:4px 10px; border-radius:12px; font-weight:700;">ATS: 99%</span>
-                       </div>
-                       <div style="font-size:12px; color:#64748b; margin-bottom:20px;"><i class="far fa-clock"></i> Cập nhật: 2 ngày trước</div>
-                       <div style="display:flex; gap:10px;">
-                           <button type="button" class="btn btn-outline" style="flex:1; padding:10px;" onclick="window.location.href='/profile/export-pdf'" title="Tải PDF"><i class="fas fa-download"></i></button>
-                           <button type="button" class="btn btn-outline" style="flex:1; padding:10px;" title="Chia sẻ"><i class="fas fa-link"></i></button>
-                           <button type="button" class="btn btn-primary" style="flex:3; padding:10px;" onclick="toggleCreateCvMenu(true); showStep(1);"><i class="fas fa-pen" style="margin-right:6px;"></i> Sửa</button>
-                       </div>
-                  </div>
-             </div>
+    <div class="main-content" style="padding:0;">
+      <form id="cvForm" onsubmit="return false;" enctype="multipart/form-data" style="display:contents;">
+        <input type="hidden" name="cv_id" id="cv_id_input" value="">
+        <input type="hidden" name="cv_template" id="cv_template_input" value="minimalist">
 
-             <!-- CV Card 2 -->
-             <div class="form-card" style="padding:0; overflow:hidden; position:relative; box-shadow:0 10px 25px rgba(0,0,0,0.02);">
-                  <div style="height: 180px; background: #fef3c7; position:relative; overflow:hidden; border-bottom: 1px solid #e2e8f0; display:flex; align-items:center; justify-content:center;">
-                       <i class="fas fa-file-invoice" style="font-size:80px; color:#fde68a; position:absolute; right:-15px; bottom:-15px; opacity:0.6;"></i>
-                       <!-- Mini Document Preview -->
-                       <div style="background:white; padding:20px 15px; border-radius:6px; box-shadow:0 10px 30px rgba(0,0,0,0.08); width:50%; height:90%; border:1px solid #e2e8f0; display:flex;">
-                            <div style="width:30%; background:#f1f5f9; height:100%; border-radius:4px; margin-right:8px;"></div>
-                            <div style="width:70%;">
-                                <div style="width:40%; height:6px; background:#d97706; margin-bottom:12px;"></div>
-                                <div style="width:100%; height:3px; background:#f1f5f9; margin-bottom:8px;"></div>
-                                <div style="width:80%; height:3px; background:#f1f5f9;"></div>
-                            </div>
-                       </div>
-                  </div>
-                  <div style="padding:25px;">
-                       <div style="display:flex; justify-content:space-between; margin-bottom:10px; align-items:center;">
-                          <h3 style="font-size:16px; font-weight:700; color:#111827;">CV Marketing</h3>
-                          <span style="font-size:10px; background:#eff6ff; color:#2563eb; padding:4px 10px; border-radius:12px; font-weight:700;">ĐƯƠNG ĐẠI</span>
-                       </div>
-                       <div style="font-size:12px; color:#64748b; margin-bottom:20px;"><i class="far fa-clock"></i> Cập nhật: 1 tuần trước</div>
-                       <div style="display:flex; gap:10px;">
-                           <button type="button" class="btn btn-outline" style="flex:1; padding:10px;" onclick="window.location.href='/profile/export-pdf'" title="Tải PDF"><i class="fas fa-download"></i></button>
-                           <button type="button" class="btn btn-outline" style="flex:1; padding:10px;" title="Chia sẻ"><i class="fas fa-link"></i></button>
-                           <button type="button" class="btn btn-primary" style="flex:3; padding:10px;" onclick="toggleCreateCvMenu(true); showStep(1);"><i class="fas fa-pen" style="margin-right:6px;"></i> Sửa</button>
-                       </div>
-                  </div>
-             </div>
-
-             <!-- Add New CV Card -->
-             <div class="form-card" style="padding:0; height: 100%; min-height:410px; display:flex; flex-direction:column; align-items:center; justify-content:center; border: 2px dashed #cbd5e1; background: transparent; cursor:pointer; gap:15px; transition:0.2s;" onclick="toggleCreateCvMenu(true); showStep(1);" onmouseover="this.style.borderColor='#3b82f6'; this.style.backgroundColor='#eff6ff'" onmouseout="this.style.borderColor='#cbd5e1'; this.style.backgroundColor='transparent'">
-                  <div style="width:70px; height:70px; background:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:24px; color:#3b82f6; box-shadow:0 4px 15px rgba(0,0,0,0.05);">
-                       <i class="fas fa-plus"></i>
-                  </div>
-                  <div style="font-size:18px; font-weight:700; color:#1e293b;">Tạo Hồ Sơ Mới</div>
-                  <div style="font-size:13px; color:#64748b; text-align:center; max-width:80%; line-height:1.5;">Bắt đầu nền móng với một khung lưới trắng tinh khôi và tối ưu hóa bằng AI.</div>
-             </div>
-        </div>
-      </div>
-
-      <!-- ================= STEP 1: Personal Info ================= -->
-      <div class="wizard-step" id="step_1" style="padding: 50px 70px;">
-        <div class="page-header">
-          <h1>Thông tin cá nhân của bạn</h1>
-          <p>Bắt đầu xây dựng hồ sơ chuyên nghiệp của bạn với các thông tin liên lạc cốt lõi. Thông tin này sẽ giúp các nhà tuyển dụng dễ dàng liên hệ với bạn.</p>
-        </div>
-        
-        <div class="form-card step1-body">
-          <div class="photo-section">
-            <input type="file" id="photo-upload" name="profile_picture" style="display: none;" onchange="previewAvatar(this)">
-            <div class="photo-box" id="avatarPreviewBox" onclick="document.getElementById('photo-upload').click()"{% if user and user.picture %} style="background: url('{{ user.picture }}') center/cover;" {% endif %}>
-              <i class="fas fa-camera"></i>
-              <div class="plus-badge">+</div>
-              <span>CẬP NHẬT ẢNH</span>
-            </div>
-            <div class="photo-hint">JPG, PNG hoặc GIF.<br>Tối đa 5MB.</div>
+        <!-- ================= STEP: Danh sách Hồ Sơ ================= -->
+        <div class="wizard-step active" id="step_list_cvs" style="padding: 50px 70px;">
+          <div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-end;">
+              <div>
+                  <h1>Danh sách hồ sơ</h1>
+                  <p>Quản lý các bản CV đã lưu của bạn.</p>
+              </div>
+              <button type="button" class="btn btn-primary" onclick="createNewCv()"><i class="fas fa-plus"></i> Tạo hồ sơ mới</button>
           </div>
           
-          <div class="step1-form">
-            
-            <div class="form-group row-2" style="grid-column: span 2;">
-                <div>
-                    <label>CHỨC DANH ỨNG TUYỂN</label>
-                    <div class="input-wrapper"><i class="fas fa-briefcase"></i><input type="text" name="job_title" placeholder="VD: Data Scientist, Kế toán..." value="{{ user.job_title if user else '' }}"></div>
-                </div>
-            </div>
-            <div class="form-group row-2" style="grid-column: span 2;">
-                <div>
-                    <label>HỌ TÊN</label>
-                    <div class="input-wrapper"><i class="far fa-user"></i><input type="text" name="name" placeholder="Ví dụ: Nguyễn Văn A" value="{{ user.name if user else '' }}"></div>
-                </div>
-            </div>
-            <div class="form-group row-2" style="grid-column: span 2;">
-                <div>
-                    <label>ĐỊA CHỈ EMAIL</label>
-                    <div class="input-wrapper">
-                        <i class="far fa-envelope"></i>
-                        <input type="email" name="email" placeholder="email@vi-du.com" value="{{ user.email if user else '' }}">
+          <div class="cv-list-grid" id="cv-items-container">
+               {% for cv in cvs %}
+               <div class="form-card" style="padding:0; overflow:hidden;" id="cv-card-{{ cv.id }}">
+                    <div style="height: 120px; background: #e0e7ff; display:flex; align-items:center; justify-content:center;">
+                         <i class="fas fa-file-alt" style="font-size:50px; color:#c7d2fe;"></i>
                     </div>
-                    <div class="invalid-feedback" style="display:none;"><i class="fas fa-exclamation-circle"></i> Sai định dạng</div>
-                </div>
-                <div>
-                    <label>SỐ ĐIỆN THOẠI</label>
-                    <div class="input-wrapper"><i class="fas fa-phone"></i><input type="tel" name="phone" placeholder="+84 900 000 000" value="{{ user.phone if user else '' }}"></div>
-                </div>
-            </div>
-            <div class="form-group" style="grid-column: span 2; margin-bottom: 0;">
-              <label>ĐỊA CHỈ TRÚ QUÁN</label>
-              <div class="input-wrapper"><i class="fas fa-map-marker-alt"></i><input type="text" name="address" placeholder="Thành phố, Tỉnh" value="{{ user.address if user else '' }}"></div>
-              <div style="font-size: 11px; color: #94a3b8; margin-top: 6px;">Nhà tuyển dụng thường tìm kiếm những ứng viên gần khu vực văn phòng.</div>
-            </div>
+                    <div style="padding:20px;">
+                         <h3 style="font-size:16px; font-weight:700; color:#111827;">Hồ sơ Phiên bản {{ cv.version }}</h3>
+                         <div style="font-size:12px; color:#64748b; margin-top:5px;">Ngày tạo: {{ cv.created_at.strftime('%d/%m/%Y') }}</div>
+                         <div style="display:flex; gap:8px; margin-top:20px;">
+                             <button type="button" class="btn btn-primary" style="flex:1;" onclick="loadCv({{ cv.id }})">Sửa</button>
+                             <button type="button" class="btn btn-outline" style="flex:1;" onclick="exportPdfSpecific({{ cv.id }})"><i class="fas fa-download"></i></button>
+                             <button type="button" class="btn btn-light" style="padding:10px; color:#ef4444;" onclick="deleteCv({{ cv.id }})"><i class="fas fa-trash"></i></button>
+                         </div>
+                    </div>
+               </div>
+               {% endfor %}
+
+               {% if not cvs %}
+               <div style="grid-column: 1/-1; text-align:center; padding:100px 0; color:#94a3b8;">
+                    <i class="far fa-folder-open" style="font-size:48px; margin-bottom:20px; display:block;"></i>
+                    <p>Bạn chưa có bản CV lưu trữ nào. Hãy bắt đầu tạo ngay!</p>
+               </div>
+               {% endif %}
           </div>
         </div>
 
-        <div class="bottom-actions">
-          <button type="button" class="btn btn-outline" onclick="showStep('list_cvs')"><i class="fas fa-arrow-left"></i> Quay lại</button>
-          <div style="display: flex; align-items: center; gap: 20px;">
-            <span style="font-size: 13px; color: #94a3b8; font-weight: 500;">Bước tiếp theo: Học vấn</span>
-            <button type="button" id="ajax-save-btn" class="btn btn-primary" onclick="saveProfileData()"><i class="fas fa-save"></i> Cập nhật vào Hồ sơ</button> <button type="button" class="btn btn-light" onclick="showStep(2)">Tiếp theo: Học vấn <i class="fas fa-arrow-right"></i></button>
-          </div>
+        <!-- ================= STEP 1: Personal Info ================= -->
+        <div class="wizard-step" id="step_1" style="padding: 50px 70px;">
+            <div class="page-header">
+                <h1>Thông tin cá nhân</h1>
+                <p>Địa chỉ, Email và Số điện thoại để nhà tuyển dụng liên lạc.</p>
+            </div>
+            <div class="form-card step1-body">
+              <div class="photo-section">
+                <input type="file" id="photo-upload" name="profile_picture" style="display: none;" onchange="previewAvatar(this)">
+                <div class="photo-box" id="avatarPreviewBox" onclick="document.getElementById('photo-upload').click()"{% if user and user.picture %} style="background: url('{{ user.picture }}') center/cover;" {% endif %}>
+                  <i class="fas fa-camera"></i>
+                  <div class="plus-badge">+</div>
+                  <span>CẬP NHẬT ẢNH</span>
+                </div>
+              </div>
+              <div class="step1-form">
+                <div class="form-group row-2" style="grid-column: span 2;">
+                    <div><label>CHỨC DANH ỨNG TUYỂN</label><div class="input-wrapper"><i class="fas fa-briefcase"></i><input type="text" name="job_title" data-sync="preview-job" value="{{ user.job_title or '' }}"></div></div>
+                </div>
+                <div class="form-group row-2" style="grid-column: span 2;">
+                    <div><label>HỌ TÊN</label><div class="input-wrapper"><i class="far fa-user"></i><input type="text" name="name" data-sync="preview-name" value="{{ user.name or '' }}"></div></div>
+                </div>
+                <div class="form-group row-2" style="grid-column: span 2;">
+                    <div><label>EMAIL</label><div class="input-wrapper"><i class="far fa-envelope"></i><input type="email" name="email" data-sync="preview-email" value="{{ user.email or '' }}"></div></div>
+                    <div><label>ĐIỆN THOẠI</label><div class="input-wrapper"><i class="fas fa-phone"></i><input type="tel" name="phone" data-sync="preview-phone" value="{{ user.phone or '' }}"></div></div>
+                </div>
+                <div class="form-group" style="grid-column: span 2;">
+                  <label>ĐỊA CHỈ</label><div class="input-wrapper"><i class="fas fa-map-marker-alt"></i><input type="text" name="address" data-sync="preview-address" value="{{ user.address or '' }}"></div>
+                </div>
+              </div>
+            </div>
+            <div class="bottom-actions">
+              <button type="button" class="btn btn-outline" onclick="showStep('list_cvs')">Hủy bỏ</button>
+              <button type="button" class="btn btn-primary" onclick="showStep(2)">Tiếp học văn <i class="fas fa-arrow-right"></i></button>
+            </div>
         </div>
-      </div>
 
-      <!-- ================= STEP 2: Education ================= -->
-      <div class="wizard-step" id="step_2" style="padding: 50px 70px;">
-        <div class="page-header">
-          <h1>Hồ sơ học vấn</h1>
-          <p>Liệt kê quá trình đào tạo bài bản của bạn để chứng minh nền tảng chuyên môn học thuật rõ ràng.</p>
+        <!-- ================= STEP 2: Education ================= -->
+        <div class="wizard-step" id="step_2" style="padding: 50px 70px;">
+            <div class="page-header"><h1>Học vấn & Kỹ năng</h1><p>Nêu bật các bằng cấp và kỹ năng của bạn.</p></div>
+            <div class="edu-layout">
+                <div class="edu-form-side">
+                    <div class="form-card"><div class="form-group"><label>THÔNG TIN HỌC VẤN (TRƯỜNG, NGÀNH...)</label><textarea name="education" data-sync="preview-education" placeholder="VD: 2020 - 2024 tại ĐH Bách Khoa..." style="height:150px; padding-left:15px; padding-top:10px;">{{ user.education or '' }}</textarea></div></div>
+                </div>
+                <div class="edu-widget-side">
+                    <div class="form-card"><div class="form-group"><label>KỸ NĂNG (CÁCH NHAU DẤU PHẨY)</label><input type="text" name="skills" data-sync="preview-skills" value="{{ user.skills or '' }}" style="padding-left:15px;"></div></div>
+                </div>
+            </div>
+            <div class="bottom-actions">
+              <button type="button" class="btn btn-outline" onclick="showStep(1)"><i class="fas fa-arrow-left"></i> Quay lại</button>
+              <button type="button" class="btn btn-primary" onclick="showStep(3)">Tiếp kinh nghiệm <i class="fas fa-arrow-right"></i></button>
+            </div>
         </div>
-        
-        <div class="edu-layout">
-          <div class="edu-form-side">
-            <div class="form-card" style="padding: 30px; margin-bottom: 0;">
-                <div class="form-group">
-                    <label>TRƯỜNG ĐẠI HỌC / CAO ĐẲNG</label>
-                    <div class="input-wrapper"><i class="fas fa-graduation-cap"></i><input type="text" name="education" placeholder="Đại học Công Nghệ TP.HCM" value="{{ user.education if user else '' }}"></div>
-                </div>
-                <div class="form-group">
-                    <label>CHUYÊN NGÀNH</label>
-                    <div class="input-wrapper"><i class="fas fa-book"></i><input type="text" name="education_major" placeholder="Công nghệ phần mềm"></div>
-                </div>
-                <div class="row-2">
-                    <div class="form-group">
-                        <label>ĐIỂM TRUNG BÌNH (GPA)</label>
-                        <div class="input-wrapper"><i class="far fa-star"></i><input type="text" name="education_gpa" placeholder="3.8 / 4.0"></div>
+
+        <!-- ================= STEP 3: Experience ================= -->
+        <div class="wizard-step" id="step_3" style="padding: 50px 70px;">
+            <div class="page-header"><h1>Kinh nghiệm & Giới thiệu</h1><p>Mô tả những thành tựu bạn đã đạt được.</p></div>
+            <div class="form-card">
+                <div class="form-group"><label>TÓM TẮT BẢN THÂN</label><textarea name="bio" data-sync="preview-bio" style="height:100px; padding-left:15px;" placeholder="Giới thiệu ngắn gọn về thế mạnh bản thân...">{{ user.bio or '' }}</textarea></div>
+                <div class="form-group"><label>KINH NGHIỆM CHI TIẾT</label><textarea name="experience" data-sync="preview-experience" style="height:200px; padding-left:15px;" placeholder="Thời gian | Công ty | Vị trí...">{{ user.experience or '' }}</textarea></div>
+                <div class="form-group"><label>NGOẠI NGỮ</label><input type="text" name="languages" data-sync="preview-languages" value="{{ user.languages or '' }}" style="padding-left:15px;"></div>
+            </div>
+            <div class="bottom-actions">
+              <button type="button" class="btn btn-outline" onclick="showStep(2)"><i class="fas fa-arrow-left"></i> Quay lại</button>
+              <button type="button" class="btn btn-primary" onclick="showStep(5)">Tiếp chọn mẫu <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <!-- ================= STEP 4: Templates ================= -->
+        <div class="wizard-step" id="step_5" style="padding: 50px 70px;">
+            <div class="page-header"><h1>Chọn mẫu CV</h1><p>Giao diện CV sẽ thay đổi theo lựa chọn này.</p></div>
+            <div class="template-gallery">
+                <div class="tpl-card selected" id="tpl-minimalist" onclick="selectTemplate('minimalist')">
+                    <div class="tpl-preview-box" style="display:flex; flex-direction:column; padding:20px; gap:8px;">
+                        <div style="width:100%; height:15px; background:#e2e8f0;"></div>
+                        <div style="width:40%; height:5px; background:#f1f5f9;"></div>
+                        <div style="width:100%; height:200px; background:#f8fafc; border:1px dashed #cbd5e1;"></div>
                     </div>
+                    <div class="tpl-title">Mẫu Tối Giản</div>
+                    <div class="tpl-desc">Bố cục trung tâm, sạch sẽ, chuyên nghiệp.</div>
                 </div>
-            </div>
-          </div>
-
-          <div class="edu-widget-side">
-             <div class="widget-box">
-                 <div class="widget-title">
-                     <span>Kỹ năng nổi bật</span>
-                     <span class="badge-progress">Đang cập nhật</span>
-                 </div>
-                 
-                 <div style="margin-top:20px;">
-                     <label style="font-size:10px;">CÁC KỸ NĂNG CHÍNH (CÁCH NHAU DẤU PHẨY)</label>
-                     <input type="text" name="skills" placeholder="Java, Python, Leadership..." value="{{ user.skills if user else '' }}" style="width:100%; border-bottom:1px solid #e2e8f0; border-radius:0; padding:10px 5px; outline:none; font-size:13px; font-weight:600; font-family:inherit;">
-                 </div>
-                 <div class="skill-bar">
-                     <div class="skill-bar-head"><span>NỀN TẢNG HỌC THUẬT</span><span>85%</span></div>
-                     <div class="bar-bg"><div class="bar-fill" style="width: 85%;"></div></div>
-                 </div>
-             </div>
-          </div>
-        </div>
-
-        <div class="bottom-actions" style="margin-top: 40px; justify-content: center; gap: 20px;">
-          <button type="button" class="btn btn-outline" onclick="showStep(1)"><i class="fas fa-arrow-left"></i> Quay lại</button>
-          <button type="button" id="ajax-save-btn" class="btn btn-primary" onclick="saveProfileData()"><i class="fas fa-save"></i> Cập nhật vào Hồ sơ</button> <button type="button" class="btn btn-light" onclick="showStep(3)">Tiếp theo <i class="fas fa-arrow-right"></i></button>
-        </div>
-      </div>
-
-      
-      <!-- ================= STEP 3: Experience ================= -->
-      <div class="wizard-step" id="step_3" style="padding: 50px 70px;">
-        <div class="page-header">
-          <h1>Kinh nghiệm làm việc</h1>
-          <p>Nêu bật những thành tựu sự nghiệp và lịch sử làm việc của bạn.</p>
-        </div>
-        
-        <div class="form-card" style="padding: 30px;">
-            <div class="form-group">
-                <label>TÓM TẮT KINH NGHIỆM CHI TIẾT</label>
-                <textarea name="experience" style="width: 100%; height: 200px; padding: 15px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; outline: none; margin-top: 5px; resize:vertical; font-weight:500;" placeholder="Thời gian | Tên Công Ty | Vị Trí&#10;&#10;Mô tả công việc và thành tựu cá nhân nổi bật...">{{ user.experience if user else '' }}</textarea>
-                <div style="font-size:11px; color:#64748b; margin-top:10px;"><i class="fas fa-magic"></i> Mẹo AI: Dùng động từ mạnh (Hoàn thành, Tối ưu, Đạt được số liệu X) sẽ giúp vượt qua hệ thống quét lọc ATS dễ hơn.</div>
-            </div>
-            
-            <div class="form-group" style="margin-top:20px;">
-                <label>NGÔN NGỮ NGOẠI NGỮ</label>
-                <div class="input-wrapper"><i class="fas fa-language"></i><input type="text" name="languages" placeholder="English (IELTS 7.0), Tiếng Nhật (N3)..." value="{{ user.languages if user else '' }}"></div>
-            </div>
-        </div>
-
-        <div class="bottom-actions" style="margin-top: 20px;">
-           <button type="button" class="btn btn-outline" onclick="showStep(2)"><i class="fas fa-arrow-left"></i> Quay lại</button>
-           <button type="button" id="ajax-save-btn" class="btn btn-primary" onclick="saveProfileData()"><i class="fas fa-save"></i> Cập nhật vào Hồ sơ</button> <button type="button" class="btn btn-light" onclick="showStep(5)">Tiếp theo <i class="fas fa-arrow-right"></i></button>
-        </div>
-      </div>
-<!-- ================= STEP 5: Templates ================= -->
-      <div class="wizard-step" id="step_5" style="padding: 50px 70px;">
-        <div class="page-header">
-          <h1>Chọn một mẫu CV.</h1>
-          <p>Lựa chọn kiểu thiết kế phản ánh đúng phong thái chuyên nghiệp của bạn.</p>
-        </div>
-        
-        <div class="template-gallery">
-            <div class="tpl-card">
-                <div class="tpl-preview" onclick="showStep('5_minimalist')" style="border-color:var(--primary); box-shadow:0 8px 25px rgba(25,100,211,0.15);">
-                    <div class="tag-rec">AI ĐỀ XUẤT CHO BẠN</div>
-                    <div style="width: 80%; margin-top: 20px;">
-                        <div style="width: 80%; height: 8px; background: #1f2937; margin-bottom:15px;"></div>
-                        <div style="width: 100%; height: 2px; background: #e2e8f0;"></div>
+                <div class="tpl-card" id="tpl-contemporary" onclick="selectTemplate('contemporary')">
+                    <div class="tpl-preview-box" style="display:flex;">
+                        <div style="width:35%; background:#1964d3;"></div>
+                        <div style="flex:1; padding:20px; display:flex; flex-direction:column; gap:8px;">
+                            <div style="width:60%; height:10px; background:#e2e8f0;"></div>
+                            <div style="width:100%; height:150px; background:#f8fafc;"></div>
+                        </div>
                     </div>
+                    <div class="tpl-title">Mẫu Đương Đại</div>
+                    <div class="tpl-desc">Bố cục 2 cột hiện đại, cực kỳ hút mắt.</div>
                 </div>
-                <div class="tpl-title">Mẫu Tối Giản</div>
-                <div class="tpl-desc">Siêu cực gọn gàng, thân thiện chuẩn chỉnh tối đa với hệ thống AI.</div>
             </div>
-            
-            <div class="tpl-card">
-                <div class="tpl-preview" onclick="showStep('5_contemporary')">
-                    <div class="tag-pop">RẤT PHỔ BIẾN</div>
-                    <div style="display:flex; width:100%; gap:10px; margin-top:20px;">
-                         <div style="width:35%; background:#f1f5f9; height:100px;"></div>
-                         <div style="width:65%;"></div>
-                    </div>
-                </div>
-                <div class="tpl-title">Mẫu Đương Đại</div>
-                <div class="tpl-desc">Bố cục chia hai cột thanh lịch với điểm nhấn navy.</div>
+            <div class="bottom-actions">
+                <button type="button" class="btn btn-outline" onclick="showStep(3)"><i class="fas fa-arrow-left"></i> Quay lại</button>
+                <button type="button" class="btn btn-primary" onclick="showStep(6)">Xem trước CV <i class="fas fa-eye"></i></button>
             </div>
         </div>
 
-        <div class="bottom-actions" style="margin-top: 40px;">
-          <button type="button" class="btn btn-outline" onclick="showStep(3)"><i class="fas fa-arrow-left"></i> Quay lại</button>
-          <button type="button" id="ajax-save-btn" class="btn btn-primary" onclick="saveProfileData()"><i class="fas fa-save"></i> Cập nhật vào Hồ sơ</button> <button type="button" class="btn btn-light" onclick="showStep(6)">Hiển thị CV <i class="fas fa-arrow-right"></i></button>
-        </div>
-      </div>
-
-      <!-- STEP 5 Details -> Skip in this compact rebuild, direct to Preview 6 -->
-      <div class="wizard-step" id="step_5_minimalist" style="padding: 50px 70px;">
-           <div class="template-detail-layout">
-                <div class="td-sidebar">
-                    <a class="back-link" onclick="showStep(5)"><i class="fas fa-arrow-left"></i> Về danh sách Mẫu CV</a>
-                    <h1 class="td-title">Mẫu Tối Giản</h1>
-                    <button type="button" class="btn btn-primary" style="margin-bottom: 15px; font-size:14px; padding:12px;" onclick="showStep(6)">Sử dụng Mẫu Này</button>
-                </div>
-                <div class="td-preview-area">
-                    <div style="width: 400px; height: 500px; background: white; box-shadow: 0 10px 40px rgba(0,0,0,0.08); padding:40px;">
-                         <div style="font-size:18px; font-weight:400; text-align:center;">NGUYỄN VĂN A</div>
-                    </div>
-                </div>
-           </div>
-      </div>
-
-      <!-- ================= STEP 6: Preview & Download ================= -->
-      <div class="wizard-step" id="step_6" style="padding:0;">
+        <!-- ================= STEP 5: Preview & Save ================= -->
+        <div class="wizard-step" id="step_6" style="padding:0;">
           <div class="preview-header">
-              <div>
-                  <h1 style="font-size:24px; font-weight:700; margin-bottom:5px;">Xem trước & Tải xuống</h1>
-                  <p style="color:#64748b; font-size:13px;">Bản CV của bạn đã quá tuyệt hảo. Hãy duyệt lại trước khi tải về.</p>
-              </div>
-              <div style="display: flex; gap: 10px;">
-                  <button type="button" class="btn btn-outline" onclick="showStep(5)"><i class="fas fa-pencil-alt"></i> Mẫu CV Khác</button>
-                  <button type="button" class="btn btn-primary" onclick="window.location.href='/profile/export-pdf'"><i class="fas fa-download"></i> Tải PDF (.pdf)</button>
+              <div><h1>Xem trước CV</h1><p id="preview-template-info">Đang dùng mẫu: Tối Giản</p></div>
+              <div style="display:flex; gap:10px;">
+                  <button type="button" class="btn btn-outline" onclick="openFullscreen()"><i class="fas fa-expand"></i> Xem toàn màn hình</button>
+                  <button type="button" class="btn btn-outline" onclick="showStep(5)">Đổi mẫu</button>
+                  <button type="button" id="btn-save-cv" class="btn btn-primary" style="background:#10b981; border:none;" onclick="handleSaveCv()"><i class="fas fa-save"></i> Lưu hồ sơ</button>
+                  <button type="button" class="btn btn-primary" onclick="handleExportPdf()"><i class="fas fa-download"></i> Tải PDF</button>
               </div>
           </div>
-
           <div class="preview-body">
               <div class="cv-wrapper">
-                  <div class="cv-paper" style="padding: 60px;">
-                      <div style="display: flex; justify-content: space-between; align-items:flex-end;">
-                          <div>
-                              <div style="font-size: 32px; font-weight: 800; line-height: 1.1; margin-bottom: 10px;">Nguyễn<br>Văn A</div>
-                              <div style="font-size: 11px; font-weight: 700; color: var(--primary); letter-spacing: 2px;">CHUYÊN VIÊN PHÂN TÍCH</div>
-                          </div>
-                      </div>
-                      <div style="width: 100%; height: 2px; background: #e0e7ff; margin: 30px 0;"></div>
-                      <div style="font-size: 11px; font-weight: 700; letter-spacing: 1px; color:#60a5fa; margin-bottom: 15px;">MỤC TIÊU NGHỀ NGHIỆP</div>
-                      <div style="font-size: 11px; color:#4b5563; line-height: 1.6; margin-bottom: 30px;">Tốt nghiệp chuyên ngành Hệ thống thông tin...</div>
+                  <!-- Container for Dynamic Switching -->
+                  <div id="cv-render-area" class="cv-paper">
+                    <!-- Minimalist inner content -->
+                    <div class="cv-minimalist" id="preview-minimalist">
+                        <div class="header">
+                            <div class="name preview-name">Họ và Tên</div>
+                            <div class="job preview-job">Chức danh ứng tuyển</div>
+                            <div class="contact">
+                                <span class="preview-email">Email</span> | <span class="preview-phone">Điện thoại</span> | <span class="preview-address">Địa chỉ</span>
+                            </div>
+                        </div>
+                        <div class="section"><div class="section-title">Giới thiệu</div><div class="content preview-bio">Giới thiệu bản thân...</div></div>
+                        <div class="section"><div class="section-title">Kinh nghiệm</div><div class="content preview-experience">Kinh nghiệm làm việc...</div></div>
+                        <div class="section"><div class="section-title">Học vấn</div><div class="content preview-education">Học vấn...</div></div>
+                        <div class="section"><div class="section-title">Kỹ năng</div><div class="content preview-skills">Kỹ năng...</div></div>
+                    </div>
+
+                    <!-- Contemporary layout -->
+                    <div class="cv-contemporary" id="preview-contemporary" style="display:none;">
+                        <div class="sidebar">
+                            <div class="avatar-rect" id="preview-avatar" style="background-image: url('{{ user.picture or "" }}')"></div>
+                            <div class="side-name preview-name">Họ và Tên</div>
+                            <div class="side-job preview-job">Chức danh</div>
+                            <div class="side-section">
+                                <div class="side-title">LIÊN HỆ</div>
+                                <div class="side-content">
+                                    <b>Email:</b> <span class="preview-email">...</span><br/><br/>
+                                    <b>Phone:</b> <span class="preview-phone">...</span><br/><br/>
+                                    <b>Address:</b> <span class="preview-address">...</span>
+                                </div>
+                            </div>
+                            <div class="side-section">
+                                <div class="side-title">HỌC VẤN</div>
+                                <div class="side-content preview-education">...</div>
+                            </div>
+                        </div>
+                        <div class="main">
+                            <div class="main-section">
+                                <div class="main-title">GIỚI THIỆU</div>
+                                <div class="main-content preview-bio">...</div>
+                            </div>
+                            <div class="main-section">
+                                <div class="main-title">KINH NGHIỆM</div>
+                                <div class="main-content preview-experience">...</div>
+                            </div>
+                            <div class="main-section">
+                                <div class="main-title">KỸ NĂNG</div>
+                                <div class="main-content preview-skills">...</div>
+                            </div>
+                        </div>
+                    </div>
                   </div>
               </div>
-
               <div class="ai-optimizer">
-                  <div class="opt-header"><i class="fas fa-magic"></i> Phân tích bởi AI</div>
-                  <div class="opt-card yellow">
-                      <div class="opt-title"><i class="far fa-lightbulb" style="color:#f59e0b;"></i> Số liệu định lượng</div>
-                      <div class="opt-desc">Kinh nghiệm của bạn cần thêm số liệu cụ thể.</div>
-                  </div>
-                  <div class="score-card">
-                      <div style="font-size:13px; font-weight:600;">Đánh Giá Tổng Quan</div>
-                      <div class="score-num">88<span style="font-size:12px; opacity:0.7;">/100</span></div>
-                      <div class="score-bar"><div style="width:88%; height:100%; background:white; border-radius:3px;"></div></div>
-                  </div>
+                  <div class="opt-header"><i class="fas fa-magic"></i> Tối ưu hóa CV</div>
+                  <div class="opt-card yellow"><div class="opt-title">Mẹo AI</div><div class="opt-desc">Kinh nghiệm nên thêm các con số đo lường hiệu quả (VD: Tăng 20% doanh thu).</div></div>
+                  <div class="score-card"><div style="font-size:13px; font-weight:600;">Điểm CV</div><div class="score-num">85<span style="font-size:12px; opacity:0.7;">/100</span></div><div class="score-bar"><div style="width:85%; height:100%; background:white; border-radius:3px;"></div></div></div>
               </div>
           </div>
-      </div>
-
-    </form>
-</div>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<!-- Fullscreen Preview Modal -->
+<div id="fullscreen-modal" class="fullscreen-modal">
+    <button class="close-fullscreen" onclick="closeFullscreen()">&times;</button>
+    <div id="fullscreen-content"></div>
+</div>
+
 <script>
+  // Core State
+  let selectedTemplate = 'minimalist';
   let isSubmenuOpen = false;
 
-  function toggleCreateCvMenu(forceOpen = false) {
-      const submenu = document.getElementById('create-cv-submenu');
-      const arrow = document.getElementById('create-cv-arrow');
-      
-      if (forceOpen) isSubmenuOpen = false;
+  function toggleUserMenu() {
+    document.getElementById('userDropdownMenu').classList.toggle('show');
+  }
 
-      if (!isSubmenuOpen) {
-          submenu.style.display = 'flex';
-          arrow.style.transform = 'rotate(90deg)';
-          isSubmenuOpen = true;
-          // Optionally auto-select step 1 if none active
-      } else {
-          submenu.style.display = 'none';
-          arrow.style.transform = 'rotate(0deg)';
-          isSubmenuOpen = false;
+  // Close dropdown when clicking outside
+  window.onclick = function(event) {
+    if (!event.target.matches('#userAvatarBtn') && !event.target.closest('#userAvatarBtn')) {
+      const dropdowns = document.getElementsByClassName("dropdown-menu");
+      for (let i = 0; i < dropdowns.length; i++) {
+        const openDropdown = dropdowns[i];
+        if (openDropdown.classList.contains('show')) {
+          openDropdown.classList.remove('show');
+        }
       }
+    }
+  }
+
+  function toggleCreateCvMenu() {
+    const submenu = document.getElementById('create-cv-submenu');
+    const arrow = document.getElementById('create-cv-arrow');
+    isSubmenuOpen = !isSubmenuOpen;
+    submenu.style.display = isSubmenuOpen ? 'flex' : 'none';
+    arrow.style.transform = isSubmenuOpen ? 'rotate(90deg)' : 'rotate(0deg)';
   }
 
   function showStep(stepName) {
     document.querySelectorAll('.wizard-step').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
     
-    // Manage Main Steps
-    if(stepName === 'list_cvs') {
-        document.getElementById('step_list_cvs').classList.add('active');
-        document.getElementById('nav-step-list').classList.add('active');
-        document.getElementById('step-indicator').innerText = 'HỒ SƠ CÁ NHÂN';
-        
-        // Hide submenu securely
-        isSubmenuOpen = true; 
-        toggleCreateCvMenu();
-        return;
+    if (stepName === 'list_cvs') {
+      document.getElementById('step_list_cvs').classList.add('active');
+      document.getElementById('nav-step-list').classList.add('active');
+      document.getElementById('step-indicator').innerText = 'HỒ SƠ CÁ NHÂN';
+      return;
     }
 
-    if(stepName === '5_minimalist' || stepName === '5_contemporary') {
-        document.getElementById('step_' + stepName).classList.add('active');
-        document.getElementById('nav-step5').classList.add('active');
-        document.getElementById('step-indicator').innerText = "TẠO HỒ SƠ - BƯỚC 4";
-        return;
-    }
-
-    let el = document.getElementById('step_' + stepName);
-    if(el) el.classList.add('active');
-    
-    let nav = document.getElementById('nav-step' + stepName);
-    if(nav) nav.classList.add('active');
-
-    // Make sure parent is apparently active
-    if ([1, 2, 3, 5, 6].includes(stepName)) {
-        if(!isSubmenuOpen) toggleCreateCvMenu(true);
-        let displayStr = stepName;
-        if(stepName===5) displayStr = 4;
-        if(stepName===6) displayStr = 5;
-        document.getElementById('step-indicator').innerText = "TẠO HỒ SƠ - BƯỚC " + displayStr;
+    if (typeof stepName === 'number') {
+        const indicator = ['THÔNG TIN CÁ NHÂN', 'HỌC VẤN & KỸ NĂNG', 'KINH NGHIỆM', 'HỒ SƠ CÁ NHÂN', 'CHỌN MẪU CV', 'XEM TRƯỚC'][stepName - 1];
+        document.getElementById('step-indicator').innerText = indicator;
+        const targetId = 'step_' + stepName;
+        document.getElementById(targetId).classList.add('active');
+        document.getElementById('nav-step' + stepName).classList.add('active');
+        syncPreview();
     }
   }
 
-  // Pre-load initialization if needed
-  window.onload = function() {
-       // Auto load Step List CV
-       // It's already default active in HTML
+  function createNewCv() {
+      document.getElementById('cvForm').reset();
+      document.getElementById('cv_id_input').value = '';
+      selectTemplate('minimalist');
+      if (!isSubmenuOpen) toggleCreateCvMenu();
+      showStep(1);
   }
-</script>
 
-<script>
+  function selectTemplate(tpl) {
+      selectedTemplate = tpl;
+      document.getElementById('cv_template_input').value = tpl;
+      document.querySelectorAll('.tpl-card').forEach(c => c.classList.remove('selected'));
+      document.getElementById('tpl-' + tpl).classList.add('selected');
+      
+      const info = document.getElementById('preview-template-info');
+      info.innerText = 'Đang dùng mẫu: ' + (tpl === 'minimalist' ? 'Tối Giản' : 'Đương Đại');
+      
+      syncPreview();
+  }
+
+  function syncPreview() {
+      document.querySelectorAll('[data-sync]').forEach(input => {
+          const targetClass = input.getAttribute('data-sync');
+          const value = input.value || input.placeholder;
+          document.querySelectorAll('.' + targetClass).forEach(target => {
+              target.innerText = value;
+          });
+      });
+
+      if (selectedTemplate === 'minimalist') {
+          document.getElementById('preview-minimalist').style.display = 'block';
+          document.getElementById('preview-contemporary').style.display = 'none';
+      } else {
+          document.getElementById('preview-minimalist').style.display = 'none';
+          document.getElementById('preview-contemporary').style.display = 'flex';
+      }
+  }
+
   function previewAvatar(input) {
       if (input.files && input.files[0]) {
-          var reader = new FileReader();
+          const reader = new FileReader();
           reader.onload = function(e) {
-              const bg = "url('" + e.target.result + "') center/cover no-repeat";
-              const box = document.getElementById('avatarPreviewBox');
-              box.style.background = bg;
-              box.innerHTML = ''; // Hide internal icons safely
+              document.getElementById('avatarPreviewBox').style.backgroundImage = "url('" + e.target.result + "')";
+              document.getElementById('preview-avatar').style.backgroundImage = "url('" + e.target.result + "')";
+              const formData = new FormData();
+              formData.append('profile_picture', input.files[0]);
+              fetch('{{ url_for("edit_profile") }}', { method: 'POST', body: formData, headers: {'X-Requested-With': 'XMLHttpRequest'} });
           }
           reader.readAsDataURL(input.files[0]);
       }
   }
 
-  function saveProfileData() {
-      let form = document.getElementById('cvForm');
-      let formData = new FormData(form);
-      let btn = document.getElementById('ajax-save-btn');
+  function openFullscreen() {
+    const renderArea = document.getElementById('cv-render-area').innerHTML;
+    const fullscreenContent = document.getElementById('fullscreen-content');
+    fullscreenContent.innerHTML = `<div class="cv-paper" style="box-shadow:none;">${renderArea}</div>`;
+    document.getElementById('fullscreen-modal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeFullscreen() {
+    document.getElementById('fullscreen-modal').classList.remove('active');
+    document.body.style.overflow = 'auto';
+  }
+
+  function handleSaveCv() {
+      const btn = document.getElementById('btn-save-cv');
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
+      const formData = new FormData(document.getElementById('cvForm'));
       
-      if(btn) btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
-      
-      fetch('{{ url_for("edit_profile") }}', {
-          method: 'POST',
-          body: formData
-      }).then(res => {
-          if(res.ok) {
-             if(btn) {
-                 btn.innerHTML = '<i class="fas fa-check"></i> Đã lưu thành công';
-                 btn.classList.add('btn-light');
-                 btn.classList.remove('btn-primary');
-             }
-             setTimeout(() => { 
-                 if(btn) {
-                     btn.innerHTML = '<i class="fas fa-save"></i> Cập nhật vào Hồ sơ'; 
-                     btn.classList.remove('btn-light');
-                     btn.classList.add('btn-primary');
-                 }
-             }, 2000);
-          } else {
-             if(btn) btn.innerHTML = '<i class="fas fa-times"></i> Lỗi lưu';
+      fetch('{{ url_for("save_cv") }}', { method: 'POST', body: formData })
+      .then(r => r.json())
+      .then(data => {
+          if (data.success) {
+              btn.innerHTML = '<i class="fas fa-check"></i> Đã lưu';
+              document.getElementById('cv_id_input').value = data.cv_id;
+              setTimeout(() => { btn.innerHTML = '<i class="fas fa-save"></i> Lưu hồ sơ'; }, 2000);
           }
       });
   }
-</script>
 
+  function loadCv(cvId) {
+      fetch('/profile/cv/load/' + cvId)
+      .then(r => r.json())
+      .then(data => {
+          const form = document.getElementById('cvForm');
+          document.getElementById('cv_id_input').value = cvId;
+          for (const [key, val] of Object.entries(data)) {
+              const input = form.querySelector(`[name="${key}"]`);
+              if (input) input.value = val;
+          }
+          if (data.template) selectTemplate(data.template);
+          if (!isSubmenuOpen) toggleCreateCvMenu();
+          showStep(1);
+      });
+  }
+
+  function deleteCv(cvId) {
+      if (!confirm('Bạn có chắc muốn xóa bản CV này?')) return;
+      fetch('/profile/cv/delete/' + cvId, { method: 'POST' })
+      .then(r => r.json())
+      .then(data => {
+          if (data.success) {
+              const card = document.getElementById('cv-card-' + cvId);
+              if (card) card.remove();
+          }
+      });
+  }
+
+  function handleExportPdf() {
+      const cvId = document.getElementById('cv_id_input').value;
+      const tpl = selectedTemplate;
+      let url = '{{ url_for("export_pdf") }}?template=' + tpl;
+      if (cvId) url += '&cv_id=' + cvId;
+      window.location.href = url;
+  }
+
+  function exportPdfSpecific(cvId) {
+      window.location.href = '{{ url_for("export_pdf") }}?cv_id=' + cvId;
+  }
+
+  document.querySelectorAll('[data-sync]').forEach(input => {
+      input.addEventListener('input', syncPreview);
+  });
+  syncPreview();
+</script>
 </body>
 </html>

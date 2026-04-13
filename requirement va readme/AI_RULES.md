@@ -23,4 +23,4 @@ File này dùng để lưu trữ các quy định, tiêu chuẩn, và cú pháp 
 * _(Ví dụ: Không tạo trực tiếp file rác ra thư mục gốc, nếu cần nháp thì bỏ vào thư mục `scratch/`)_
 
 ## 5. Quản lý Source Code (Git)
-* Từ giờ trở đi, chỉ thực hiện lệnh pull và push trên nhánh `main` của repository [https://github.com/sealdog17/SS2_InternshipFinder/tree/main](https://github.com/sealdog17/SS2_InternshipFinder/tree/main). Không tự ý checkout sang branch khác trừ phi được yêu cầu.
+* Từ giờ trở đi, chỉ thực hiện lệnh pull và push trên nhánh `master` của repository [https://github.com/sealdog17/SS2_InternshipFinder/tree/master](https://github.com/sealdog17/SS2_InternshipFinder/tree/master). Không tự ý checkout sang branch khác trừ phi được yêu cầu.

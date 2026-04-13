@@ -8,7 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from authlib.integrations.flask_client import OAuth
 from dotenv import load_dotenv
 from reportlab.lib.pagesizes import A4
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.units import inch
@@ -188,7 +188,6 @@ def register():
         session['user_email'] = user.email
         session['user_picture'] = None
 
-           # ... trong route register, sau khi commit
         flash('Đăng ký thành công!', 'success')
         return redirect(url_for('job_list'))  # thay dashboard
 
@@ -204,7 +203,7 @@ def google_login():
 @app.route('/google/callback')
 def callback():
     if request.args.get('state') != session.get('oauth_state'):
-        return 'State mismatch - possible CSRF attack', 400
+        return 'Lỗi xác thực (State mismatch) - Vui lòng thử lại', 400
     try:
         token = google.authorize_access_token()
         user_info = google.get('https://www.googleapis.com/oauth2/v3/userinfo').json()
@@ -274,7 +273,7 @@ def edit_profile():
                 os.makedirs(upload_path)
             file.save(os.path.join(upload_path, filename))
             user.picture = url_for('static', filename='uploads/' + filename)
-            session['user_picture'] = user.picture
+            # session['user_picture'] = user.picture  # Không cập nhật header bằng ảnh CV
 
         user.name = request.form.get('name') or user.name
         user.phone = request.form.get('phone')
@@ -289,115 +288,227 @@ def edit_profile():
         user.languages = request.form.get('languages')
         
         db.session.commit()
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'success': True})
+            
         flash('Cập nhật hồ sơ thành công!', 'success')
-        return redirect(url_for('edit_profile'))  # Ở lại trang edit để check kết quả
-    return render_template('edit_profile.html', user=user)
+        return redirect(url_for('edit_profile'))
+    
+    cvs = CV.query.filter_by(user_id=user.id).order_by(CV.created_at.desc()).all()
+    return render_template('edit_profile.html', user=user, cvs=cvs)
+
+@app.route('/profile/cv/save', methods=['POST'])
+@login_required
+def save_cv():
+    import json
+    user_id = session['user_id']
+    cv_data = {
+        'name': request.form.get('name'),
+        'job_title': request.form.get('job_title'),
+        'email': request.form.get('email'),
+        'phone': request.form.get('phone'),
+        'address': request.form.get('address'),
+        'bio': request.form.get('bio'),
+        'skills': request.form.get('skills'),
+        'education': request.form.get('education'),
+        'experience': request.form.get('experience'),
+        'languages': request.form.get('languages'),
+        'template': request.form.get('cv_template', 'minimalist')
+    }
+    
+    cv_id = request.form.get('cv_id')
+    if cv_id and cv_id.isdigit():
+        cv = CV.query.filter_by(id=int(cv_id), user_id=user_id).first()
+        if cv:
+            cv.content = json.dumps(cv_data)
+            cv.version += 1
+            db.session.commit()
+            return jsonify({'success': True, 'cv_id': cv.id})
+    
+    new_cv = CV(user_id=user_id, content=json.dumps(cv_data))
+    db.session.add(new_cv)
+    db.session.commit()
+    return jsonify({'success': True, 'cv_id': new_cv.id})
+
+@app.route('/profile/cv/delete/<int:cv_id>', methods=['POST'])
+@login_required
+def delete_cv(cv_id):
+    cv = CV.query.filter_by(id=cv_id, user_id=session['user_id']).first_or_404()
+    db.session.delete(cv)
+    db.session.commit()
+    return jsonify({'success': True})
+
+@app.route('/profile/cv/load/<int:cv_id>')
+@login_required
+def load_cv(cv_id):
+    import json
+    cv = CV.query.filter_by(id=cv_id, user_id=session['user_id']).first_or_404()
+    data = json.loads(cv.content)
+    return jsonify(data)
 
 @app.route('/profile/export-pdf')
 @login_required
 def export_pdf():
+    import json
     user = User.query.get(session['user_id'])
+    
+    # Check if exporting a specific CV version or current profile
+    cv_id = request.args.get('cv_id')
+    template_type = request.args.get('template', 'minimalist')
+    
+    cv_data = {
+        'name': user.name,
+        'job_title': user.job_title,
+        'email': user.email,
+        'phone': user.phone,
+        'address': user.address,
+        'bio': user.bio,
+        'skills': user.skills,
+        'education': user.education,
+        'experience': user.experience,
+        'languages': user.languages
+    }
+
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+    
+    # Register Times New Roman for Vietnamese support
+    try:
+        font_path = "C:/Windows/Fonts/times.ttf"
+        font_path_bold = "C:/Windows/Fonts/timesbd.ttf"
+        if os.path.exists(font_path):
+            pdfmetrics.registerFont(TTFont('TimesNewRoman', font_path))
+            pdfmetrics.registerFont(TTFont('TimesNewRoman-Bold', font_path_bold))
+            font_main = 'TimesNewRoman'
+            font_bold = 'TimesNewRoman-Bold'
+        else:
+            font_main = 'Helvetica'
+            font_bold = 'Helvetica-Bold'
+    except:
+        font_main = 'Helvetica'
+        font_bold = 'Helvetica-Bold'
+
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4,
-                            rightMargin=0.75*inch, leftMargin=0.75*inch,
-                            topMargin=0.75*inch, bottomMargin=0.75*inch)
+                            rightMargin=0.3*inch, leftMargin=0.3*inch,
+                            topMargin=0.3*inch, bottomMargin=0.3*inch)
     styles = getSampleStyleSheet()
 
-    style_name = ParagraphStyle('Name', parent=styles['Heading1'], fontSize=28,
-                                textColor=colors.HexColor('#2c3e50'), alignment=TA_CENTER, spaceAfter=6)
-    style_position = ParagraphStyle('Position', parent=styles['Heading2'], fontSize=16,
-                                    textColor=colors.HexColor('#3498db'), alignment=TA_CENTER, spaceAfter=12)
-    style_section = ParagraphStyle('Section', parent=styles['Heading2'], fontSize=14,
-                                   textColor=colors.HexColor('#2c3e50'), spaceAfter=6, spaceBefore=12)
-    style_normal = ParagraphStyle('Normal', parent=styles['Normal'], fontSize=10, leading=12)
-    style_contact = ParagraphStyle('Contact', parent=styles['Normal'], fontSize=9,
-                                   textColor=colors.grey, alignment=TA_CENTER, spaceAfter=12)
-    style_subsection = ParagraphStyle('Subsection', parent=styles['Heading3'], fontSize=12,
-                                      textColor=colors.HexColor('#2c3e50'), spaceAfter=4, spaceBefore=8)
-
+    # Shared Styles using Times New Roman
+    style_normal = ParagraphStyle('Normal', parent=styles['Normal'], fontName=font_main, fontSize=10, leading=14, textColor=colors.HexColor('#4b5563'))
+    style_section = ParagraphStyle('Section', parent=styles['Heading2'], fontName=font_bold, fontSize=14, 
+                                   textColor=colors.HexColor('#111827'), spaceAfter=8, spaceBefore=12)
+    
     story = []
-    story.append(Paragraph(user.name, style_name))
-    story.append(Paragraph(user.job_title or 'Ứng viên', style_position))
 
-    contact_parts = [f"Email: {user.email}"]
-    if user.phone:
-        contact_parts.append(f"Phone: {user.phone}")
-    if user.address:
-        contact_parts.append(f"Address: {user.address}")
-    story.append(Paragraph(" | ".join(contact_parts), style_contact))
-    story.append(Spacer(1, 0.2*inch))
+    if template_type == 'contemporary':
+        # Contemporary: Two-column layout with sidebar
+        # Left column (Blue Sidebar)
+        left_items = []
+        
+        # Profile Picture Placeholder
+        if user.picture:
+            try:
+                # Check if it's a relative path from static
+                img_path = user.picture.replace('/static/', 'static/')
+                if os.path.exists(img_path):
+                    from reportlab.lib.utils import ImageReader
+                    img = ImageReader(img_path)
+                    left_items.append(Image(img_path, width=1.4*inch, height=1.4*inch)) # Adjusted to match web circle feel
+                    left_items.append(Spacer(1, 0.2*inch))
+            except:
+                pass
 
-    # Cột trái
-    left_items = []
-    left_items.append(Paragraph("Personal Details", style_section))
-    left_items.append(Paragraph(f"Date of Birth: {user.dob or 'Not provided'}", style_normal))
-    left_items.append(Paragraph(f"Marital Status: {user.marital_status or 'Not provided'}", style_normal))
-    left_items.append(Paragraph(f"Languages: {user.languages or 'Not provided'}", style_normal))
-    left_items.append(Paragraph(f"Address: {user.address or 'Not provided'}", style_normal))
-    left_items.append(Spacer(1, 0.1*inch))
+        name_style = ParagraphStyle('ContempName', fontName=font_bold, fontSize=20, textColor=colors.white, alignment=TA_CENTER)
+        job_style = ParagraphStyle('ContempJob', fontName=font_main, fontSize=11, textColor=colors.HexColor('#93c5fd'), alignment=TA_CENTER, spaceAfter=20)
+        
+        left_items.append(Paragraph(cv_data['name'], name_style))
+        left_items.append(Paragraph(cv_data['job_title'] or 'Ứng viên', job_style))
+        
+        sidebar_section = ParagraphStyle('SideSection', fontName=font_bold, fontSize=11, textColor=colors.white, spaceBefore=15, spaceAfter=8)
+        sidebar_text = ParagraphStyle('SideText', fontName=font_main, fontSize=9, textColor=colors.HexColor('#bfdbfe'), leading=12)
+        
+        left_items.append(Paragraph("LIÊN HỆ", sidebar_section))
+        left_items.append(Paragraph(f"<b>Email:</b><br/>{cv_data['email']}", sidebar_text))
+        if cv_data['phone']:
+            left_items.append(Paragraph(f"<b>Số điện thoại:</b><br/>{cv_data['phone']}", sidebar_text))
+        if cv_data['address']:
+            left_items.append(Paragraph(f"<b>Địa chỉ:</b><br/>{cv_data['address']}", sidebar_text))
+        
+        if cv_data['skills']:
+            left_items.append(Paragraph("KỸ NĂNG", sidebar_section))
+            for s in cv_data['skills'].split(','):
+                if s.strip():
+                    left_items.append(Paragraph(f"• {s.strip()}", sidebar_text))
+        
+        if cv_data['education']:
+            left_items.append(Paragraph("HỌC VẤN", sidebar_section))
+            left_items.append(Paragraph(cv_data['education'], sidebar_text))
 
-    if user.skills:
-        left_items.append(Paragraph("Professional Skills", style_section))
-        for line in user.skills.split('\n'):
-            if ':' in line:
-                group, skills_text = line.split(':', 1)
-                left_items.append(Paragraph(f"<b>{group.strip()}</b>", style_subsection))
-                for skill in [s.strip() for s in skills_text.split(',') if s.strip()]:
-                    left_items.append(Paragraph(f"• {skill}", style_normal))
-            elif line.strip():
-                left_items.append(Paragraph(f"• {line.strip()}", style_normal))
-        left_items.append(Spacer(1, 0.1*inch))
+        # Right column (Main Area)
+        right_items = []
+        main_section = ParagraphStyle('MainSection', fontName=font_bold, fontSize=13, textColor=colors.HexColor('#1d4ed8'), spaceBefore=10, spaceAfter=10)
+        
+        if cv_data['bio']:
+            right_items.append(Paragraph("GIỚI THIỆU BẢN THÂN", main_section))
+            right_items.append(Paragraph(cv_data['bio'], style_normal))
+            right_items.append(Spacer(1, 0.15*inch))
+        
+        if cv_data['experience']:
+            right_items.append(Paragraph("KINH NGHIỆM LÀM VIỆC", main_section))
+            for exp in cv_data['experience'].split('\n'):
+                if exp.strip():
+                    right_items.append(Paragraph(exp.strip(), style_normal))
 
-    if user.education:
-        left_items.append(Paragraph("Education", style_section))
-        for edu in user.education.split('\n'):
-            if edu.strip():
-                left_items.append(Paragraph(f"• {edu.strip()}", style_normal))
-        left_items.append(Spacer(1, 0.1*inch))
+        if cv_data['languages']:
+            right_items.append(Paragraph("NGÔN NGỮ", main_section))
+            right_items.append(Paragraph(cv_data['languages'], style_normal))
 
-    # Cột phải
-    right_items = []
-    if user.bio:
-        right_items.append(Paragraph("Summary", style_section))
-        right_items.append(Paragraph(user.bio, style_normal))
-        right_items.append(Spacer(1, 0.1*inch))
+        # Table for Sidebar Layout
+        table_data = [[left_items, right_items]]
+        col_widths = [doc.width * 0.35, doc.width * 0.65]
+        table = Table(table_data, colWidths=col_widths)
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (0,0), colors.HexColor('#1964d3')),
+            ('VALIGN', (0,0), (-1,-1), 'TOP'),
+            ('LEFTPADDING', (0,0), (0,0), 20),
+            ('RIGHTPADDING', (0,0), (0,0), 15),
+            ('TOPPADDING', (0,0), (-1,-1), 25),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 25),
+            # Ensure the table expands to full height if possible (approximate)
+        ]))
+        story.append(table)
+    else:
+        # Minimalist Layout (Existing or similar)
+        style_name = ParagraphStyle('Name', fontName=font_bold, fontSize=28, textColor=colors.HexColor('#111827'), alignment=TA_CENTER, spaceAfter=4)
+        style_job = ParagraphStyle('Job', fontName=font_main, fontSize=14, textColor=colors.HexColor('#3b82f6'), alignment=TA_CENTER, spaceAfter=20)
+        
+        story.append(Paragraph(cv_data['name'], style_name))
+        story.append(Paragraph((cv_data['job_title'] or 'Ứng viên').upper(), style_job))
+        
+        contact_line = f"{cv_data['email']}  |  {cv_data['phone'] or ''}  |  {cv_data['address'] or ''}"
+        story.append(Paragraph(contact_line, ParagraphStyle('Contact', fontName=font_main, alignment=TA_CENTER, fontSize=9, textColor=colors.grey)))
+        from reportlab.platypus import HRFlowable
+        story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor('#e5e7eb'), spaceBefore=15, spaceAfter=15))
 
-    if user.experience:
-        right_items.append(Paragraph("Work Experience", style_section))
-        lines = user.experience.split('\n')
-        i = 0
-        while i < len(lines):
-            line = lines[i].strip()
-            if not line:
-                i += 1
-                continue
-            if ' - ' in line or '(' in line:
-                right_items.append(Paragraph(line, style_subsection))
-                i += 1
-                while i < len(lines) and (lines[i].strip().startswith('-') or lines[i].strip().startswith('•')):
-                    desc = lines[i].strip().lstrip('-• ').strip()
-                    if desc:
-                        right_items.append(Paragraph(f"• {desc}", style_normal))
-                    i += 1
-            else:
-                right_items.append(Paragraph(f"• {line}", style_normal))
-                i += 1
-        right_items.append(Spacer(1, 0.1*inch))
+        if cv_data['bio']:
+            story.append(Paragraph("MỤC TIÊU NGHỀ NGHIỆP", style_section))
+            story.append(Paragraph(cv_data['bio'], style_normal))
 
-    col_widths = [doc.width * 0.35, doc.width * 0.65]
-    table = Table([[left_items, right_items]], colWidths=col_widths, rowHeights=None)
-    table.setStyle(TableStyle([
-        ('VALIGN', (0,0), (-1,-1), 'TOP'),
-        ('LEFTPADDING', (0,0), (-1,-1), 0),
-        ('RIGHTPADDING', (0,0), (-1,-1), 10),
-        ('TOPPADDING', (0,0), (-1,-1), 0),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 0),
-    ]))
-    story.append(table)
+        if cv_data['experience']:
+            story.append(Paragraph("KINH NGHIỆM LÀM VIỆC", style_section))
+            for line in cv_data['experience'].split('\n'):
+                if line.strip():
+                    story.append(Paragraph(f"• {line.strip()}", style_normal))
+
+        if cv_data['education']:
+            story.append(Paragraph("HỌC VẤN", style_section))
+            story.append(Paragraph(cv_data['education'], style_normal))
 
     doc.build(story)
     buffer.seek(0)
     return send_file(buffer, as_attachment=True, download_name=f"CV_{user.name}.pdf", mimetype='application/pdf')
+
 
 # --------------------- JOB MANAGEMENT ---------------------
 @app.route('/jobs')

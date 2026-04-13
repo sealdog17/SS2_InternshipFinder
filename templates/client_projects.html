@@ -34,8 +34,30 @@
     
     .nav-right { display: flex; gap: 20px; align-items: center; }
     .icon-btn { color: #6b7280; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; text-decoration: none; }
-    .avatar { width: 32px; height: 32px; border-radius: 50%; background: #1f2937; color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; overflow: hidden; }
+    .avatar { width: 32px; height: 32px; border-radius: 50%; background: #1f2937; color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; overflow: hidden; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
+    .avatar:hover { border-color: var(--primary); }
     .avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* Dropdown UI */
+    .user-dropdown { position: relative; display: flex; align-items: center; }
+    .dropdown-menu { 
+      position: absolute; top: calc(100% + 15px); right: 0; width: 220px; 
+      background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+      border: 1px solid var(--border); display: none; flex-direction: column; z-index: 1000; padding: 8px 0;
+      animation: slideIn 0.2s ease;
+    }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .dropdown-menu.show { display: flex; }
+    .menu-header { padding: 12px 20px; border-bottom: 1px solid #f1f5f9; margin-bottom: 8px; text-align: left;}
+    .menu-header strong { display: block; font-size: 14px; color: #111827; }
+    .menu-header span { font-size: 12px; color: #64748b; }
+    .dropdown-menu a { 
+      padding: 10px 20px; font-size: 13px; color: #4b5563; text-decoration: none; 
+      display: flex; align-items: center; gap: 10px; transition: 0.2s;
+    }
+    .dropdown-menu a i { width: 16px; text-align: center; font-size: 14px; color: #94a3b8; }
+    .dropdown-menu a:hover { background: #f8fafc; color: var(--primary); }
+    .menu-divider { height: 1px; background: #f1f5f9; margin: 8px 0; }
 
     /* Layout */
     .builder-container { display: flex; flex: 1; overflow: hidden; }
@@ -73,18 +95,38 @@
     .search-bar select { padding:10px 15px; border-radius:8px; border:1px solid #e2e8f0; outline:none; font-family:inherit; font-size:13px; color:#4b5563; font-weight: 500; cursor: pointer; }
 
     /* Project Cards */
-    .projects-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap:20px; }
-    .project-card { background:white; border:1px solid #e2e8f0; border-radius:16px; padding:24px; transition:0.2s; cursor:pointer; display: flex; flex-direction: column;}
-    .project-card:hover { box-shadow: 0 10px 25px rgba(0,0,0,0.05); border-color: #cbd5e1; transform: translateY(-2px); }
-    .pc-badge { font-size:10px; font-weight:800; padding:4px 10px; border-radius:12px; letter-spacing: 0.5px; }
-    .pc-badge.open { color:#2563eb; background:#eff6ff; }
-    .pc-badge.closed { color:#dc2626; background:#fef2f2; }
-    .pc-badge.active { color:#d97706; background:#fef3c7; }
-    .pc-title { font-size:16px; font-weight:700; color:#111827; margin: 15px 0 8px; line-height:1.4; }
-    .pc-company { color:#64748b; font-size:13px; margin-bottom:15px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
-    .pc-desc { font-size:13px; color:#4b5563; line-height:1.6; margin-bottom:20px; flex: 1; }
-    .pc-tags { display:flex; gap:8px; margin-bottom:25px; flex-wrap:wrap; }
-    .pc-tag { font-size:11px; background:#f8fafc; padding:4px 10px; border-radius:4px; font-weight:600; color:#4b5563; border:1px solid #e2e8f0; }
+    .projects-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap:25px; }
+    .project-card { 
+      background:white; border:1px solid #eef2f6; border-radius:20px; padding:28px; 
+      transition:0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor:pointer; display: flex; 
+      flex-direction: column; position: relative; overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+    }
+    .project-card:hover { box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05), 0 10px 10px -5px rgba(0,0,0,0.02); border-color: #cbd5e1; transform: translateY(-5px); }
+    .project-card::before { content: ""; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--primary); opacity: 0; transition: 0.3s; }
+    .project-card:hover::before { opacity: 1; }
+
+    .pc-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+    .pc-logo { width: 48px; height: 48px; border-radius: 12px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--primary); }
+    
+    .pc-badge { font-size:10px; font-weight:800; padding:5px 12px; border-radius:12px; letter-spacing: 0.5px; text-transform: uppercase; }
+    .pc-badge.open { color:#10b981; background:#ecfdf5; }
+    .pc-badge.closed { color:#ef4444; background:#fef2f2; }
+    .pc-badge.active { color:#f59e0b; background:#fffbeb; }
+
+    .pc-title { font-size:18px; font-weight:700; color:#111827; margin: 0 0 8px; line-height:1.4; }
+    .pc-company { color:#64748b; font-size:14px; margin-bottom:15px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+    .pc-company i { color: #94a3b8; font-size: 14px; }
+    
+    .pc-desc { font-size:14px; color:#4b5563; line-height:1.6; margin-bottom:20px; flex: 1; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    
+    .pc-meta { display: flex; gap: 15px; margin-bottom: 20px; padding: 12px 0; border-top: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9; }
+    .pc-meta-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #64748b; font-weight: 500; }
+    .pc-meta-item i { color: #94a3b8; }
+
+    .pc-tags { display:flex; gap:8px; flex-wrap:wrap; }
+    .pc-tag { font-size:11px; background:#f1f5f9; padding:4px 12px; border-radius:6px; font-weight:600; color:#475569; transition: 0.2s; }
+    .pc-card:hover .pc-tag { background: #e2e8f0; }
 
     .btn { padding: 9px 20px; border-radius: 8px; font-weight: 600; font-size: 12px; cursor: pointer; border: none; transition: 0.2s; font-family: inherit; }
     .btn-primary { background: var(--primary); color: white; }
@@ -118,11 +160,25 @@
     </div>
 
     <div class="nav-right">
-      <div class="icon-btn"><i class="far fa-bell" style="font-size: 18px;"></i></div>
-      <a href="{{ url_for('edit_profile') }}" class="icon-btn"><i class="fas fa-cog" style="font-size: 18px;"></i></a>
-      <div class="avatar">
-        {% if session.get('user_picture') %}<img src="{{ session.get('user_picture') }}">
-        {% else %}{{ (session.get('user_name', 'U') or 'U')[0].upper() }}{% endif %}
+      <div class="icon-btn" title="Thông báo"><i class="far fa-bell" style="font-size: 16px;"></i></div>
+      <a href="{{ url_for('edit_profile') }}" class="icon-btn" title="Cài đặt"><i class="fas fa-cog" style="font-size: 16px;"></i></a>
+      
+      <div class="user-dropdown">
+        <div class="avatar" id="userAvatarBtn" onclick="toggleUserMenu()">
+          {% if session.get('user_picture') %}<img src="{{ session.get('user_picture') }}">
+          {% else %}{{ (session.get('user_name', 'U') or 'U')[0].upper() }}{% endif %}
+        </div>
+        <div class="dropdown-menu" id="userDropdownMenu">
+          <div class="menu-header">
+            <strong>{{ session.get('user_name', 'Người dùng') }}</strong>
+            <span>{{ session.get('user_email', '') }}</span>
+          </div>
+          <div class="menu-divider"></div>
+          <a href="{{ url_for('profile') }}"><i class="far fa-user"></i> Hồ sơ của tôi</a>
+          <a href="{{ url_for('edit_profile') }}"><i class="fas fa-cog"></i> Cài đặt tài khoản</a>
+          <div class="menu-divider"></div>
+          <a href="{{ url_for('logout') }}" style="color: #ef4444;"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+        </div>
       </div>
     </div>
   </nav>
@@ -137,13 +193,16 @@
       
       <div class="nav-menu">
         <div class="menu-item active" id="nav-explore" onclick="switchTab('explore')">
-          <i class="fas fa-search"></i> Khám phá dự án
+          <i class="fas fa-compass"></i> Khám phá dự án
         </div>
         <div class="menu-item" id="nav-my_projects" onclick="switchTab('my_projects')">
           <i class="fas fa-folder-open"></i> Dự án của tôi
         </div>
-        <div class="menu-item" id="nav-history" onclick="alert('Tính năng Lịch sử ứng tuyển đang phát triển!')">
-          <i class="fas fa-history"></i> Lịch sử ứng tuyển
+        <div class="menu-item" id="nav-applied" onclick="alert('Tính năng Đang ứng tuyển đang phát triển!')">
+          <i class="fas fa-paper-plane"></i> Đang ứng tuyển
+        </div>
+        <div class="menu-item" id="nav-history" onclick="alert('Tính năng Lịch sử dự án đang phát triển!')">
+          <i class="fas fa-history"></i> Lịch sử dự án
         </div>
       </div>
 
@@ -176,71 +235,43 @@
         </div>
 
         <div class="projects-grid">
-             <!-- Project Card 1 -->
-             <div class="project-card" onclick="openProjectModal('1')">
-                  <div style="display:flex; justify-content:space-between; align-items:center;">
-                       <span class="pc-badge open">ĐANG MỞ ĐĂNG KÝ</span>
-                       <span style="color:#64748b; font-size:12px; font-weight:600;"><i class="far fa-clock"></i> 2 tuần</span>
+                <div class="project-card" onclick="openProjectModal('Thiết kế App Tài chính', 'Ngân hàng ABC', 'Dự án yêu cầu thiết kế bộ nhận diện thương hiệu và UI/UX cho ứng dụng mobile banking mới...', 'UX/UI, Figma, Tài chính', '3 tháng', 'Cố định')">
+                  <div class="pc-header">
+                    <div class="pc-logo"><i class="fas fa-university"></i></div>
+                    <span class="pc-badge open">Đang mở</span>
                   </div>
-                  <h3 class="pc-title">Phát triển Landing Page quảng bá Khóa học E-learning</h3>
-                  <div class="pc-company"><i class="fas fa-building" style="color:#94a3b8;"></i> VNG Corp - ZaloPay</div>
-                  <div class="pc-desc">Yêu cầu tạo landing page chuyển đổi cao cho chiến dịch mùa hè. Đã có sẵn thiết kế Figma, cần cắt HTML/CSS/JS nhanh nhất.</div>
+                  <h3 class="pc-title">Thiết kế App Tài chính</h3>
+                  <div class="pc-company"><i class="far fa-building"></i> Ngân hàng ABC</div>
+                  <p class="pc-desc">Dự án yêu cầu thiết kế bộ nhận diện thương hiệu và UI/UX cho ứng dụng mobile banking mới, tập trung vào trải nghiệm người dùng hiện đại và bảo mật.</p>
+                  <div class="pc-meta">
+                    <div class="pc-meta-item"><i class="far fa-calendar-alt"></i> 3 tháng</div>
+                    <div class="pc-meta-item"><i class="fas fa-coins"></i> Cố định</div>
+                  </div>
                   <div class="pc-tags">
-                      <span class="pc-tag">ReactJS</span>
-                      <span class="pc-tag">Tailwind</span>
+                    <span class="pc-tag">UX/UI</span>
+                    <span class="pc-tag">Figma</span>
+                    <span class="pc-tag">Mobile</span>
                   </div>
-                  <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #e2e8f0; padding-top:15px; margin-top:auto;">
-                      <div>
-                          <div style="font-size:10px; color:#64748b; margin-bottom:2px; font-weight:700;">NGÂN SÁCH</div>
-                          <div style="font-size:14px; font-weight:800; color:#10b981;">2.000.000 VNĐ</div>
-                      </div>
-                      <button class="btn btn-primary">Xem chi tiết</button>
-                  </div>
-             </div>
-             
-             <!-- Project Card 2 -->
-             <div class="project-card" onclick="openProjectModal('2')">
-                  <div style="display:flex; justify-content:space-between; align-items:center;">
-                       <span class="pc-badge open">ĐANG MỞ ĐĂNG KÝ</span>
-                       <span style="color:#64748b; font-size:12px; font-weight:600;"><i class="far fa-clock"></i> 4 tuần</span>
-                  </div>
-                  <h3 class="pc-title">App Đặt Trà Sữa (Giao Diện Khách Hàng)</h3>
-                  <div class="pc-company"><i class="fas fa-building" style="color:#94a3b8;"></i> FPT Software</div>
-                  <div class="pc-desc">Tái cấu trúc UI/UX luồng mua hàng và chọn topping. Khách hàng mong đợi giao diện mang phong cách GenZ năng động.</div>
-                  <div class="pc-tags">
-                      <span class="pc-tag">Figma</span>
-                      <span class="pc-tag">UI/UX</span>
-                  </div>
-                  <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #e2e8f0; padding-top:15px; margin-top:auto;">
-                      <div>
-                          <div style="font-size:10px; color:#64748b; margin-bottom:2px; font-weight:700;">NGÂN SÁCH</div>
-                          <div style="font-size:14px; font-weight:800; color:#10b981;">Thỏa thuận</div>
-                      </div>
-                      <button class="btn btn-primary">Xem chi tiết</button>
-                  </div>
-             </div>
+                </div>
 
-             <!-- Project Card 3 -->
-             <div class="project-card">
-                  <div style="display:flex; justify-content:space-between; align-items:center;">
-                       <span class="pc-badge closed">ĐÃ CHỐT SỔ</span>
-                       <span style="color:#64748b; font-size:12px; font-weight:600;"><i class="far fa-clock"></i> 3 tuần</span>
+                <div class="project-card" onclick="openProjectModal('Hệ thống E-Learning', 'Trung tâm Giáo dục X', 'Xây dựng nền tảng học trực tuyến hỗ trợ video streaming, bài tập trắc nghiệm và hệ thống quản lý học viên bài bản.', 'Web dev, React, Node.js', '5 tháng', 'Thỏa thuận')">
+                  <div class="pc-header">
+                    <div class="pc-logo"><i class="fas fa-graduation-cap"></i></div>
+                    <span class="pc-badge active">Đang làm</span>
                   </div>
-                  <h3 class="pc-title">Bot Telegram Trích Xuất Dữ Liệu</h3>
-                  <div class="pc-company"><i class="fas fa-building" style="color:#94a3b8;"></i> Momo FinData</div>
-                  <div class="pc-desc">Xây dựng Bot nhận lệnh qua Telegram và crawl kết quả chứng khoán từ nguồn chỉ định trả về file thống kê tự động hóa.</div>
+                  <h3 class="pc-title">Hệ thống E-Learning</h3>
+                  <div class="pc-company"><i class="far fa-building"></i> Trung tâm Giáo dục X</div>
+                  <p class="pc-desc">Xây dựng nền tảng học trực tuyến hỗ trợ video streaming, bài tập trắc nghiệm và hệ thống quản lý học viên bài bản, dễ dàng mở rộng quy mô.</p>
+                  <div class="pc-meta">
+                    <div class="pc-meta-item"><i class="far fa-calendar-alt"></i> 5 tháng</div>
+                    <div class="pc-meta-item"><i class="fas fa-coins"></i> Thỏa thuận</div>
+                  </div>
                   <div class="pc-tags">
-                      <span class="pc-tag">Python</span>
-                      <span class="pc-tag">Scraping</span>
+                    <span class="pc-tag">React</span>
+                    <span class="pc-tag">Node.js</span>
+                    <span class="pc-tag">Web</span>
                   </div>
-                  <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #e2e8f0; padding-top:15px; margin-top:auto;">
-                      <div>
-                          <div style="font-size:10px; color:#64748b; margin-bottom:2px; font-weight:700;">NGÂN SÁCH</div>
-                          <div style="font-size:14px; font-weight:800; color:#64748b;">Kín chỗ (3/3)</div>
-                      </div>
-                      <button class="btn" style="background:#f1f5f9; color:#94a3b8;" disabled>Đã đủ người</button>
-                  </div>
-             </div>
+                </div>
         </div>
       </div>
 
@@ -292,33 +323,19 @@
     </div>
     <div class="modal-body">
          <div class="pc-badge open" style="display:inline-block; margin-bottom:15px; font-size:11px; padding:6px 12px;">ĐANG MỞ ĐĂNG KÝ</div>
-         <h1 id="modal-title" style="font-size:24px; font-weight:800; color:#111827; margin-bottom:12px; line-height:1.3;">App Đặt Trà Sữa (Giao Diện Khách Hàng)</h1>
+         <h1 id="m-title" style="font-size:24px; font-weight:800; color:#111827; margin-bottom:12px; line-height:1.3;">...</h1>
          <div style="display:flex; gap:20px; font-size:13px; color:#4b5563; margin-bottom:30px; font-weight:600;">
-              <div><i class="far fa-building"></i> <span id="modal-company">FPT Software</span></div>
-              <div><i class="far fa-clock"></i> Thời lượng: 4 tuần</div>
+              <div><i class="far fa-building"></i> <span id="m-company">...</span></div>
          </div>
          
-         <h3 style="font-size:15px; font-weight:700; margin-bottom:12px; color:#111827;">Mô tả chung</h3>
-         <p style="font-size:14px; color:#4b5563; line-height:1.6; margin-bottom:25px;">Khách hàng của chúng tôi là một chuỗi nhượng quyền. Hệ thống hiện tại quá rườm rà. Nhiệm vụ của bạn là tái cấu trúc trải nghiệm người dùng theo các form yêu cầu đính kèm lúc nhận việc.</p>
-
-         <h3 style="font-size:15px; font-weight:700; margin-bottom:12px; color:#111827;">Yêu cầu (Deliverables)</h3>
-         <ul style="font-size:14px; color:#4b5563; line-height:1.6; padding-left:20px; margin-bottom:25px;">
-             <li style="margin-bottom:8px;">Bản phác thảo UX (User Flow).</li>
-             <li style="margin-bottom:8px;">Ít nhất 10 màn hình giao diện UI chính trên Figma/Code.</li>
-             <li style="margin-bottom:8px;">Prototype bản mềm có thể truyền tải đến đối tác.</li>
-         </ul>
-
-         <h3 style="font-size:15px; font-weight:700; margin-bottom:12px; color:#111827;">Kỹ năng yêu cầu</h3>
-         <div class="pc-tags" style="margin-bottom:30px;">
-             <span class="pc-tag">React / Figma</span>
-             <span class="pc-tag">Thiết kế UI/UX</span>
-         </div>
+         <ul style="list-style:none; display:flex; flex-direction:column; gap:15px; font-size:14px; color:#4b5563;">
+              <li><i class="far fa-calendar-alt" style="width:20px; color:var(--primary);"></i> Thời hạn: <b id="m-duration">...</b></li>
+              <li><i class="fas fa-coins" style="width:20px; color:var(--primary);"></i> Ngân sách: <b id="m-budget">...</b></li>
+              <li><i class="fas fa-tags" style="width:20px; color:var(--primary);"></i> Kỹ năng: <span id="m-tags">...</span></li>
+            </ul>
          
-         <div style="background:#f8fafc; border-radius:12px; padding:20px; border:1px solid #e2e8f0; border-left:4px solid #10b981;">
-             <div style="font-size:11px; font-weight:800; color:#64748b; margin-bottom:5px; letter-spacing:0.5px;">QUYỀN LỢI TÀI CHÍNH</div>
-             <div style="font-size:20px; font-weight:800; color:#10b981; margin-bottom:12px;">Theo Thỏa thuận</div>
-             <div style="font-size:13px; color:#4b5563; line-height:1.5;">Đánh giá dựa trên portfolio và năng lực phân tích khi phỏng vấn qua Zoom với ban chuyên môn.</div>
-         </div>
+         <h3 style="font-size:15px; font-weight:700; margin-top:25px; margin-bottom:12px; color:#111827;">Mô tả chung</h3>
+         <p id="m-desc" style="font-size:14px; color:#4b5563; line-height:1.6; margin-bottom:25px;">...</p>
     </div>
     <div class="modal-footer">
          <button class="btn btn-outline" style="padding:12px 24px; font-size:14px;" onclick="closeProjectModal()">Bỏ qua</button>
@@ -330,7 +347,24 @@
 <div id="modal-backdrop" onclick="closeProjectModal()"></div>
 
 <script>
-function switchTab(tabId) {
+  function toggleUserMenu() {
+    document.getElementById('userDropdownMenu').classList.toggle('show');
+  }
+
+  // Close dropdown when clicking outside
+  window.onclick = function(event) {
+    if (!event.target.matches('#userAvatarBtn') && !event.target.closest('#userAvatarBtn')) {
+      const dropdowns = document.getElementsByClassName("dropdown-menu");
+      for (let i = 0; i < dropdowns.length; i++) {
+        const openDropdown = dropdowns[i];
+        if (openDropdown.classList.contains('show')) {
+          openDropdown.classList.remove('show');
+        }
+      }
+    }
+  }
+
+  function switchTab(tabId) {
     document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
     
@@ -338,14 +372,13 @@ function switchTab(tabId) {
     document.getElementById('nav-' + tabId).classList.add('active');
 }
 
-function openProjectModal(id) {
-    if (id === '1') {
-        document.getElementById('modal-title').innerText = 'Phát triển Landing Page quảng bá Khóa học E-learning';
-        document.getElementById('modal-company').innerText = 'VNG Corp - ZaloPay';
-    } else {
-        document.getElementById('modal-title').innerText = 'App Đặt Trà Sữa (Giao Diện Khách Hàng)';
-        document.getElementById('modal-company').innerText = 'FPT Software';
-    }
+function openProjectModal(title, company, desc, tags, duration, budget) {
+    document.getElementById('m-title').innerText = title;
+    document.getElementById('m-company').innerText = company;
+    document.getElementById('m-desc').innerText = desc;
+    document.getElementById('m-tags').innerText = tags;
+    document.getElementById('m-duration').innerText = duration || 'Chưa xác định';
+    document.getElementById('m-budget').innerText = budget || 'Thỏa thuận';
     
     document.getElementById('modal-backdrop').style.display = 'block';
     setTimeout(() => {
