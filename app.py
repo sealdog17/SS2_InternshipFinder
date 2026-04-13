@@ -250,8 +250,7 @@ def logout():
 @app.route('/profile')
 @login_required
 def profile():
-    user = User.query.get(session['user_id'])
-    return render_template('profile.html', user=user)
+    return redirect(url_for('edit_profile'))
 
 @app.route('/profile/edit', methods=['GET', 'POST'])
 @login_required
