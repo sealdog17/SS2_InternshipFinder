@@ -230,6 +230,22 @@
         margin-bottom: 50px;
     }
     #fullscreen-content .cv-paper { box-shadow: none; border: none; margin: 0; }
+ 
+    /* Dropdown Styles for Download Button */
+    .download-dropdown { position: relative; flex: 1; display: flex; }
+    .dropdown-menu {
+        position: absolute; bottom: 100%; right: 0; margin-bottom: 10px;
+        background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        display: none; flex-direction: column; min-width: 130px; z-index: 1000;
+        overflow: hidden; border: 1px solid #f1f5f9;
+    }
+    .download-dropdown:hover .dropdown-menu { display: flex; }
+    .dropdown-item {
+        padding: 12px 16px; font-size: 13px; font-weight: 600; color: #475569;
+        display: flex; align-items: center; gap: 10px; transition: 0.2s; cursor: pointer;
+    }
+    .dropdown-item:hover { background: #f8fafc; color: var(--primary); }
+    .dropdown-item i { width: 16px; text-align: center; }
   </style>
 </head>
 <body>
@@ -331,7 +347,13 @@
                          <div class="score-label" style="font-size:11px; color:#64748b;">Cập nhật: {{ cv.created_at.strftime('%d/%m/%Y %H:%M') }}</div>
                          <div style="display:flex; gap:8px; margin-top:20px;">
                              <button type="button" class="btn btn-primary flex-1" onclick="loadCv('{{ cv.id }}')">Sửa</button>
-                             <button type="button" class="btn btn-outline flex-1" onclick="exportPdfSpecific('{{ cv.id }}')"><i class="fas fa-download"></i></button>
+                             <div class="download-dropdown">
+                                 <button type="button" class="btn btn-outline flex-1"><i class="fas fa-download"></i></button>
+                                 <div class="dropdown-menu">
+                                     <div class="dropdown-item" onclick="exportPdfSpecific('{{ cv.id }}')"><i class="fas fa-file-pdf" style="color:#ef4444;"></i> Tải PDF</div>
+                                     <div class="dropdown-item" onclick="handleExportImageFromList('{{ cv.id }}')"><i class="fas fa-image" style="color:#3b82f6;"></i> Tải PNG</div>
+                                 </div>
+                             </div>
                              <button type="button" class="btn btn-light" style="padding:10px; color:#ef4444;" onclick="deleteCv('{{ cv.id }}')"><i class="fas fa-trash"></i></button>
                          </div>
                     </div>
@@ -613,14 +635,23 @@
       syncPreview();
   }
 
-  function syncPreview() {
-      document.querySelectorAll('[data-sync]').forEach(input => {
-          const targetClass = input.getAttribute('data-sync');
-          const value = input.value || input.placeholder;
-          document.querySelectorAll('.' + targetClass).forEach(target => {
-              target.innerText = value;
+  function syncPreview(data = null) {
+      if (data) {
+          // Populate fields from data object
+          for (const [key, val] of Object.entries(data)) {
+              const targets = document.querySelectorAll('.preview-' + key);
+              targets.forEach(t => t.innerText = val || '');
+          }
+          if (data.cv_picture) document.getElementById('preview-avatar').style.backgroundImage = "url('" + data.cv_picture + "')";
+      } else {
+          document.querySelectorAll('[data-sync]').forEach(input => {
+              const targetClass = input.getAttribute('data-sync');
+              const value = input.value || input.placeholder;
+              document.querySelectorAll('.' + targetClass).forEach(target => {
+                  target.innerText = value;
+              });
           });
-      });
+      }
 
       const id = selectedTemplate;
       document.getElementById('preview-white').style.display = (id === 'white' ? 'block' : 'none');
@@ -724,7 +755,6 @@
 
   function handleExportImage() {
        const area = document.getElementById('cv-render-area');
-       // Hide any temporary elements if needed, then capture
        html2canvas(area, {
            scale: 2, // High resolution
            useCORS: true, 
@@ -736,6 +766,21 @@
            link.click();
        });
    }
+
+  function handleExportImageFromList(cvId) {
+      fetch('/profile/cv/load/' + cvId)
+      .then(r => r.json())
+      .then(data => {
+          if (data.success) {
+              const newTpl = data.cv.template_name === 'minimalist' ? 'white' : data.cv.template_name.toLowerCase();
+              selectedTemplate = newTpl;
+              syncPreview(data.cv);
+              setTimeout(() => {
+                  handleExportImage();
+              }, 800);
+          }
+      });
+  }
 
   document.addEventListener('DOMContentLoaded', function() {
       // Initialize dynamic background images from data-bg to avoid linter issues
