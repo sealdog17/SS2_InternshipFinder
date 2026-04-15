@@ -455,6 +455,7 @@
                   <button type="button" class="btn btn-outline" onclick="showStep(5)">Đổi mẫu</button>
                   <button type="button" id="btn-save-cv" class="btn btn-primary" style="background:#10b981; border:none;" onclick="handleSaveCv()"><i class="fas fa-save"></i> Lưu hồ sơ</button>
                   <button type="button" class="btn btn-primary" onclick="handleExportPdf()"><i class="fas fa-download"></i> Tải PDF</button>
+                  <button type="button" class="btn btn-outline" style="background:#f8fafc; border-color:#e2e8f0; color:#475569;" onclick="handleExportImage()"><i class="fas fa-image"></i> Tải ảnh</button>
               </div>
           </div>
           <div class="preview-body">
@@ -534,6 +535,7 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <!-- Fullscreen Preview Modal -->
 <div id="fullscreen-modal" class="fullscreen-modal">
     <button class="close-fullscreen" onclick="closeFullscreen()">&times;</button>
@@ -719,6 +721,21 @@
   function exportPdfSpecific(cvId) {
       window.location.href = '{{ url_for("export_pdf") }}?cv_id=' + cvId;
   }
+
+  function handleExportImage() {
+       const area = document.getElementById('cv-render-area');
+       // Hide any temporary elements if needed, then capture
+       html2canvas(area, {
+           scale: 2, // High resolution
+           useCORS: true, 
+           backgroundColor: "#ffffff"
+       }).then(canvas => {
+           const link = document.createElement('a');
+           link.download = `CV_${document.querySelector('.preview-name').innerText}.png`;
+           link.href = canvas.toDataURL('image/png');
+           link.click();
+       });
+   }
 
   document.addEventListener('DOMContentLoaded', function() {
       // Initialize dynamic background images from data-bg to avoid linter issues

@@ -38,10 +38,11 @@ Luôn đảm bảo sự đồng bộ **Pixel-Perfect** giữa: Trình duyệt, X
 *   **Fullscreen Scroll:** Sử dụng `flex-direction: column` và `align-items: center` để tránh lỗi kẹt cuộn khi dùng `justify-content: center`.
 *   **Times New Roman:** Font này phải được đăng ký trong ReportLab từ `/static/fonts/` để hỗ trợ tiếng Việt sắc nét.
 
-### 📄 Xuất PDF (ReportLab)
+### 📄 Xuất File (PDF & PNG)
 *   **Sidebar Bleed:** Đặt lề doc bằng 0, dùng `canvas.rect` cho sidebar.
 *   **Spacing:** Name `spaceAfter=18`, Contact `spaceAfter=30` để tránh dính chữ.
 *   **Headers:** Sử dụng `HRFlowable` để tạo các đường kẻ phân cách section mượt mà.
+*   **Export PNG:** Sử dụng thư viện `html2canvas` với `scale: 2` để cho phép người dùng tải CV dưới dạng ảnh chất lượng cao.
 
 ### ⚙️ Logic Hệ thống
 *   **Time Tracking:** Cập nhật `created_at` trong route `save_cv` theo giờ Việt Nam.
