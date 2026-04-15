@@ -465,15 +465,14 @@ def export_pdf():
         sidebar_items = []
         main_items = []
 
-        # Sidebar: Profile Picture
+        # Sidebar: Profile Picture - Increased size to match Web prominence
         pic = user.cv_picture or user.picture
         if pic:
             try:
                 img_path = pic.replace('/static/', 'static/').split('?')[0]
                 if os.path.exists(img_path):
-                    # Slightly larger image for the PDF sidebar
-                    sidebar_items.append(Image(img_path, width=2.1*inch, height=2.6*inch))
-                    sidebar_items.append(Spacer(1, 0.35*inch))
+                    sidebar_items.append(Image(img_path, width=2.4*inch, height=2.4*inch))
+                    sidebar_items.append(Spacer(1, 0.4*inch))
             except:
                 pass
 
@@ -488,7 +487,7 @@ def export_pdf():
             return HRFlowable(width="100%", thickness=1, color=colors.HexColor('#60a5fa'), spaceAfter=15)
 
         side_section_style = ParagraphStyle('PdfSideSec', fontName=font_bold, fontSize=13, textColor=colors.white, spaceBefore=25, spaceAfter=8)
-        side_text_style = ParagraphStyle('PdfSideText', fontName=font_main, fontSize=10.5, textColor=colors.HexColor('#eff6ff'), leading=18)
+        side_text_style = ParagraphStyle('PdfSideText', fontName=font_main, fontSize=10, textColor=colors.HexColor('#eff6ff'), leading=18)
         
         sidebar_items.append(Paragraph("LIÊN HỆ", side_section_style))
         sidebar_items.append(get_divider())
@@ -511,30 +510,26 @@ def export_pdf():
             sidebar_items.append(Paragraph(cv_data['education'], side_text_style))
 
         # Main Column items
-        main_section_style = ParagraphStyle('PdfMainSec', fontName=font_bold, fontSize=16, textColor=colors.HexColor('#1e40af'), spaceBefore=25, spaceAfter=15)
+        main_section_style = ParagraphStyle('PdfMainSec', fontName=font_bold, fontSize=15, textColor=colors.HexColor('#1e40af'), letterSpacing=1.5)
+        main_text_style = ParagraphStyle('PdfMainText', fontName=font_main, fontSize=12, textColor=colors.HexColor('#1f2937'), leading=20)
         
-        def get_main_divider():
-            # Matches the border-bottom / divider effect in the web view
-            return HRFlowable(width="100%", thickness=1, color=colors.HexColor('#e5e7eb'), spaceAfter=15, spaceBefore=-10)
+        def add_main_section(title, content):
+            if content:
+                # Table-based header to achieve "Text ———" effect (matches Web flex)
+                header_table = Table([[Paragraph(title.upper(), main_section_style), ""]], colWidths=[None, 3.5*inch])
+                header_table.setStyle(TableStyle([
+                    ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+                    ('LINEBELOW', (1,0), (1,0), 1, colors.HexColor('#e2e8f0')), # The horizontal line after text
+                    ('LEFTPADDING', (0,0), (-1,-1), 0),
+                    ('BOTTOMPADDING', (0,0), (-1,-1), 15),
+                ]))
+                main_items.append(Spacer(1, 0.3*inch))
+                main_items.append(header_table)
+                main_items.append(Paragraph(content.replace('\n', '<br/>'), main_text_style))
 
-        main_text_style = ParagraphStyle('PdfMainText', fontName=font_main, fontSize=12.5, textColor=colors.HexColor('#1f2937'), leading=22)
-        
-        if cv_data['bio']:
-            main_items.append(Paragraph("GIỚI THIỆU", main_section_style))
-            main_items.append(get_main_divider())
-            main_items.append(Paragraph(cv_data['bio'], main_text_style))
-        
-        if cv_data['experience']:
-            main_items.append(Paragraph("KINH NGHIỆM", main_section_style))
-            main_items.append(get_main_divider())
-            for exp in cv_data['experience'].split('\n'):
-                if exp.strip():
-                    main_items.append(Paragraph(exp.strip(), main_text_style))
-
-        if cv_data['languages']:
-            main_items.append(Paragraph("NGOẠI NGỮ", main_section_style))
-            main_items.append(get_main_divider())
-            main_items.append(Paragraph(cv_data['languages'], main_text_style))
+        add_main_section("GIỚI THIỆU", cv_data['bio'])
+        add_main_section("KINH NGHIỆM", cv_data['experience'])
+        add_main_section("NGOẠI NGỮ", cv_data['languages'])
 
         data = [[sidebar_items, main_items]]
         # Sidebar 3 inch, Main 5.27 inch (Total A4 width is 8.27 inch)
