@@ -1,4 +1,5 @@
 import os
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 import secrets
 from datetime import datetime, timedelta, date, timezone
 from io import BytesIO
@@ -35,7 +36,7 @@ db = SQLAlchemy(app)
 
 # ===================== HELPERS =====================
 def get_vietnam_time():
-    """Trả về thời gian hiện tại theo múi giờ Việt Nam (GMT+7)"""
+    """Returns current time in Vietnam timezone (GMT+7)"""
     return datetime.now(timezone(timedelta(hours=7)))
 
 # ===================== MODELS =====================
@@ -146,7 +147,7 @@ def login():
             next_url = session.pop('next_url', url_for('job_list'))  # thay dashboard bằng job_list
             return redirect(next_url)
         else:
-            flash('Sai tên đăng nhập hoặc mật khẩu', 'danger')
+            flash('Incorrect username or password', 'danger')
             return redirect(url_for('login'))
     return render_template('login.html')
 
@@ -164,18 +165,18 @@ def register():
         address = request.form.get('address')
 
         if password != confirm_password:
-            flash('Mật khẩu xác nhận không khớp', 'danger')
+            flash('Passwords do not match', 'danger')
             return redirect(url_for('register'))
 
         if not re.search(r'[A-Z]', password) or not re.search(r'\d', password) or not re.search(r'[\W_]', password):
-            flash('Mật khẩu phải chứa ít nhất 1 chữ in hoa, 1 chữ số và 1 ký tự đặc biệt', 'danger')
+            flash('Password must contain at least 1 uppercase letter, 1 digit, and 1 special character', 'danger')
             return redirect(url_for('register'))
 
         if User.query.filter_by(username=username).first():
-            flash('Tên đăng nhập đã tồn tại', 'danger')
+            flash('Username already exists', 'danger')
             return redirect(url_for('register'))
         if User.query.filter_by(email=email).first():
-            flash('Email đã được sử dụng', 'danger')
+            flash('Email is already in use', 'danger')
             return redirect(url_for('register'))
 
         user = User(
@@ -195,7 +196,7 @@ def register():
         session['user_email'] = user.email
         session['user_picture'] = None
 
-        flash('Đăng ký thành công!', 'success')
+        flash('Registration successful!', 'success')
         return redirect(url_for('job_list'))  # thay dashboard
 
     return render_template('register.html')
@@ -203,14 +204,10 @@ def register():
 @app.route('/google-login')
 def google_login():
     redirect_uri = url_for('callback', _external=True)
-    state = secrets.token_urlsafe(16)
-    session['oauth_state'] = state
-    return google.authorize_redirect(redirect_uri, state=state)
+    return google.authorize_redirect(redirect_uri)
 
 @app.route('/google/callback')
 def callback():
-    if request.args.get('state') != session.get('oauth_state'):
-        return 'Lỗi xác thực (State mismatch) - Vui lòng thử lại', 400
     try:
         token = google.authorize_access_token()
         user_info = google.get('https://www.googleapis.com/oauth2/v3/userinfo').json()
@@ -222,13 +219,22 @@ def callback():
 
         user = User.query.filter_by(google_id=google_id).first()
         if not user:
-            user = User(
-                google_id=google_id,
-                email=email,
-                name=name,
-                picture=picture
-            )
-            db.session.add(user)
+            # Check if a user with the same email already exists (e.g., registered via password)
+            user = User.query.filter_by(email=email).first()
+            if user:
+                # Link the Google account to the existing email account
+                user.google_id = google_id
+                if not user.picture:
+                    user.picture = picture
+            else:
+                # Create a completely new user
+                user = User(
+                    google_id=google_id,
+                    email=email,
+                    name=name,
+                    picture=picture
+                )
+                db.session.add(user)
             db.session.commit()
 
         session.permanent = True
@@ -243,7 +249,7 @@ def callback():
         return redirect(next_url)
 
     except Exception as e:
-        return f"Đã xảy ra lỗi: {str(e)}", 500
+        return f"An error occurred: {str(e)}", 500
 
 
 
@@ -283,9 +289,49 @@ def settings():
             db.session.commit()
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return jsonify({'success': True, 'picture_url': user.picture})
-            flash('Cập nhật ảnh đại diện thành công!', 'success')
+            flash('Profile picture updated successfully!', 'success')
         return redirect(url_for('settings'))
     return render_template('settings.html', user=user)
+
+@app.route('/settings/update_password', methods=['POST'])
+@login_required
+def update_password():
+    user = User.query.get(session['user_id'])
+    current_password = request.form.get('current_password')
+    new_password = request.form.get('new_password')
+    confirm_password = request.form.get('confirm_password')
+
+    if not user.check_password(current_password):
+        flash('Incorrect current password.', 'danger')
+        return redirect(url_for('settings'))
+    
+    if new_password != confirm_password:
+        flash('New passwords do not match.', 'danger')
+        return redirect(url_for('settings'))
+        
+    if not re.search(r'[A-Z]', new_password) or not re.search(r'\d', new_password) or not re.search(r'[\W_]', new_password):
+        flash('Password must contain at least 1 uppercase letter, 1 digit, and 1 special character.', 'danger')
+        return redirect(url_for('settings'))
+
+    user.set_password(new_password)
+    db.session.commit()
+    flash('Password updated successfully!', 'success')
+    return redirect(url_for('settings'))
+
+@app.route('/settings/delete_account', methods=['POST'])
+@login_required
+def delete_account():
+    user = User.query.get(session['user_id'])
+    # Optional: Delete all related CVs (if cascade delete is not set on DB level)
+    cvs = CV.query.filter_by(user_id=user.id).all()
+    for cv in cvs:
+        db.session.delete(cv)
+    
+    db.session.delete(user)
+    db.session.commit()
+    session.clear()
+    flash('Your account has been successfully deleted.', 'success')
+    return redirect(url_for('index'))
 
 # --------------------- PROFILE & CV ---------------------
 @app.route('/profile')
@@ -330,17 +376,17 @@ def edit_profile():
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return jsonify({'success': True})
             
-        flash('Cập nhật hồ sơ thành công!', 'success')
+        flash('Profile updated successfully!', 'success')
         return redirect(url_for('edit_profile'))
     
     cvs = CV.query.filter_by(user_id=user.id).order_by(CV.created_at.desc()).all()
     for cv in cvs:
         try:
             data = json.loads(cv.content)
-            cv.parsed_title = data.get('job_title') or f"Phiên bản {cv.version}"
+            cv.parsed_title = data.get('job_title') or f"Version {cv.version}"
             cv.template_name = "Blue" if data.get('template') in ['blue', 'contemporary'] else "White"
         except:
-            cv.parsed_title = f"Phiên bản {cv.version}"
+            cv.parsed_title = f"Version {cv.version}"
             cv.template_name = "White"
 
     return render_template('edit_profile.html', user=user, cvs=cvs)
@@ -393,6 +439,24 @@ def load_cv(cv_id):
     data = json.loads(cv.content)
     return jsonify(data)
 
+@app.route('/profile/cv/list')
+@login_required
+def list_cvs():
+    user_id = session['user_id']
+    cvs = CV.query.filter_by(user_id=user_id).order_by(CV.created_at.desc()).all()
+    result = []
+    for cv in cvs:
+        try:
+            data = json.loads(cv.content)
+            title = data.get('job_title') or data.get('name') or f"Version {cv.version}"
+            tpl_raw = data.get('template', 'white')
+            template = 'Blue' if tpl_raw in ['blue', 'contemporary'] else 'White'
+        except Exception:
+            title = f"Version {cv.version}"
+            template = 'White'
+        result.append({'id': cv.id, 'title': title, 'template': template})
+    return jsonify(result)
+
 @app.route('/profile/export-pdf')
 @login_required
 def export_pdf():
@@ -427,7 +491,7 @@ def export_pdf():
     from reportlab.pdfbase import pdfmetrics
     from reportlab.pdfbase.ttfonts import TTFont
     
-    # Register Times New Roman for Vietnamese support from local fonts folder
+    # Register Times New Roman for display support from local fonts folder
     try:
         font_path = os.path.join(app.root_path, 'static', 'fonts', 'times.ttf')
         font_path_bold = os.path.join(app.root_path, 'static', 'fonts', 'timesbd.ttf')
@@ -480,7 +544,7 @@ def export_pdf():
         job_style = ParagraphStyle('PdfBlueJob', fontName=font_main, fontSize=12, textColor=colors.HexColor('#bfdbfe'), alignment=TA_CENTER, spaceAfter=40, letterSpacing=2)
         
         sidebar_items.append(Paragraph(cv_data['name'].upper(), name_style))
-        sidebar_items.append(Paragraph((cv_data['job_title'] or 'Ứng viên').upper(), job_style))
+        sidebar_items.append(Paragraph((cv_data['job_title'] or 'Candidate').upper(), job_style))
         
         from reportlab.platypus import HRFlowable
         def get_divider():
@@ -489,23 +553,23 @@ def export_pdf():
         side_section_style = ParagraphStyle('PdfSideSec', fontName=font_bold, fontSize=13, textColor=colors.white, spaceBefore=25, spaceAfter=8)
         side_text_style = ParagraphStyle('PdfSideText', fontName=font_main, fontSize=10, textColor=colors.HexColor('#eff6ff'), leading=18)
         
-        sidebar_items.append(Paragraph("LIÊN HỆ", side_section_style))
+        sidebar_items.append(Paragraph("CONTACT", side_section_style))
         sidebar_items.append(get_divider())
         sidebar_items.append(Paragraph(f"<b>Email:</b><br/>{cv_data['email']}", side_text_style))
         if cv_data['phone']:
-            sidebar_items.append(Paragraph(f"<b>Điện thoại:</b><br/>{cv_data['phone']}", side_text_style))
+            sidebar_items.append(Paragraph(f"<b>Phone:</b><br/>{cv_data['phone']}", side_text_style))
         if cv_data['address']:
-            sidebar_items.append(Paragraph(f"<b>Địa chỉ:</b><br/>{cv_data['address']}", side_text_style))
+            sidebar_items.append(Paragraph(f"<b>Address:</b><br/>{cv_data['address']}", side_text_style))
         
         if cv_data['skills']:
-            sidebar_items.append(Paragraph("KỸ NĂNG", side_section_style))
+            sidebar_items.append(Paragraph("SKILLS", side_section_style))
             sidebar_items.append(get_divider())
             for s in cv_data['skills'].split(','):
                 if s.strip():
                     sidebar_items.append(Paragraph(f"• {s.strip()}", side_text_style))
         
         if cv_data['education']:
-            sidebar_items.append(Paragraph("HỌC VẤN", side_section_style))
+            sidebar_items.append(Paragraph("EDUCATION", side_section_style))
             sidebar_items.append(get_divider())
             sidebar_items.append(Paragraph(cv_data['education'], side_text_style))
 
@@ -529,9 +593,9 @@ def export_pdf():
                 main_items.append(header_table)
                 main_items.append(Paragraph(content.replace('\n', '<br/>'), main_text_style))
 
-        add_main_section("GIỚI THIỆU", cv_data['bio'])
-        add_main_section("KINH NGHIỆM", cv_data['experience'])
-        add_main_section("NGOẠI NGỮ", cv_data['languages'])
+        add_main_section("ABOUT ME", cv_data['bio'])
+        add_main_section("EXPERIENCE", cv_data['experience'])
+        add_main_section("LANGUAGES", cv_data['languages'])
 
         data = [[sidebar_items, main_items]]
         # Sidebar 3 inch, Main 5.27 inch (Total A4 width is 8.27 inch)
@@ -581,11 +645,11 @@ def export_pdf():
                 story.append(HRFlowable(width="100%", thickness=0.8, color=colors.HexColor('#e5e7eb'), spaceAfter=15, spaceBefore=-8))
                 story.append(Paragraph(content.replace('\n', '<br/>'), white_text_style))
 
-        add_white_section("GIỚI THIỆU", cv_data['bio'])
-        add_white_section("KINH NGHIỆM", cv_data['experience'])
-        add_white_section("HỌC VẤN", cv_data['education'])
-        add_white_section("KỸ NĂNG", cv_data['skills'])
-        add_white_section("NGOẠI NGỮ", cv_data['languages'])
+        add_white_section("ABOUT ME", cv_data['bio'])
+        add_white_section("EXPERIENCE", cv_data['experience'])
+        add_white_section("EDUCATION", cv_data['education'])
+        add_white_section("SKILLS", cv_data['skills'])
+        add_white_section("LANGUAGES", cv_data['languages'])
 
         doc.build(story)
 
@@ -621,10 +685,10 @@ def job_detail(job_id):
     job = Job.query.get_or_404(job_id)
     return render_template('job_detail.html', job=job)
 
-# ===================== TẠO DATABASE & DỮ LIỆU MẪU =====================
+# ===================== CREATE DATABASE & SAMPLE DATA =====================
 with app.app_context():
     db.create_all()
-    # Tự động thêm cột cv_picture nếu chưa tồn tại (cho SQLite)
+    # Automatically add cv_picture column if not exists (for SQLite)
     try:
         from sqlalchemy import text
         db.session.execute(text('ALTER TABLE users ADD COLUMN cv_picture VARCHAR(200)'))
@@ -638,10 +702,10 @@ with app.app_context():
             Job(
                 title="Frontend Developer Intern",
                 company="Viettel Solutions",
-                description="Phát triển giao diện ReactJS, làm việc với đội ngũ product.",
+                description="Develop ReactJS interfaces, work with the product team.",
                 required_skills="React, HTML/CSS, JavaScript",
-                salary_range="3-5 triệu",
-                location="Hà Nội",
+                salary_range="3-5 million",
+                location="Hanoi",
                 job_type="internship",
                 industry="IT",
                 application_deadline=date(2025, 12, 31),
@@ -651,10 +715,10 @@ with app.app_context():
             Job(
                 title="Part-time Marketing Assistant",
                 company="VinGroup",
-                description="Hỗ trợ chiến dịch marketing, viết content, thiết kế ảnh cơ bản.",
-                required_skills="Canva, Viết content, Sử dụng mạng xã hội",
-                salary_range="2-3 triệu",
-                location="Hồ Chí Minh",
+                description="Support marketing campaigns, content writing, basic graphic design.",
+                required_skills="Canva, Content writing, Social media management",
+                salary_range="2-3 million",
+                location="Ho Chi Minh City",
                 job_type="part-time",
                 industry="Marketing",
                 application_deadline=date(2025, 12, 15),
@@ -664,10 +728,10 @@ with app.app_context():
             Job(
                 title="Data Science Intern",
                 company="FPT Software",
-                description="Hỗ trợ phân tích dữ liệu, xây dựng mô hình ML.",
+                description="Support data analysis, build ML models.",
                 required_skills="Python, Pandas, Scikit-learn",
-                salary_range="4-6 triệu",
-                location="Đà Nẵng",
+                salary_range="4-6 million",
+                location="Da Nang",
                 job_type="internship",
                 industry="IT",
                 application_deadline=date(2025, 12, 20),
@@ -677,7 +741,7 @@ with app.app_context():
         ]
         db.session.add_all(sample_jobs)
         db.session.commit()
-        print("✅ Đã thêm 3 công việc mẫu.")
+        print("✅ Added 3 sample jobs.")
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

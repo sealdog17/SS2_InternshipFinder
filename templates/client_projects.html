@@ -1,233 +1,186 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dự án khách hàng - InternshipFinder</title>
+  <title>Client Projects - InternshipFinder</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
       --primary: #1964d3;
-      --primary-hover: #1555b5;
-      --bg-color: #f8fafc;
-      --card-bg: #ffffff;
-      --text-main: #1f2937;
-      --text-muted: #64748b;
-      --border: #e5e7eb;
-      --sidebar-width: 260px;
-      --navbar-height: 110px;
+      --primary-soft: #eff6ff;
+      --bg: #f8fafc;
+      --white: #ffffff;
+      --border: #e2e8f0;
+      --text: #111827;
+      --muted: #64748b;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Inter', sans-serif; background: var(--bg-color); color: var(--text-main); overflow-y: scroll; overflow-x: hidden; height: 100vh;}
-    
-    .app-frame { height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); padding-top: 80px; }
 
     /* Navbar */
-    .navbar { height: var(--navbar-height); background: #ffffff; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 40px; flex-shrink: 0; }
-    .nav-left { display: flex; align-items: center; text-decoration: none;}
-    
-    .nav-center { display: flex; gap: 30px; height: 100%; align-items: center; }
-    .nav-link { text-decoration: none; color: #4b5563; font-size: 14px; font-weight: 500; height: 100%; display: flex; align-items: center; position: relative; }
-    .nav-link.active { color: var(--primary); font-weight: 600; }
-    .nav-link.active::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: var(--primary); border-top-left-radius: 3px; border-top-right-radius: 3px; }
-    
-    .nav-right { display: flex; gap: 20px; align-items: center; }
-    .icon-btn { color: #6b7280; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; text-decoration: none; }
-    .avatar { width: 32px; height: 32px; border-radius: 50%; background: #1f2937; color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; overflow: hidden; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
-    .avatar:hover { border-color: var(--primary); }
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0; height: 80px;
+      background: #ffffff; border-bottom: 1px solid #e5e7eb;
+      display: flex; justify-content: space-between; align-items: center; padding: 0 5%;
+      z-index: 1000;
+    }
+    .nav-left { display: flex; align-items: center; gap: 40px; }
+    .nav-logo img { height: 44px; display: block; }
+    .nav-center { display: flex; gap: 32px; }
+    .nav-link { 
+      text-decoration: none; color: var(--muted); font-size: 14px; font-weight: 500; 
+      transition: 0.2s; position: relative; padding: 28px 0;
+    }
+    .nav-link:hover { color: var(--primary); }
+    .nav-link.active { color: var(--primary); font-weight: 700; }
+    .nav-link.active::after {
+      content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px;
+      background: var(--primary); border-radius: 3px 3px 0 0;
+    }
+    .nav-right { display: flex; align-items: center; gap: 20px; }
+    .nav-icon { color: var(--muted); font-size: 18px; cursor: pointer; transition: 0.2s; }
+    .nav-icon:hover { color: var(--primary); }
+    .avatar { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; cursor: pointer; border: 1.5px solid var(--border); }
     .avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-    /* Dropdown UI */
-    .user-dropdown { position: relative; display: flex; align-items: center; }
-    .dropdown-menu { 
-      position: absolute; top: calc(100% + 15px); right: 0; width: 220px; 
-      background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
-      border: 1px solid var(--border); display: none; flex-direction: column; z-index: 1000; padding: 8px 0;
-      animation: slideIn 0.2s ease;
-    }
-    @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .dropdown-menu.show { display: flex; }
-    .menu-header { padding: 12px 20px; border-bottom: 1px solid #f1f5f9; margin-bottom: 8px; text-align: left;}
-    .menu-header strong { display: block; font-size: 14px; color: #111827; }
-    .menu-header span { font-size: 12px; color: #64748b; }
-    .dropdown-menu a { 
-      padding: 10px 20px; font-size: 13px; color: #4b5563; text-decoration: none; 
-      display: flex; align-items: center; gap: 10px; transition: 0.2s;
-    }
-    .dropdown-menu a i { width: 16px; text-align: center; font-size: 14px; color: #94a3b8; }
-    .dropdown-menu a:hover { background: #f8fafc; color: var(--primary); }
-    .menu-divider { height: 1px; background: #f1f5f9; margin: 8px 0; }
-
-    /* Layout */
-    .builder-container { display: flex; flex: 1; overflow: hidden; }
+    /* Main Container */
+    .main-container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
     
-    /* LEFT SIDEBAR */
-    .sidebar { width: var(--sidebar-width); background: #ffffff; border-right: 1px solid var(--border); padding: 30px 0; display: flex; flex-direction: column; flex-shrink: 0; }
-    .sidebar-header { padding: 0 24px 20px 30px; border-bottom: 1px solid #f8fafc; margin-bottom: 15px; }
-    .sidebar-header h2 { font-size: 16px; font-weight: 700; color: #1e3a8a; margin-bottom: 4px; display: flex; align-items: center; gap: 10px;}
-    .sidebar-header p { font-size: 11px; color: #64748b; font-weight: 600; padding-left: 26px; text-transform: uppercase; letter-spacing: 0.5px;}
+    .page-header { margin-bottom: 40px; }
+    .page-header h1 { font-size: 32px; font-weight: 800; color: #111827; margin-bottom: 12px; }
+    .page-header p { font-size: 16px; color: var(--muted); max-width: 700px; line-height: 1.6; }
 
-    .nav-menu { flex: 1; display: flex; flex-direction: column; }
-    .menu-item { display: flex; align-items: center; gap: 12px; padding: 12px 24px 12px 30px; cursor: pointer; color: #64748b; font-size: 13px; font-weight: 600; text-decoration: none; transition: 0.2s; margin: 0 12px; border-radius: 8px; }
-    .menu-item i { font-size: 14px; width: 20px; text-align: center; }
-    .menu-item:hover { color: #1e293b; background: #f8fafc; }
-    .menu-item.active { background: #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.05); color: var(--primary); font-weight: 700; border: 1px solid #e2e8f0; }
-    
-    .sidebar-footer { padding: 20px 30px; border-top: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 16px; margin-top: auto; }
-    .sidebar-footer a { color: #64748b; text-decoration: none; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 12px; }
-    .sidebar-footer a:hover { color: #1e293b; }
+    /* Search Bar */
+    .search-bar { 
+      background: white; padding: 12px; border-radius: 12px; 
+      border: 1px solid var(--border); display: flex; gap: 12px; 
+      margin-bottom: 40px; box-shadow: var(--shadow);
+    }
+    .search-bar .input-group { flex: 1; display: flex; align-items: center; gap: 12px; padding: 0 16px; }
+    .search-bar input { border: none; outline: none; width: 100%; font-size: 15px; font-family: inherit; color: var(--text); }
+    .search-bar select { 
+      padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border); 
+      outline: none; font-size: 14px; color: var(--muted); font-weight: 500; cursor: pointer; 
+    }
 
-    /* Main Content */
-    .main-content { flex: 1; overflow-y: auto; padding: 40px 50px; position: relative; background: var(--bg-color);}
-    .tab-pane { display: none; animation: fadeIn 0.3s; }
-    .tab-pane.active { display: block; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-    .page-header { margin-bottom: 35px; }
-    .page-header h1 { font-size: 26px; font-weight: 700; color: #111827; margin-bottom: 12px; letter-spacing: -0.5px; }
-    .page-header p { font-size: 15px; color: #64748b; max-width: 650px; line-height: 1.6; }
-
-    /* Explore Search */
-    .search-bar { background:white; padding:15px 20px; border-radius:12px; border:1px solid #e2e8f0; display:flex; gap:15px; margin-bottom: 25px; }
-    .search-bar .input-group { flex:1; display:flex; align-items:center; gap:10px; background:#f8fafc; padding:10px 15px; border-radius:8px; border: 1px solid #f1f5f9; }
-    .search-bar input { border:none; background:transparent; width:100%; outline:none; font-family:inherit; font-size:13px; font-weight: 500; }
-    .search-bar select { padding:10px 15px; border-radius:8px; border:1px solid #e2e8f0; outline:none; font-family:inherit; font-size:13px; color:#4b5563; font-weight: 500; cursor: pointer; }
+    /* Tabs Sync */
+    .tab-nav { display: flex; gap: 24px; margin-bottom: 32px; border-bottom: 1px solid var(--border); }
+    .tab-btn { 
+      padding: 12px 16px; font-size: 15px; font-weight: 600; color: var(--muted); 
+      cursor: pointer; border-bottom: 2px solid transparent; transition: 0.2s;
+    }
+    .tab-btn:hover { color: var(--primary); }
+    .tab-btn.active { color: var(--primary); border-color: var(--primary); }
 
     /* Project Cards */
-    .projects-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap:25px; }
+    .projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 24px; }
     .project-card { 
-      background:white; border:1px solid #eef2f6; border-radius:20px; padding:28px; 
-      transition:0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor:pointer; display: flex; 
-      flex-direction: column; position: relative; overflow: hidden;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+      background: white; border: 1px solid var(--border); border-radius: 16px; padding: 32px; 
+      transition: all 0.3s; cursor: pointer; position: relative; overflow: hidden;
     }
-    .project-card:hover { box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05), 0 10px 10px -5px rgba(0,0,0,0.02); border-color: #cbd5e1; transform: translateY(-5px); }
-    .project-card::before { content: ""; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--primary); opacity: 0; transition: 0.3s; }
-    .project-card:hover::before { opacity: 1; }
+    .project-card:hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(0,0,0,0.08); border-color: var(--primary); }
+    
+    .pc-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
+    .pc-logo { width: 52px; height: 52px; border-radius: 12px; background: #f8fafc; display: flex; align-items: center; justify-content: center; font-size: 24px; color: var(--primary); border: 1px solid var(--border); }
+    
+    .pc-badge { font-size: 10px; font-weight: 800; padding: 6px 14px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .pc-badge.open { color: #10b981; background: #ecfdf5; }
+    .pc-badge.closed { color: #ef4444; background: #fef2f2; }
+    .pc-badge.active { color: #f59e0b; background: #fffbeb; }
 
-    .pc-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
-    .pc-logo { width: 48px; height: 48px; border-radius: 12px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--primary); }
+    .pc-title { font-size: 20px; font-weight: 800; color: #111827; margin: 0 0 8px; line-height: 1.3; }
+    .pc-company { color: var(--primary); font-size: 15px; margin-bottom: 20px; font-weight: 700; display: block; }
     
-    .pc-badge { font-size:10px; font-weight:800; padding:5px 12px; border-radius:12px; letter-spacing: 0.5px; text-transform: uppercase; }
-    .pc-badge.open { color:#10b981; background:#ecfdf5; }
-    .pc-badge.closed { color:#ef4444; background:#fef2f2; }
-    .pc-badge.active { color:#f59e0b; background:#fffbeb; }
-
-    .pc-title { font-size:18px; font-weight:700; color:#111827; margin: 0 0 8px; line-height:1.4; }
-    .pc-company { color:#64748b; font-size:14px; margin-bottom:15px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-    .pc-company i { color: #94a3b8; font-size: 14px; }
+    .pc-desc { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 24px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     
-    .pc-desc { font-size:14px; color:#4b5563; line-height:1.6; margin-bottom:20px; flex: 1; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-    
-    .pc-meta { display: flex; gap: 15px; margin-bottom: 20px; padding: 12px 0; border-top: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9; }
-    .pc-meta-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #64748b; font-weight: 500; }
+    .pc-meta { display: flex; gap: 20px; margin-bottom: 24px; padding-top: 20px; border-top: 1px solid #f1f5f9; }
+    .pc-meta-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); font-weight: 500; }
     .pc-meta-item i { color: #94a3b8; }
 
-    .pc-tags { display:flex; gap:8px; flex-wrap:wrap; }
-    .pc-tag { font-size:11px; background:#f1f5f9; padding:4px 12px; border-radius:6px; font-weight:600; color:#475569; transition: 0.2s; }
-    .pc-card:hover .pc-tag { background: #e2e8f0; }
+    .pc-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+    .pc-tag { font-size: 12px; background: #f1f5f9; padding: 6px 14px; border-radius: 20px; font-weight: 600; color: #64748b; }
 
-    .btn { padding: 9px 20px; border-radius: 8px; font-weight: 600; font-size: 12px; cursor: pointer; border: none; transition: 0.2s; font-family: inherit; }
-    .btn-primary { background: var(--primary); color: white; }
-    .btn-primary:hover { background: var(--primary-hover); }
-    .btn-outline { background: white; border: 1px solid #e5e7eb; color: var(--primary); }
-    .btn-outline:hover { background: #f8fafc; }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; animation: fadeIn 0.3s; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-    /* Modal */
-    #project-modal { position:fixed; top:0; right:-600px; width:550px; height:100vh; background:white; z-index:1001; box-shadow:-5px 0 30px rgba(0,0,0,0.1); transition:0.3s ease; display:flex; flex-direction:column; }
-    #modal-backdrop { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:1000; display:none; opacity:0; transition:0.3s ease; }
+    /* Modal Styling Sync */
+    #project-modal { position: fixed; top: 0; right: -600px; width: 550px; height: 100vh; background: white; z-index: 2001; box-shadow: -10px 0 50px rgba(0,0,0,0.1); transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; }
+    #project-modal.open { right: 0; }
+    #modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); z-index: 2000; display: none; opacity: 1; }
     
-    .modal-header { padding:25px 30px; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; }
-    .modal-body { flex:1; overflow-y:auto; padding:30px; }
-    .modal-footer { padding:20px 30px; border-top:1px solid #e2e8f0; background:#f8fafc; display:flex; gap:15px; justify-content:flex-end; }
+    .modal-header { padding: 32px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .modal-body { flex: 1; overflow-y: auto; padding: 32px; }
+    .modal-footer { padding: 24px 32px; border-top: 1px solid var(--border); background: #f8fafc; display: flex; gap: 16px; justify-content: flex-end; }
+    
+    .btn { padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; border: none; transition: 0.2s; font-family: inherit; }
+    .btn-primary { background: #032d84; color: white; }
+    .btn-primary:hover { background: #021f5c; }
   </style>
 </head>
 <body>
 
-<div class="app-frame">
   <!-- Navbar -->
   <nav class="navbar">
-    <a href="{{ url_for('job_list') }}" class="nav-left">
-      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" style="height: 85px; vertical-align: middle;">
-    </a>
-    
-    <div class="nav-center">
-      <a href="{{ url_for('job_list') }}" class="nav-link">Tổng quan</a>
-      <a href="{{ url_for('profile') }}" class="nav-link">Hồ sơ của tôi</a>
-      <a href="{{ url_for('client_projects') }}" class="nav-link active">Dự án khách hàng</a>
-      <a href="{{ url_for('resources') }}" class="nav-link">Tài nguyên</a>
+    <div class="nav-left">
+      <div class="nav-logo">
+        <a href="{{ url_for('index') }}">
+          <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo">
+        </a>
+      </div>
+      <div class="nav-center">
+        <a href="{{ url_for('job_list') }}" class="nav-link">Dashboard</a>
+        <a href="{{ url_for('profile') }}" class="nav-link">My Resumes</a>
+        <a href="{{ url_for('client_projects') }}" class="nav-link active">Client Work</a>
+        <a href="{{ url_for('settings') }}" class="nav-link">Resources</a>
+      </div>
     </div>
-
     <div class="nav-right">
-      <div class="icon-btn" title="Thông báo"><i class="far fa-bell" style="font-size: 16px;"></i></div>
-      <a href="{{ url_for('settings') }}" class="icon-btn" title="Cài đặt"><i class="fas fa-cog" style="font-size: 16px;"></i></a>
-      
-      <div class="user-dropdown">
-        <div class="avatar" id="userAvatarBtn" onclick="toggleUserMenu()">
-          {% if session.get('user_picture') %}<img src="{{ session.get('user_picture') }}">
-          {% else %}{{ (session.get('user_name', 'U') or 'U')[0].upper() }}{% endif %}
-        </div>
-        <div class="dropdown-menu" id="userDropdownMenu">
-          <div class="menu-header">
-            <strong>{{ session.get('user_name', 'Người dùng') }}</strong>
-            <span>{{ session.get('user_email', '') }}</span>
+      <i class="fa-regular fa-bell nav-icon"></i>
+      <a href="{{ url_for('settings') }}"><i class="fa-solid fa-gear nav-icon"></i></a>
+      <div class="avatar" onclick="window.location.href='{{ url_for('profile') }}'">
+        {% if session.get('user_picture') %}
+          <img src="{{ session['user_picture'] }}" alt="Avatar">
+        {% else %}
+          <div style="width: 100%; height: 100%; background: #1f2937; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700;">
+            {{ session.get('user_name', 'U')[0].upper() }}
           </div>
-          <div class="menu-divider"></div>
-          <a href="{{ url_for('profile') }}"><i class="far fa-user"></i> Hồ sơ của tôi</a>
-          <a href="{{ url_for('settings') }}"><i class="fas fa-cog"></i> Cài đặt tài khoản</a>
-          <div class="menu-divider"></div>
-          <a href="{{ url_for('logout') }}" style="color: #ef4444;"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
-        </div>
+        {% endif %}
       </div>
     </div>
   </nav>
 
-  <div class="builder-container">
-    <!-- KHU VỰC SIDEBAR BÊN TRÁI -->
-    <div class="sidebar">
-      <div class="sidebar-header">
-        <h2><i class="fas fa-rocket"></i> Trung tâm Dự án</h2>
-        <p>QUẢN LÝ CÔNG VIỆC</p>
-      </div>
-      
-      <div class="nav-menu">
-        <div class="menu-item active" id="nav-explore" onclick="switchTab('explore')">
-          <i class="fas fa-compass"></i> Khám phá dự án
-        </div>
-        <div class="menu-item" id="nav-my_projects" onclick="switchTab('my_projects')">
-          <i class="fas fa-folder-open"></i> Dự án của tôi
-        </div>
-        <div class="menu-item" id="nav-applied" onclick="alert('Tính năng Đang ứng tuyển đang phát triển!')">
-          <i class="fas fa-paper-plane"></i> Đang ứng tuyển
-        </div>
-        <div class="menu-item" id="nav-history" onclick="alert('Tính năng Lịch sử dự án đang phát triển!')">
-          <i class="fas fa-history"></i> Lịch sử dự án
-        </div>
-      </div>
-
-      <div class="sidebar-footer">
-        <a href="#"><i class="far fa-question-circle"></i> Trợ giúp & Hỗ trợ</a>
-      </div>
+  <div class="main-container">
+    
+    <div class="page-header">
+      <h1>Client Projects</h1>
+      <p>Collaborate on real-world challenges with our network of partner companies.</p>
     </div>
 
-    <!-- MAIN CONTENT -->
-    <div class="main-content">
+    <div class="tab-nav">
+      <div class="tab-btn active" onclick="switchTab('explore')">Explore Projects</div>
+      <div class="tab-btn" onclick="switchTab('my_projects')">My Active Work</div>
+    </div>
+
+    <!-- MAIN CONTENT AREA -->
       
       <!-- Tab 1: Khám phá -->
       <div class="tab-pane active" id="tab_explore">
         <div class="page-header">
-          <h1>Dự án Khách hàng</h1>
-          <p>Thử sức và thực chiến với những vấn đề công nghệ thật từ mạng lưới doanh nghiệp đối tác hàng đầu.</p>
+          <h1>Client Projects</h1>
+          <p>Challenge yourself with real-world technology problems from our network of leading partner companies.</p>
         </div>
         
         <div class="search-bar">
             <div class="input-group">
                 <i class="fas fa-search" style="color:#94a3b8;"></i>
-                <input type="text" placeholder="Tìm tên dự án, kỹ năng (VD: Landing page, Figma...)">
+                <input type="text" placeholder="Search project name, skills (Ex: Landing page, Figma...)">
             </div>
             <select>
-                 <option>Phân loại: Tất cả</option>
+                 <option>Filter: All</option>
                  <option>UI/UX Design</option>
                  <option>Frontend Web</option>
                  <option>Mobile App</option>
@@ -235,17 +188,17 @@
         </div>
 
         <div class="projects-grid">
-                <div class="project-card" onclick="openProjectModal('Thiết kế App Tài chính', 'Ngân hàng ABC', 'Dự án yêu cầu thiết kế bộ nhận diện thương hiệu và UI/UX cho ứng dụng mobile banking mới...', 'UX/UI, Figma, Tài chính', '3 tháng', 'Cố định')">
+                <div class="project-card" onclick="openProjectModal('Financial App Design', 'ABC Bank', 'The project requires designing a brand identity and UI/UX for a new mobile banking app...', 'UX/UI, Figma, Finance', '3 months', 'Fixed')">
                   <div class="pc-header">
                     <div class="pc-logo"><i class="fas fa-university"></i></div>
-                    <span class="pc-badge open">Đang mở</span>
+                    <span class="pc-badge open">Open</span>
                   </div>
-                  <h3 class="pc-title">Thiết kế App Tài chính</h3>
-                  <div class="pc-company"><i class="far fa-building"></i> Ngân hàng ABC</div>
-                  <p class="pc-desc">Dự án yêu cầu thiết kế bộ nhận diện thương hiệu và UI/UX cho ứng dụng mobile banking mới, tập trung vào trải nghiệm người dùng hiện đại và bảo mật.</p>
+                  <h3 class="pc-title">Financial App Design</h3>
+                  <div class="pc-company"><i class="far fa-building"></i> ABC Bank</div>
+                  <p class="pc-desc">The project requires designing a brand identity and UI/UX for a new mobile banking application, focusing on modern user experience and security.</p>
                   <div class="pc-meta">
-                    <div class="pc-meta-item"><i class="far fa-calendar-alt"></i> 3 tháng</div>
-                    <div class="pc-meta-item"><i class="fas fa-coins"></i> Cố định</div>
+                    <div class="pc-meta-item"><i class="far fa-calendar-alt"></i> 3 months</div>
+                    <div class="pc-meta-item"><i class="fas fa-coins"></i> Fixed</div>
                   </div>
                   <div class="pc-tags">
                     <span class="pc-tag">UX/UI</span>
@@ -254,17 +207,17 @@
                   </div>
                 </div>
 
-                <div class="project-card" onclick="openProjectModal('Hệ thống E-Learning', 'Trung tâm Giáo dục X', 'Xây dựng nền tảng học trực tuyến hỗ trợ video streaming, bài tập trắc nghiệm và hệ thống quản lý học viên bài bản.', 'Web dev, React, Node.js', '5 tháng', 'Thỏa thuận')">
+                <div class="project-card" onclick="openProjectModal('E-Learning System', 'Education Center X', 'Building an online learning platform supporting video streaming, quiz assignments and professional student management system.', 'Web dev, React, Node.js', '5 months', 'Negotiable')">
                   <div class="pc-header">
                     <div class="pc-logo"><i class="fas fa-graduation-cap"></i></div>
-                    <span class="pc-badge active">Đang làm</span>
+                    <span class="pc-badge active">In Progress</span>
                   </div>
-                  <h3 class="pc-title">Hệ thống E-Learning</h3>
-                  <div class="pc-company"><i class="far fa-building"></i> Trung tâm Giáo dục X</div>
-                  <p class="pc-desc">Xây dựng nền tảng học trực tuyến hỗ trợ video streaming, bài tập trắc nghiệm và hệ thống quản lý học viên bài bản, dễ dàng mở rộng quy mô.</p>
+                  <h3 class="pc-title">E-Learning System</h3>
+                  <div class="pc-company"><i class="far fa-building"></i> Education Center X</div>
+                  <p class="pc-desc">Building an online learning platform supporting video streaming, quiz assignments and a professional, scalable student management system.</p>
                   <div class="pc-meta">
-                    <div class="pc-meta-item"><i class="far fa-calendar-alt"></i> 5 tháng</div>
-                    <div class="pc-meta-item"><i class="fas fa-coins"></i> Thỏa thuận</div>
+                    <div class="pc-meta-item"><i class="far fa-calendar-alt"></i> 5 months</div>
+                    <div class="pc-meta-item"><i class="fas fa-coins"></i> Negotiable</div>
                   </div>
                   <div class="pc-tags">
                     <span class="pc-tag">React</span>
@@ -278,25 +231,25 @@
       <!-- Tab 2: Dự án của tôi -->
       <div class="tab-pane" id="tab_my_projects">
          <div class="page-header">
-            <h1>Dự án của tôi</h1>
-            <p>Quản lý và giám sát tiến độ các nền tảng bạn đang tham gia cùng đối tác.</p>
+            <h1>My Projects</h1>
+            <p>Manage and monitor the progress of platforms you are participating in with partners.</p>
          </div>
 
          <div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:30px;">
-              <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 20px;"><i class="fas fa-tasks" style="color:var(--primary); margin-right:8px;"></i> Đang thực hiện</h3>
+              <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 20px;"><i class="fas fa-tasks" style="color:var(--primary); margin-right:8px;"></i> In Progress</h3>
               
               <!-- Progress Item -->
               <div style="border:1px solid #e2e8f0; border-radius:12px; padding:25px; display:flex; justify-content:space-between; align-items:center;">
                    <div style="flex:1;">
                        <div style="display:flex; align-items:center; gap:10px; margin-bottom:5px;">
-                           <h4 style="font-size:18px; font-weight:800; color:#111827;">Hệ thống Check-in Quét Mã QR</h4>
-                           <span class="pc-badge active">ĐANG CODE</span>
+                           <h4 style="font-size:18px; font-weight:800; color:#111827;">QR Code Check-in System</h4>
+                           <span class="pc-badge active">CODING</span>
                        </div>
-                       <div style="font-size:13px; color:#64748b; font-weight:500; margin-bottom:20px;"><i class="far fa-calendar-alt"></i> Bắt đầu: 10/04/2026 &nbsp;&bull;&nbsp; Deadline: 25/04/2026</div>
+                       <div style="font-size:13px; color:#64748b; font-weight:500; margin-bottom:20px;"><i class="far fa-calendar-alt"></i> Started: 10/04/2026 &nbsp;&bull;&nbsp; Deadline: 25/04/2026</div>
                        
                        <div style="max-width:450px;">
                             <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:700; color:#1f2937; margin-bottom:8px;">
-                                 <span>Mức độ hoàn thành</span>
+                                 <span>Completion Rate</span>
                                  <span style="color:var(--primary);">60%</span>
                             </div>
                             <div style="width:100%; height:8px; background:#e2e8f0; border-radius:4px; overflow:hidden;">
@@ -305,7 +258,7 @@
                        </div>
                    </div>
                    <div style="width: 250px; text-align:right;">
-                        <button class="btn btn-primary" style="padding:12px 24px;" onclick="alert('Đang mở Môi trường Nhóm làm việc trên hệ thống...')"><i class="fas fa-laptop-code"></i> Workspace</button>
+                        <button class="btn btn-primary" style="padding:12px 24px;" onclick="alert('Opening Team Workspace environment...')"><i class="fas fa-laptop-code"></i> Workspace</button>
                    </div>
               </div>
          </div>
@@ -318,28 +271,28 @@
 <!-- Modal Right Sidebar -->
 <div id="project-modal">
     <div class="modal-header">
-         <h2 style="font-size:18px; font-weight:700;">Chi tiết dự án</h2>
+         <h2 style="font-size:18px; font-weight:700;">Project Details</h2>
          <i class="fas fa-times" style="font-size:22px; color:#64748b; cursor:pointer;" onclick="closeProjectModal()"></i>
     </div>
     <div class="modal-body">
-         <div class="pc-badge open" style="display:inline-block; margin-bottom:15px; font-size:11px; padding:6px 12px;">ĐANG MỞ ĐĂNG KÝ</div>
+         <div class="pc-badge open" style="display:inline-block; margin-bottom:15px; font-size:11px; padding:6px 12px;">REGISTRATION OPEN</div>
          <h1 id="m-title" style="font-size:24px; font-weight:800; color:#111827; margin-bottom:12px; line-height:1.3;">...</h1>
          <div style="display:flex; gap:20px; font-size:13px; color:#4b5563; margin-bottom:30px; font-weight:600;">
               <div><i class="far fa-building"></i> <span id="m-company">...</span></div>
          </div>
          
          <ul style="list-style:none; display:flex; flex-direction:column; gap:15px; font-size:14px; color:#4b5563;">
-              <li><i class="far fa-calendar-alt" style="width:20px; color:var(--primary);"></i> Thời hạn: <b id="m-duration">...</b></li>
-              <li><i class="fas fa-coins" style="width:20px; color:var(--primary);"></i> Ngân sách: <b id="m-budget">...</b></li>
-              <li><i class="fas fa-tags" style="width:20px; color:var(--primary);"></i> Kỹ năng: <span id="m-tags">...</span></li>
+              <li><i class="far fa-calendar-alt" style="width:20px; color:var(--primary);"></i> Duration: <b id="m-duration">...</b></li>
+              <li><i class="fas fa-coins" style="width:20px; color:var(--primary);"></i> Budget: <b id="m-budget">...</b></li>
+              <li><i class="fas fa-tags" style="width:20px; color:var(--primary);"></i> Skills: <span id="m-tags">...</span></li>
             </ul>
          
-         <h3 style="font-size:15px; font-weight:700; margin-top:25px; margin-bottom:12px; color:#111827;">Mô tả chung</h3>
+         <h3 style="font-size:15px; font-weight:700; margin-top:25px; margin-bottom:12px; color:#111827;">General Description</h3>
          <p id="m-desc" style="font-size:14px; color:#4b5563; line-height:1.6; margin-bottom:25px;">...</p>
     </div>
     <div class="modal-footer">
-         <button class="btn btn-outline" style="padding:12px 24px; font-size:14px;" onclick="closeProjectModal()">Bỏ qua</button>
-         <button class="btn btn-primary" style="padding:12px 30px; font-size:14px;" onclick="alert('Đã gửi yêu cầu ứng tuyển! Đối tác sẽ phản hồi trong 2 ngày.')">Ứng tuyển ngay</button>
+         <button class="btn btn-outline" style="padding:12px 24px; font-size:14px;" onclick="closeProjectModal()">Cancel</button>
+         <button class="btn btn-primary" style="padding:12px 30px; font-size:14px;" onclick="alert('Application submitted! Partner will respond within 2 days.')">Apply Now</button>
     </div>
 </div>
 
@@ -377,8 +330,8 @@ function openProjectModal(title, company, desc, tags, duration, budget) {
     document.getElementById('m-company').innerText = company;
     document.getElementById('m-desc').innerText = desc;
     document.getElementById('m-tags').innerText = tags;
-    document.getElementById('m-duration').innerText = duration || 'Chưa xác định';
-    document.getElementById('m-budget').innerText = budget || 'Thỏa thuận';
+    document.getElementById('m-duration').innerText = duration || 'Unspecified';
+    document.getElementById('m-budget').innerText = budget || 'Negotiable';
     
     document.getElementById('modal-backdrop').style.display = 'block';
     setTimeout(() => {

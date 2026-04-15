@@ -19,7 +19,7 @@ def scrape_careerviet():
         response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()
     except Exception as e:
-        print(f"Lỗi khi tải trang web: {e}")
+        print(f"Error loading website: {e}")
         return
 
     soup = BeautifulSoup(response.text, 'html.parser')
@@ -50,12 +50,12 @@ def scrape_careerviet():
                 new_job = Job(
                     title=title,
                     company="Top IT Company", 
-                    description="Cơ hội việc làm đang mở, xem chi tiết ở đường dẫn ứng tuyển.",
+                    description="Job opportunity open, see details at the application link.",
                     required_skills="Software, Logic problem solving",
-                    salary_range="Cạnh tranh",
-                    location="Hà Nội/HCM",
+                    salary_range="Competitive",
+                    location="Hanoi/HCM",
                     job_type="full-time",
-                    industry="IT Phần mềm",
+                    industry="Softwave IT",
                     application_deadline=date(2025, 12, 31),
                     apply_url=href,
                     source="CareerViet"
@@ -78,20 +78,20 @@ def scrape_careerviet():
             
             # Additional details
             company_tag = item.find('a', class_='company-name')
-            company = company_tag.text.strip() if company_tag else "Công ty công nghệ"
+            company = company_tag.text.strip() if company_tag else "Tech Company"
             
             location_tag = item.find('div', class_='location') or item.find('li', class_='location')
-            location = location_tag.text.strip() if location_tag else "Hà Nội"
+            location = location_tag.text.strip() if location_tag else "Hanoi"
 
             salary_tag = item.find('div', class_='salary') or item.find('li', class_='salary')
-            salary = salary_tag.text.strip() if salary_tag else "Thỏa thuận"
+            salary = salary_tag.text.strip() if salary_tag else "Negotiable"
 
             if Job.query.filter_by(apply_url=href).first():
                 continue
                 
             # Cào dữ liệu chi tiết
-            description = "Chi tiết công việc đang được cập nhật."
-            required_skills = "Yêu cầu công việc chưa được cung cấp."
+            description = "Job details are being updated."
+            required_skills = "Job requirements have not been provided."
             try:
                 detail_resp = requests.get(href, headers=headers, timeout=10)
                 if detail_resp.status_code == 200:
@@ -106,9 +106,9 @@ def scrape_careerviet():
                             content = row.text.strip()
                             content = ' '.join(content.split())
                             
-                            if 'mô tả' in heading_text:
+                            if 'description' in heading_text:
                                 description = content[:1500] if len(content) > 5 else description
-                            elif 'yêu cầu' in heading_text:
+                            elif 'requirement' in heading_text:
                                 required_skills = content[:1000] if len(content) > 5 else required_skills
             except Exception as e:
                 pass
@@ -133,9 +133,9 @@ def scrape_careerviet():
         
     if jobs_added > 0:
         db.session.commit()
-        print(f"[SUCCESS] Đã cào và lưu thành công {jobs_added} công việc mới từ CareerViet!")
+        print(f"[SUCCESS] Successfully scraped and saved {jobs_added} new jobs from CareerViet!")
     else:
-        print("Không có công việc mới nào cần thêm.")
+        print("No new jobs to add.")
 
 
 if __name__ == "__main__":

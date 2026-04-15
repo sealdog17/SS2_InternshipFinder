@@ -1,62 +1,50 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cài đặt tài khoản - InternshipFinder</title>
+  <title>Account Settings - InternshipFinder</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --primary: #2563eb; --primary-dark: #1d4ed8;
-      --navy: #0f1f3d; --bg: #f1f5f9; --white: #fff;
-      --border: #e2e8f0; --text: #1e293b; --muted: #64748b;
-      --sidebar: 260px; --navbar: 110px;
+      --primary: #1964d3; --primary-dark: #1555b5;
+      --navy: #0f1f3d; --bg: #f8fafc; --white: #fff;
+      --border: #e2e8f0; --text: #111827; --muted: #64748b;
+      --sidebar: 260px; --navbar: 80px;
     }
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); overflow-y: scroll; overflow-x: hidden; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); padding-top: 80px; overflow-y: scroll; overflow-x: hidden; }
 
     /* ===== NAVBAR ===== */
     .navbar {
       position: fixed; top: 0; left: 0; right: 0; height: var(--navbar);
       background: #ffffff; border-bottom: 1px solid #e5e7eb;
-      display: flex; justify-content: space-between; align-items: center; padding: 0 40px;
-      z-index: 1000; font-family: 'Inter', sans-serif;
+      display: flex; justify-content: space-between; align-items: center; padding: 0 5%;
+      z-index: 1000;
     }
-    .nav-logo img { height: 40px; }
-    .nav-center { display: flex; gap: 30px; height: 100%; align-items: center; }
-    .nav-link { text-decoration: none; color: #4b5563; font-size: 14px; font-weight: 500; height: 100%; display: flex; align-items: center; position: relative; }
-    .nav-link.active { color: #1964d3; font-weight: 600; }
-    .nav-link.active::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: #1964d3; border-top-left-radius: 3px; border-top-right-radius: 3px; }
-    
-    .nav-right { display: flex; gap: 20px; align-items: center; }
-    .icon-btn { color: #6b7280; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; text-decoration: none; background: #f1f5f9; border-radius: 50%; }
-    .icon-btn:hover { background: #e2e8f0; }
-    .avatar { width: 36px; height: 36px; border-radius: 50%; background: #1f2937; color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; overflow: hidden; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
-    .avatar:hover { border-color: #1964d3; }
+    .nav-left { display: flex; align-items: center; gap: 40px; }
+    .nav-logo img { height: 44px; display: block; }
+    .nav-center { display: flex; gap: 32px; }
+    .nav-link {
+      text-decoration: none; color: var(--muted); font-size: 14px; font-weight: 500;
+      transition: 0.2s; position: relative; padding: 28px 0;
+    }
+    .nav-link:hover { color: var(--primary); }
+    .nav-link.active { color: var(--primary); font-weight: 700; }
+    .nav-link.active::after {
+      content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px;
+      background: var(--primary); border-radius: 3px 3px 0 0;
+    }
+    .nav-right { display: flex; align-items: center; gap: 20px; }
+    .nav-icon { color: var(--muted); font-size: 18px; cursor: pointer; transition: 0.2s; text-decoration: none; }
+    .nav-icon:hover { color: var(--primary); }
+    .avatar { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; cursor: pointer; border: 1.5px solid var(--border); }
     .avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-    /* Dropdown UI */
-    .user-dropdown { position: relative; display: flex; align-items: center; }
-    .dropdown-menu { 
-      position: absolute; top: calc(100% + 15px); right: 0; width: 220px; 
-      background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
-      border: 1px solid var(--border); display: none; flex-direction: column; z-index: 1000; padding: 8px 0;
-      animation: slideIn 0.2s ease;
-    }
-    @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .dropdown-menu.show { display: flex; }
-    .menu-header { padding: 12px 20px; border-bottom: 1px solid #f1f5f9; margin-bottom: 8px; text-align: left; }
-    .menu-header strong { display: block; font-size: 14px; color: #111827; }
-    .menu-header span { font-size: 12px; color: #64748b; }
-    .dropdown-menu a { 
-      padding: 10px 20px; font-size: 13px; color: #4b5563; text-decoration: none; 
-      display: flex; align-items: center; gap: 10px; transition: 0.2s;
-    }
-    .dropdown-menu a i { width: 16px; text-align: center; font-size: 14px; color: #94a3b8; }
-    .dropdown-menu a:hover { background: #f8fafc; color: #1964d3; }
-    .menu-divider { height: 1px; background: #f1f5f9; margin: 8px 0; }
+    /* ===== MAIN CONTAINER ===== */
+    .main-container { max-width: 860px; margin: 0 auto; padding: 40px 24px; }
 
     /* ===== LAYOUT ===== */
     .app-layout {
@@ -233,75 +221,41 @@
 </head>
 <body>
 
-<!-- TOP NAV -->
-<nav class="navbar">
-  <a href="{{ url_for('job_list') }}" class="nav-left">
-    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" style="height: 85px; vertical-align: middle;">
-  </a>
-  
-  <div class="nav-center">
-    <a href="{{ url_for('job_list') }}" class="nav-link">Tổng quan</a>
-    <a href="{{ url_for('profile') }}" class="nav-link">Hồ sơ của tôi</a>
-    <a href="{{ url_for('client_projects') }}" class="nav-link">Dự án khách hàng</a>
-    <a href="{{ url_for('resources') }}" class="nav-link active">Tài nguyên</a>
-  </div>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-left">
+      <div class="nav-logo">
+        <a href="{{ url_for('index') }}">
+          <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo">
+        </a>
+      </div>
+      <div class="nav-center">
+        <a href="{{ url_for('job_list') }}" class="nav-link">Dashboard</a>
+        <a href="{{ url_for('profile') }}" class="nav-link">My Resumes</a>
+        <a href="{{ url_for('client_projects') }}" class="nav-link">Client Work</a>
+        <a href="{{ url_for('settings') }}" class="nav-link active">Resources</a>
+      </div>
+    </div>
+    <div class="nav-right">
+      <i class="fa-regular fa-bell nav-icon"></i>
+      <a href="{{ url_for('settings') }}"><i class="fa-solid fa-gear nav-icon"></i></a>
+      <div class="avatar" onclick="window.location.href='{{ url_for('profile') }}'">
+        {% if session.get('user_picture') %}
+          <img src="{{ session['user_picture'] }}" alt="Avatar">
+        {% else %}
+          <div style="width: 100%; height: 100%; background: #1f2937; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700;">
+            {{ session.get('user_name', 'U')[0].upper() }}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
 
-  <div class="nav-right">
-    <div class="icon-btn" title="Thông báo"><i class="far fa-bell" style="font-size: 16px;"></i></div>
-    <a href="{{ url_for('settings') }}" class="icon-btn" title="Cài đặt"><i class="fas fa-cog" style="font-size: 16px;"></i></a>
+  <div class="main-container" style="padding-top: 40px;">
     
-    <div class="user-dropdown">
-      <div class="avatar" id="userAvatarBtn" onclick="toggleUserMenu()">
-        {% if session.get('user_picture') %}<img src="{{ session.get('user_picture') }}">
-        {% else %}{{ (session.get('user_name', 'U') or 'U')[0].upper() }}{% endif %}
-      </div>
-      <div class="dropdown-menu" id="userDropdownMenu">
-        <div class="menu-header">
-          <strong>{{ session.get('user_name', 'Người dùng') }}</strong>
-          <span>{{ session.get('user_email', '') }}</span>
-        </div>
-        <div class="menu-divider"></div>
-        <a href="{{ url_for('profile') }}"><i class="far fa-user"></i> Hồ sơ của tôi</a>
-        <a href="{{ url_for('settings') }}"><i class="fas fa-cog"></i> Cài đặt tài khoản</a>
-        <div class="menu-divider"></div>
-        <a href="{{ url_for('logout') }}" style="color: #ef4444;"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
-      </div>
-    </div>
-  </div>
-</nav>
-
-<div class="app-layout">
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="sidebar-section">
-      <span class="sidebar-label">Tài nguyên</span>
-      <a href="{{ url_for('settings') }}" class="sidebar-link active">
-        <i class="fas fa-user-cog" style="width: 15px;"></i>
-        Cài đặt tài khoản
-      </a>
-      <a href="#" class="sidebar-link">
-        <i class="fas fa-book" style="width: 15px;"></i>
-        Hướng dẫn sử dụng
-      </a>
-      <a href="#" class="sidebar-link">
-        <i class="fas fa-question-circle" style="width: 15px;"></i>
-        Câu hỏi thường gặp
-      </a>
-    </div>
-
-    <div class="sidebar-bottom">
-      <a href="{{ url_for('logout') }}" class="sidebar-link" style="color:#ef4444;">
-        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        Đăng xuất
-      </a>
-    </div>
-  </aside>
-
-  <!-- MAIN -->
-  <main class="main-content">
     <div class="page-header">
-      <h1>Cài đặt tài khoản</h1>
-      <p>Quản lý thông tin bảo mật và cấu hình tài khoản của bạn</p>
+      <h1>Account Settings</h1>
+      <p>Manage your account preferences and professional profile details.</p>
     </div>
 
     <div class="flash-messages">
@@ -323,55 +277,57 @@
               {{ (user.name or user.username or 'U')[0].upper() }}
             {% endif %}
           </div>
-          <label for="avatarInput" class="upload-label" title="Thay đổi ảnh đại diện">
+          <label for="avatarInput" class="upload-label" title="Change profile picture">
             <i class="fas fa-camera"></i>
           </label>
           <input type="file" id="avatarInput" accept="image/*" style="display: none;" onchange="uploadAvatar(this)">
         </div>
         <div class="avatar-info">
-          <h3>Ảnh đại diện</h3>
-          <p>Nhấp vào biểu tượng máy ảnh để tải lên ảnh mới. <br>Định dạng hỗ trợ: JPG, PNG (Tối đa 2MB).</p>
+          <h3>Profile Picture</h3>
+          <p>Click the camera icon to upload a new photo. <br>Supported formats: JPG, PNG (Max 2MB).</p>
         </div>
       </div>
 
       <div class="settings-section">
-        <h2>Thông tin đăng nhập</h2>
+        <h2>Login Information</h2>
         <div class="form-group">
-          <label>Email đại diện</label>
+          <label>Profile Email</label>
           <input type="email" value="{{ user.email }}" disabled style="background: #f8fafc; cursor: not-allowed;">
         </div>
         <div class="form-group">
-          <label>Tên người dùng</label>
+          <label>Username</label>
           <input type="text" value="{{ user.username or '' }}" disabled style="background: #f8fafc; cursor: not-allowed;">
         </div>
       </div>
 
       <div class="settings-section">
-        <h2>Đổi mật khẩu</h2>
-        <form>
+        <h2>Change Password</h2>
+        <form action="{{ url_for('update_password') }}" method="POST">
           <div class="form-group">
-            <label>Mật khẩu hiện tại</label>
-            <input type="password" placeholder="••••••••">
+            <label>Current Password</label>
+            <input type="password" name="current_password" placeholder="••••••••" required>
           </div>
           <div class="form-group">
-            <label>Mật khẩu mới</label>
-            <input type="password" placeholder="Tối thiểu 8 ký tự">
+            <label>New Password</label>
+            <input type="password" name="new_password" placeholder="Minimum 8 characters" required>
           </div>
           <div class="form-group">
-            <label>Xác nhận mật khẩu mới</label>
-            <input type="password" placeholder="Nhập lại mật khẩu mới">
+            <label>Confirm New Password</label>
+            <input type="password" name="confirm_password" placeholder="Re-enter new password" required>
           </div>
-          <button type="button" class="btn-save" onclick="alert('Tính năng đổi mật khẩu đang được phát triển!')">Cập nhật mật khẩu</button>
+          <button type="submit" class="btn-save">Update Password</button>
         </form>
       </div>
 
       <div class="settings-section" style="border-top: 1px solid #fee2e2; padding-top: 24px; margin-top: 40px;">
-        <h2 style="color: #ef4444; border-bottom: none;">Vùng nguy hiểm</h2>
-        <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px;">Xóa tài khoản sẽ gỡ bỏ toàn bộ dữ liệu CV và thông tin cá nhân của bạn. Hành động này không thể hoàn tác.</p>
-        <button type="button" style="padding: 10px 20px; background: transparent; color: #ef4444; border: 1px solid #fecaca; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;" onclick="confirm('Bạn có chắc chắn muốn xóa tài khoản không?')">Xóa tài khoản</button>
+        <h2 style="color: #ef4444; border-bottom: none;">Danger Zone</h2>
+        <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px;">Deleting your account will remove all CV data and personal information. This action cannot be undone.</p>
+        <form action="{{ url_for('delete_account') }}" method="POST" onsubmit="return confirm('Are you sure you want to permanently delete your account including all CV data?');">
+          <button type="submit" style="padding: 10px 20px; background: transparent; color: #ef4444; border: 1px solid #fecaca; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">Delete Account</button>
+        </form>
       </div>
     </div>
-  </main>
+  </div>
 </div>
 
 <script>
@@ -395,16 +351,16 @@
     if (input.files && input.files[0]) {
       const file = input.files[0];
       
-      // Kiểm tra kích thước file (2MB)
+      // Check file size (2MB)
       if (file.size > 2 * 1024 * 1024) {
-        alert('File quá lớn! Vui lòng chọn ảnh dưới 2MB.');
+        alert('File too large! Please choose an image under 2MB.');
         return;
       }
 
       const formData = new FormData();
       formData.append('avatar', file);
 
-      // Hiệu ứng chờ
+      // Loading effect
       const preview = document.getElementById('settingsAvatarPreview');
       const originalHTML = preview.innerHTML;
       preview.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
@@ -435,19 +391,19 @@
             }
           });
 
-          // Thông báo thành công
+          // Success notification
           const flashContainer = document.querySelector('.flash-messages');
-          flashContainer.innerHTML = '<div class="flash success">Cập nhật ảnh đại diện thành công!</div>';
+          flashContainer.innerHTML = '<div class="flash success">Profile picture updated successfully!</div>';
           setTimeout(() => { flashContainer.innerHTML = ''; }, 3000);
         } else {
           preview.innerHTML = originalHTML;
-          alert('Có lỗi xảy ra khi upload ảnh.');
+          alert('An error occurred while uploading the image.');
         }
       })
       .catch(error => {
         console.error('Error:', error);
         preview.innerHTML = originalHTML;
-        alert('Có lỗi kết nối. Vui lòng thử lại.');
+        alert('Connection error. Please try again.');
       });
     }
   }
