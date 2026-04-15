@@ -281,8 +281,9 @@
                          <i class="fas fa-file-alt cv-card-icon"></i>
                     </div>
                     <div class="cv-card-info">
-                         <h3 style="font-size:16px; font-weight:700; color:#111827;">Hồ sơ Phiên bản {{ cv.version }}</h3>
-                         <div class="score-label" style="font-size:12px; color:#64748b; margin-top:5px;">Ngày tạo: {{ cv.created_at.strftime('%d/%m/%Y') }}</div>
+                         <h3 style="font-size:16px; font-weight:700; color:#111827; margin-bottom: 2px;">{{ cv.parsed_title }}</h3>
+                         <div style="font-size:12px; color:#1964d3; font-weight: 600; margin-bottom: 4px;">Mẫu: {{ cv.template_name }}</div>
+                         <div class="score-label" style="font-size:11px; color:#64748b;">Cập nhật: {{ cv.created_at.strftime('%d/%m/%Y %H:%M') }}</div>
                          <div style="display:flex; gap:8px; margin-top:20px;">
                              <button type="button" class="btn btn-primary flex-1" onclick="loadCv('{{ cv.id }}')">Sửa</button>
                              <button type="button" class="btn btn-outline flex-1" onclick="exportPdfSpecific('{{ cv.id }}')"><i class="fas fa-download"></i></button>
@@ -629,9 +630,13 @@
           document.getElementById('cv_id_input').value = cvId;
           for (const [key, val] of Object.entries(data)) {
               const input = form.querySelector(`[name="${key}"]`);
-              if (input) input.value = val;
+              if (input) input.value = val !== null ? val : '';
           }
-          if (data.template) selectTemplate(data.template);
+          if (data.template) {
+              selectTemplate(data.template);
+          } else {
+              selectTemplate('minimalist');
+          }
           if (!isSubmenuOpen) toggleCreateCvMenu();
           showStep(1);
       });
@@ -669,7 +674,7 @@
               el.style.backgroundImage = "url('" + bg + "')";
           }
       });
-      showStep(1);
+      showStep('list_cvs');
   });
 
   document.querySelectorAll('[data-sync]').forEach(input => {

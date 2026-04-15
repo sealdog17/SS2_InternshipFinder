@@ -295,6 +295,16 @@ def edit_profile():
         return redirect(url_for('edit_profile'))
     
     cvs = CV.query.filter_by(user_id=user.id).order_by(CV.created_at.desc()).all()
+    import json
+    for cv in cvs:
+        try:
+            data = json.loads(cv.content)
+            cv.parsed_title = data.get('job_title') or f"Phiên bản {cv.version}"
+            cv.template_name = "Đương Đại" if data.get('template') == 'contemporary' else "Tối Giản"
+        except:
+            cv.parsed_title = f"Phiên bản {cv.version}"
+            cv.template_name = "Tối Giản"
+
     return render_template('edit_profile.html', user=user, cvs=cvs)
 
 @app.route('/profile/cv/save', methods=['POST'])
