@@ -4,12 +4,13 @@ File này là **Nguồn Sự Thật Duy Nhất** (Single Source of Truth) dành 
 
 ---
 
-## 📌 1. QUY ƯỚC LÀM VIỆC CỐ ĐỊNH (FOR AI)
+## 📌 1. QUY ƯỚC LÀM VIỆC CỐ ĐỊNH (MANDATORY)
+*   **Đọc và Ghi nhớ:** AI phải luôn đọc file này khi bắt đầu phiên làm việc mới để nắm bắt lịch sử và không lặp lại lỗi cũ.
+*   **Cập nhật bắt buộc (Crucial):** AI phải tự động cập nhật file này (`HUONGDAN/QUYUOC.md`) ngay lập tức khi phát sinh bất kỳ quy ước mới, thay đổi thiết kế, hoặc logic hệ thống nào. Đây là "Bộ não ngoài" của dự án.
 *   **Tự động triển khai:** Bỏ qua bước tạo Kế hoạch (Implementation Plan) và xin phép. Thực thi ngay lập tức khi được giao việc.
 *   **Ngôn ngữ:** Giao tiếp ngắn gọn, trực tiếp bằng tiếng Việt.
-*   **Lưu trữ chuyên nghiệp:** Không tạo file rác ở thư mục gốc. Sử dụng `scratch/` cho file nháp.
+*   **Lưu trữ:** Không tạo file rác ở thư mục gốc. Sử dụng `scratch/` cho file nháp.
 *   **Git:** Chỉ thực hiện `pull` và `push` trên nhánh `master` của repository [InternshipFinder](https://github.com/sealdog17/SS2_InternshipFinder).
-*   **Cập nhật nhật ký:** Phải cập nhật file này (`HUONGDAN/QUYUOC.md`) sau mỗi thay đổi quan trọng về giao diện hoặc logic hệ thống.
 
 ---
 
