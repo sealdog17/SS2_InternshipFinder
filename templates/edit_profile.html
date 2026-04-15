@@ -131,30 +131,32 @@
     /* PREVIEW TEMPLATE STYLES (BROWSER) */
     .cv-paper { width: 100%; max-width: 800px; min-height: 1100px; background: white; box-shadow: 0 10px 40px rgba(0,0,0,0.05); margin: 0 auto 40px; border: 1px solid #e2e8f0; overflow: hidden; display: flex; flex-direction: column; }
     
-    /* Minimalist (Default) */
-    .cv-minimalist { padding: 60px; }
-    .cv-minimalist .header { text-align: center; margin-bottom: 30px; }
-    .cv-minimalist .name { font-size: 32px; font-weight: 800; color: #111827; margin-bottom: 8px; }
-    .cv-minimalist .job { font-size: 14px; font-weight: 700; color: var(--primary); letter-spacing: 2px; text-transform: uppercase; }
-    .cv-minimalist .contact { font-size: 12px; color: #64748b; margin-top: 15px; }
-    .cv-minimalist .section { margin-top: 35px; }
-    .cv-minimalist .section-title { font-size: 14px; font-weight: 800; color: #111827; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
-    .cv-minimalist .content { font-size: 14px; line-height: 1.6; color: #374151; white-space: pre-wrap; }
+    /* White (Default) */
+    .cv-white { width: 794px; min-height: 1122px; background: white; padding: 60px 50px; box-sizing: border-box; font-family: 'Times New Roman', serif; color: #111827; }
+    .cv-white .header { text-align: center; border-bottom: 2px solid #111827; padding-bottom: 20px; margin-bottom: 30px; }
+    .cv-white .name { font-size: 32px; font-weight: 400; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 12px; }
+    .cv-white .contact { font-size: 11px; letter-spacing: 1px; color: #6b7280; text-transform: uppercase; }
+    .cv-white .contact span { margin: 0 10px; }
+    .cv-white .section { margin-bottom: 30px; }
+    .cv-white .section-title { font-size: 14px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; margin-bottom: 15px; color: #111827; }
+    .cv-white .content { font-size: 13px; line-height: 1.6; color: #374151; white-space: pre-line; }
 
-    /* Contemporary (Two Column) */
-    .cv-contemporary { display: flex; height: 100%; min-height: 1100px; }
-    .cv-contemporary .sidebar { width: 35%; background: #1964d3; color: white; padding: 40px 25px; display: flex; flex-direction: column; align-items: center; text-align: center; height: auto; position: static; }
-    .cv-contemporary .main { flex: 1; padding: 50px 40px; background: white; }
-    .cv-contemporary .avatar-rect { width: 120px; height: 160px; border-radius: 6px; border: 3px solid rgba(255,255,255,0.2); margin-bottom: 25px; background-size: cover; background-position: center; background-color: rgba(255,255,255,0.1); }
-    .cv-contemporary .side-name { font-size: 22px; font-weight: 800; margin-bottom: 5px; }
-    .cv-contemporary .side-job { font-size: 12px; color: #bfdbfe; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 30px; }
-    .cv-contemporary .side-section { width: 100%; text-align: left; margin-bottom: 30px; }
-    .cv-contemporary .side-title { font-size: 11px; font-weight: 800; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 6px; margin-bottom: 12px; letter-spacing: 1px; }
-    .cv-contemporary .side-content { font-size: 12px; line-height: 1.5; color: #dbeafe; text-align: left; word-break: break-all; }
-    .cv-contemporary .main-section { margin-bottom: 35px; }
-    .cv-contemporary .main-title { font-size: 14px; font-weight: 800; color: #1e40af; margin-bottom: 15px; letter-spacing: 1px; display: flex; align-items: center; gap: 10px; }
-    .cv-contemporary .main-title::after { content: ""; flex: 1; height: 1px; background: #e2e8f0; }
-    .cv-contemporary .main-content { font-size: 14px; line-height: 1.6; color: #1f2937; white-space: pre-wrap; }
+    /* Blue (Two Column) */
+    .cv-blue { display: flex; height: 100%; min-height: 1122px; width: 794px; background: white; margin: 0 auto; }
+    .cv-blue .sidebar { width: 33%; background: #1964d3; color: white; padding: 50px 25px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+    .cv-blue .main { flex: 1; padding: 60px 45px; background: white; }
+    .cv-blue .avatar-rect { width: 150px; height: 190px; border-radius: 4px; border: 2px solid rgba(255,255,255,0.4); margin-bottom: 30px; background-size: cover; background-position: center; background-color: rgba(255,255,255,0.1); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .cv-blue .side-name { font-size: 24px; font-weight: 800; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+    .cv-blue .side-job { font-size: 13px; color: #bfdbfe; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 40px; }
+    .cv-blue .side-divider { width: 40px; height: 3px; background: white; margin-bottom: 30px; }
+    .cv-blue .side-section { width: 100%; text-align: left; margin-bottom: 35px; }
+    .cv-blue .side-title { font-size: 13px; font-weight: 800; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 8px; margin-bottom: 15px; letter-spacing: 1.5px; text-transform: uppercase; }
+    .cv-blue .side-content { font-size: 12px; line-height: 1.6; color: #eff6ff; text-align: left; }
+    .cv-blue .side-content b { color: white; opacity: 0.9; }
+    .cv-blue .main-section { margin-bottom: 45px; }
+    .cv-blue .main-title { font-size: 16px; font-weight: 800; color: #1e40af; margin-bottom: 20px; letter-spacing: 1.5px; display: flex; align-items: center; gap: 15px; text-transform: uppercase; }
+    .cv-blue .main-title::after { content: ""; flex: 1; height: 1.5px; background: #e2e8f0; }
+    .cv-blue .main-content { font-size: 14.5px; line-height: 1.8; color: #1f2937; white-space: pre-wrap; font-weight: 400; }
 
     /* List CV Dynamic */
     .cv-list-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap:30px; margin-top:20px; }
@@ -185,6 +187,49 @@
       align-items: center; justify-content: center; font-size: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
     .step1-form { flex: 1; }
+
+    /* Fullscreen Modal Styles */
+    .fullscreen-modal {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(15, 23, 42, 0.92);
+        z-index: 10000;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        overflow-y: auto;
+        padding: 50px 0;
+        backdrop-filter: blur(12px);
+    }
+    .fullscreen-modal.active { display: flex; }
+    .close-fullscreen {
+        position: fixed;
+        top: 30px; right: 40px;
+        width: 50px; height: 50px;
+        background: white;
+        border: none;
+        border-radius: 50%;
+        font-size: 28px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        z-index: 10001;
+        transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .close-fullscreen:hover { transform: scale(1.1) rotate(90deg); color: #ef4444; }
+    #fullscreen-content { 
+        width: 794px; 
+        background: white; 
+        box-shadow: 0 30px 60px rgba(0,0,0,0.5); 
+        min-height: 1122px;
+        border-radius: 4px;
+        overflow: hidden;
+        flex-shrink: 0; /* Prevent the CV from shrinking */
+        margin-bottom: 50px;
+    }
+    #fullscreen-content .cv-paper { box-shadow: none; border: none; margin: 0; }
   </style>
 </head>
 <body>
@@ -200,12 +245,12 @@
       <a href="{{ url_for('job_list') }}" class="nav-link">Tổng quan</a>
       <a href="{{ url_for('profile') }}" class="nav-link active">Hồ sơ của tôi</a>
       <a href="{{ url_for('client_projects') }}" class="nav-link">Dự án khách hàng</a>
-      <a href="#" class="nav-link">Tài nguyên</a>
+      <a href="{{ url_for('resources') }}" class="nav-link">Tài nguyên</a>
     </div>
 
     <div class="nav-right">
       <div class="icon-btn" title="Thông báo"><i class="far fa-bell" style="font-size: 16px;"></i></div>
-      <a href="{{ url_for('edit_profile') }}" class="icon-btn" title="Cài đặt"><i class="fas fa-cog" style="font-size: 16px;"></i></a>
+      <a href="{{ url_for('settings') }}" class="icon-btn" title="Cài đặt"><i class="fas fa-cog" style="font-size: 16px;"></i></a>
       
       <div class="user-dropdown">
         <div class="avatar" id="userAvatarBtn" onclick="toggleUserMenu()">
@@ -219,7 +264,7 @@
           </div>
           <div class="menu-divider"></div>
           <a href="{{ url_for('profile') }}"><i class="far fa-user"></i> Hồ sơ của tôi</a>
-          <a href="{{ url_for('edit_profile') }}"><i class="fas fa-cog"></i> Cài đặt tài khoản</a>
+          <a href="{{ url_for('settings') }}"><i class="fas fa-cog"></i> Cài đặt tài khoản</a>
           <div class="menu-divider"></div>
           <a href="{{ url_for('logout') }}" style="color: #ef4444;"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
         </div>
@@ -262,7 +307,7 @@
     <div class="main-content" style="padding:0;">
       <form id="cvForm" onsubmit="return false;" enctype="multipart/form-data" style="display:contents;">
         <input type="hidden" name="cv_id" id="cv_id_input" value="">
-        <input type="hidden" name="cv_template" id="cv_template_input" value="minimalist">
+        <input type="hidden" name="cv_template" id="cv_template_input" value="white">
 
         <!-- ================= STEP: Danh sách Hồ Sơ ================= -->
         <div class="wizard-step active" id="step_list_cvs" style="padding: 50px 70px;">
@@ -311,7 +356,7 @@
             <div class="form-card step1-body">
               <div class="photo-section">
                 <input type="file" id="photo-upload" name="profile_picture" style="display: none;" onchange="previewAvatar(this)">
-                <div class="photo-box" id="avatarPreviewBox" onclick="document.getElementById('photo-upload').click()" data-bg="{{ user.picture or '' }}">
+                <div class="photo-box" id="avatarPreviewBox" onclick="document.getElementById('photo-upload').click()" data-bg="{{ user.cv_picture or '' }}">
                   <i class="fas fa-camera"></i>
                   <div class="plus-badge">+</div>
                   <span>CẬP NHẬT ẢNH</span>
@@ -374,16 +419,16 @@
         <div class="wizard-step" id="step_5" style="padding: 50px 70px;">
             <div class="page-header"><h1>Chọn mẫu CV</h1><p>Giao diện CV sẽ thay đổi theo lựa chọn này.</p></div>
             <div class="template-gallery">
-                <div class="tpl-card selected" id="tpl-minimalist" onclick="selectTemplate('minimalist')">
-                    <div class="tpl-preview-box" style="display:flex; flex-direction:column; padding:20px; gap:8px;">
-                        <div style="width:100%; height:15px; background:#e2e8f0;"></div>
-                        <div style="width:40%; height:5px; background:#f1f5f9;"></div>
-                        <div style="width:100%; height:200px; background:#f8fafc; border:1px dashed #cbd5e1;"></div>
+                <div class="tpl-card selected" id="tpl-white" onclick="selectTemplate('white')">
+                    <div class="tpl-preview-box" style="display:flex; flex-direction:column; padding:20px; gap:8px; background:white;">
+                        <div style="width:100%; height:15px; background:#111827;"></div>
+                        <div style="width:40%; height:4px; background:#e2e8f0; margin:0 auto;"></div>
+                        <div style="width:100%; height:180px; background:#fff; border:1px solid #f1f5f9; margin-top:10px;"></div>
                     </div>
-                    <div class="tpl-title">Mẫu Tối Giản</div>
-                    <div class="tpl-desc">Bố cục trung tâm, sạch sẽ, chuyên nghiệp.</div>
+                    <div class="tpl-title">Mẫu White</div>
+                    <div class="tpl-desc">Bố cục trung tâm, tinh tế và cực kỳ chuyên nghiệp.</div>
                 </div>
-                <div class="tpl-card" id="tpl-contemporary" onclick="selectTemplate('contemporary')">
+                <div class="tpl-card" id="tpl-blue" onclick="selectTemplate('blue')">
                     <div class="tpl-preview-box" style="display:flex;">
                         <div style="width:35%; background:#1964d3;"></div>
                         <div style="flex:1; padding:20px; display:flex; flex-direction:column; gap:8px;">
@@ -391,8 +436,8 @@
                             <div style="width:100%; height:150px; background:#f8fafc;"></div>
                         </div>
                     </div>
-                    <div class="tpl-title">Mẫu Đương Đại</div>
-                    <div class="tpl-desc">Bố cục 2 cột hiện đại, cực kỳ hút mắt.</div>
+                    <div class="tpl-title">Mẫu Blue</div>
+                    <div class="tpl-desc">Bố cục 2 cột hiện đại, mạnh mẽ và chuyên nghiệp.</div>
                 </div>
             </div>
             <div class="bottom-actions">
@@ -404,7 +449,7 @@
         <!-- ================= STEP 5: Preview & Save ================= -->
         <div class="wizard-step" id="step_6" style="padding:0;">
           <div class="preview-header">
-              <div><h1>Xem trước CV</h1><p id="preview-template-info">Đang dùng mẫu: Tối Giản</p></div>
+              <div><h1>Xem trước CV</h1><p id="preview-template-info">Đang dùng mẫu: White</p></div>
               <div style="display:flex; gap:10px;">
                   <button type="button" class="btn btn-outline" onclick="openFullscreen()"><i class="fas fa-expand"></i> Xem toàn màn hình</button>
                   <button type="button" class="btn btn-outline" onclick="showStep(5)">Đổi mẫu</button>
@@ -416,34 +461,39 @@
               <div class="cv-wrapper">
                   <!-- Container for Dynamic Switching -->
                   <div id="cv-render-area" class="cv-paper">
-                    <!-- Minimalist inner content -->
-                    <div class="cv-minimalist" id="preview-minimalist">
+                    <!-- White inner content -->
+                    <div class="cv-white" id="preview-white">
                         <div class="header">
-                            <div class="name preview-name">Họ và Tên</div>
-                            <div class="job preview-job">Chức danh ứng tuyển</div>
+                            <div class="name preview-name">HỌ VÀ TÊN</div>
                             <div class="contact">
-                                <span class="preview-email">Email</span> | <span class="preview-phone">Điện thoại</span> | <span class="preview-address">Địa chỉ</span>
+                                <span class="preview-address">ĐỊA CHỈ</span> • <span class="preview-email">EMAIL</span> • <span class="preview-phone">ĐIỆN THOẠI</span>
                             </div>
                         </div>
                         <div class="section"><div class="section-title">Giới thiệu</div><div class="content preview-bio">Giới thiệu bản thân...</div></div>
                         <div class="section"><div class="section-title">Kinh nghiệm</div><div class="content preview-experience">Kinh nghiệm làm việc...</div></div>
                         <div class="section"><div class="section-title">Học vấn</div><div class="content preview-education">Học vấn...</div></div>
                         <div class="section"><div class="section-title">Kỹ năng</div><div class="content preview-skills">Kỹ năng...</div></div>
+                        <div class="section"><div class="section-title">Ngoại ngữ</div><div class="content preview-languages">Ngoại ngữ...</div></div>
                     </div>
 
-                    <!-- Contemporary layout -->
-                    <div class="cv-contemporary" id="preview-contemporary" style="display:none;">
+                    <!-- Blue layout -->
+                    <div class="cv-blue" id="preview-blue" style="display:none;">
                         <div class="sidebar">
-                            <div class="avatar-rect" id="preview-avatar" data-bg="{{ user.picture or '' }}"></div>
+                            <div class="avatar-rect" id="preview-avatar" data-bg="{{ user.cv_picture or '' }}"></div>
                             <div class="side-name preview-name">Họ và Tên</div>
                             <div class="side-job preview-job">Chức danh</div>
+                            <div class="side-divider"></div>
                             <div class="side-section">
                                 <div class="side-title">LIÊN HỆ</div>
                                 <div class="side-content">
-                                    <b>Email:</b> <span class="preview-email">...</span><br/><br/>
-                                    <b>Phone:</b> <span class="preview-phone">...</span><br/><br/>
-                                    <b>Address:</b> <span class="preview-address">...</span>
+                                    <b>Email:</b> <br><span class="preview-email">...</span><br/><br/>
+                                    <b>Phone:</b> <br><span class="preview-phone">...</span><br/><br/>
+                                    <b>Address:</b> <br><span class="preview-address">...</span>
                                 </div>
+                            </div>
+                            <div class="side-section">
+                                <div class="side-title">KỸ NĂNG</div>
+                                <div class="side-content preview-skills">...</div>
                             </div>
                             <div class="side-section">
                                 <div class="side-title">HỌC VẤN</div>
@@ -460,8 +510,8 @@
                                 <div class="main-content preview-experience">...</div>
                             </div>
                             <div class="main-section">
-                                <div class="main-title">KỸ NĂNG</div>
-                                <div class="main-content preview-skills">...</div>
+                                <div class="main-title">NGOẠI NGỮ</div>
+                                <div class="main-content preview-languages">...</div>
                             </div>
                         </div>
                     </div>
@@ -492,7 +542,7 @@
 
 <script>
   // Core State
-  let selectedTemplate = 'minimalist';
+  let selectedTemplate = 'white';
   let isSubmenuOpen = false;
 
   function toggleUserMenu() {
@@ -544,7 +594,7 @@
   function createNewCv() {
       document.getElementById('cvForm').reset();
       document.getElementById('cv_id_input').value = '';
-      selectTemplate('minimalist');
+      selectTemplate('white');
       if (!isSubmenuOpen) toggleCreateCvMenu();
       showStep(1);
   }
@@ -556,7 +606,7 @@
       document.getElementById('tpl-' + tpl).classList.add('selected');
       
       const info = document.getElementById('preview-template-info');
-      info.innerText = 'Đang dùng mẫu: ' + (tpl === 'minimalist' ? 'Tối Giản' : 'Đương Đại');
+      info.innerText = 'Đang dùng mẫu: ' + (tpl === 'white' ? 'White' : 'Blue');
       
       syncPreview();
   }
@@ -570,13 +620,10 @@
           });
       });
 
-      if (selectedTemplate === 'minimalist') {
-          document.getElementById('preview-minimalist').style.display = 'block';
-          document.getElementById('preview-contemporary').style.display = 'none';
-      } else {
-          document.getElementById('preview-minimalist').style.display = 'none';
-          document.getElementById('preview-contemporary').style.display = 'flex';
-      }
+      const id = selectedTemplate;
+      document.getElementById('preview-white').style.display = (id === 'white' ? 'block' : 'none');
+      document.getElementById('preview-blue').style.display = (id === 'blue' ? 'flex' : 'none');
+      document.getElementById('preview-template-info').innerText = 'Đang dùng mẫu: ' + (id === 'white' ? 'White' : 'Blue');
   }
 
   function previewAvatar(input) {
@@ -596,7 +643,14 @@
   function openFullscreen() {
     const renderArea = document.getElementById('cv-render-area').innerHTML;
     const fullscreenContent = document.getElementById('fullscreen-content');
-    fullscreenContent.innerHTML = `<div class="cv-paper" style="box-shadow:none;">${renderArea}</div>`;
+    fullscreenContent.innerHTML = renderArea;
+    
+    // Ensure the correct template is visible
+    const tplBlue = fullscreenContent.querySelector('#preview-blue');
+    const tplWhite = fullscreenContent.querySelector('#preview-white');
+    if (tplBlue) tplBlue.style.display = (selectedTemplate === 'blue' ? 'flex' : 'none');
+    if (tplWhite) tplWhite.style.display = (selectedTemplate === 'white' ? 'block' : 'none');
+    
     document.getElementById('fullscreen-modal').classList.add('active');
     document.body.style.overflow = 'hidden';
   }
@@ -633,9 +687,9 @@
               if (input) input.value = val !== null ? val : '';
           }
           if (data.template) {
-              selectTemplate(data.template);
+              selectTemplate(data.template === 'minimalist' ? 'white' : data.template);
           } else {
-              selectTemplate('minimalist');
+              selectTemplate('white');
           }
           if (!isSubmenuOpen) toggleCreateCvMenu();
           showStep(1);

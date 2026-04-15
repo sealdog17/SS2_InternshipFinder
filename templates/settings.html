@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cài đặt tài khoản - InternshipFinder</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #2563eb; --primary-dark: #1d4ed8;
+      --navy: #0f1f3d; --bg: #f1f5f9; --white: #fff;
+      --border: #e2e8f0; --text: #1e293b; --muted: #64748b;
+      --sidebar: 260px; --navbar: 110px;
+    }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); overflow-y: scroll; overflow-x: hidden; }
+
+    /* ===== NAVBAR ===== */
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0; height: var(--navbar);
+      background: #ffffff; border-bottom: 1px solid #e5e7eb;
+      display: flex; justify-content: space-between; align-items: center; padding: 0 40px;
+      z-index: 1000; font-family: 'Inter', sans-serif;
+    }
+    .nav-logo img { height: 40px; }
+    .nav-center { display: flex; gap: 30px; height: 100%; align-items: center; }
+    .nav-link { text-decoration: none; color: #4b5563; font-size: 14px; font-weight: 500; height: 100%; display: flex; align-items: center; position: relative; }
+    .nav-link.active { color: #1964d3; font-weight: 600; }
+    .nav-link.active::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: #1964d3; border-top-left-radius: 3px; border-top-right-radius: 3px; }
+    
+    .nav-right { display: flex; gap: 20px; align-items: center; }
+    .icon-btn { color: #6b7280; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; text-decoration: none; background: #f1f5f9; border-radius: 50%; }
+    .icon-btn:hover { background: #e2e8f0; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; background: #1f2937; color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; overflow: hidden; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
+    .avatar:hover { border-color: #1964d3; }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* Dropdown UI */
+    .user-dropdown { position: relative; display: flex; align-items: center; }
+    .dropdown-menu { 
+      position: absolute; top: calc(100% + 15px); right: 0; width: 220px; 
+      background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+      border: 1px solid var(--border); display: none; flex-direction: column; z-index: 1000; padding: 8px 0;
+      animation: slideIn 0.2s ease;
+    }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .dropdown-menu.show { display: flex; }
+    .menu-header { padding: 12px 20px; border-bottom: 1px solid #f1f5f9; margin-bottom: 8px; text-align: left; }
+    .menu-header strong { display: block; font-size: 14px; color: #111827; }
+    .menu-header span { font-size: 12px; color: #64748b; }
+    .dropdown-menu a { 
+      padding: 10px 20px; font-size: 13px; color: #4b5563; text-decoration: none; 
+      display: flex; align-items: center; gap: 10px; transition: 0.2s;
+    }
+    .dropdown-menu a i { width: 16px; text-align: center; font-size: 14px; color: #94a3b8; }
+    .dropdown-menu a:hover { background: #f8fafc; color: #1964d3; }
+    .menu-divider { height: 1px; background: #f1f5f9; margin: 8px 0; }
+
+    /* ===== LAYOUT ===== */
+    .app-layout {
+      display: flex; margin-top: var(--navbar);
+      min-height: calc(100vh - var(--navbar));
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      width: var(--sidebar); flex-shrink: 0;
+      background: var(--white); border-right: 1px solid var(--border);
+      padding: 20px 0; position: fixed;
+      top: var(--navbar); bottom: 0; overflow-y: auto;
+    }
+    .sidebar-section { padding: 0 12px; margin-bottom: 4px; }
+    .sidebar-label {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.8px; color: var(--muted); padding: 0 8px;
+      margin-bottom: 6px; margin-top: 16px; display: block;
+    }
+    .sidebar-link {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 10px; border-radius: 8px; font-size: 13px;
+      font-weight: 500; color: var(--muted); text-decoration: none;
+      transition: all 0.15s; margin-bottom: 2px;
+    }
+    .sidebar-link:hover { background: var(--bg); color: var(--text); }
+    .sidebar-link.active {
+      background: #eff6ff; color: var(--primary); font-weight: 600;
+      border-left: 3px solid var(--primary);
+    }
+    .sidebar-link svg { flex-shrink: 0; }
+    .sidebar-bottom {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 12px; border-top: 1px solid var(--border);
+    }
+
+    /* ===== MAIN ===== */
+    .main-content {
+      flex: 1; margin-left: var(--sidebar);
+      padding: 28px 32px; min-height: calc(100vh - var(--navbar));
+    }
+    .page-header { margin-bottom: 24px; }
+    .page-header h1 { font-size: 22px; font-weight: 700; color: var(--text); }
+    .page-header p { font-size: 14px; color: var(--muted); margin-top: 4px; }
+
+    /* Settings Card */
+    .settings-card {
+      background: var(--white);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 24px;
+      max-width: 800px;
+    }
+    .settings-section {
+      margin-bottom: 32px;
+    }
+    .settings-section h2 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus {
+      border-color: var(--primary);
+    }
+    .btn-save {
+      padding: 10px 24px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-save:hover {
+      background: var(--primary-dark);
+    }
+
+    /* Avatar Upload */
+    .avatar-upload-container {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: #f8fafc;
+      border-radius: 12px;
+      border: 1px dashed var(--border);
+    }
+    .avatar-preview-wrapper {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      flex-shrink: 0;
+    }
+    .avatar-preview {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid white;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      background: var(--navy);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      font-weight: 700;
+    }
+    .upload-label {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 32px;
+      height: 32px;
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: 2px solid white;
+      transition: 0.2s;
+    }
+    .upload-label:hover {
+      background: var(--primary-dark);
+      transform: scale(1.1);
+    }
+    .avatar-info h3 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .avatar-info p {
+      font-size: 12px;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    /* FLASH */
+    .flash-messages { margin-bottom: 16px; }
+    .flash { padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 500; margin-bottom: 8px; }
+    .flash.success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .flash.danger  { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+  </style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="navbar">
+  <a href="{{ url_for('job_list') }}" class="nav-left">
+    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" style="height: 85px; vertical-align: middle;">
+  </a>
+  
+  <div class="nav-center">
+    <a href="{{ url_for('job_list') }}" class="nav-link">Tổng quan</a>
+    <a href="{{ url_for('profile') }}" class="nav-link">Hồ sơ của tôi</a>
+    <a href="{{ url_for('client_projects') }}" class="nav-link">Dự án khách hàng</a>
+    <a href="{{ url_for('resources') }}" class="nav-link active">Tài nguyên</a>
+  </div>
+
+  <div class="nav-right">
+    <div class="icon-btn" title="Thông báo"><i class="far fa-bell" style="font-size: 16px;"></i></div>
+    <a href="{{ url_for('settings') }}" class="icon-btn" title="Cài đặt"><i class="fas fa-cog" style="font-size: 16px;"></i></a>
+    
+    <div class="user-dropdown">
+      <div class="avatar" id="userAvatarBtn" onclick="toggleUserMenu()">
+        {% if session.get('user_picture') %}<img src="{{ session.get('user_picture') }}">
+        {% else %}{{ (session.get('user_name', 'U') or 'U')[0].upper() }}{% endif %}
+      </div>
+      <div class="dropdown-menu" id="userDropdownMenu">
+        <div class="menu-header">
+          <strong>{{ session.get('user_name', 'Người dùng') }}</strong>
+          <span>{{ session.get('user_email', '') }}</span>
+        </div>
+        <div class="menu-divider"></div>
+        <a href="{{ url_for('profile') }}"><i class="far fa-user"></i> Hồ sơ của tôi</a>
+        <a href="{{ url_for('settings') }}"><i class="fas fa-cog"></i> Cài đặt tài khoản</a>
+        <div class="menu-divider"></div>
+        <a href="{{ url_for('logout') }}" style="color: #ef4444;"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="app-layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <span class="sidebar-label">Tài nguyên</span>
+      <a href="{{ url_for('settings') }}" class="sidebar-link active">
+        <i class="fas fa-user-cog" style="width: 15px;"></i>
+        Cài đặt tài khoản
+      </a>
+      <a href="#" class="sidebar-link">
+        <i class="fas fa-book" style="width: 15px;"></i>
+        Hướng dẫn sử dụng
+      </a>
+      <a href="#" class="sidebar-link">
+        <i class="fas fa-question-circle" style="width: 15px;"></i>
+        Câu hỏi thường gặp
+      </a>
+    </div>
+
+    <div class="sidebar-bottom">
+      <a href="{{ url_for('logout') }}" class="sidebar-link" style="color:#ef4444;">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Đăng xuất
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+    <div class="page-header">
+      <h1>Cài đặt tài khoản</h1>
+      <p>Quản lý thông tin bảo mật và cấu hình tài khoản của bạn</p>
+    </div>
+
+    <div class="flash-messages">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+      <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
+      {% endwith %}
+    </div>
+
+    <div class="settings-card">
+      <!-- Avatar Upload Section -->
+      <div class="avatar-upload-container">
+        <div class="avatar-preview-wrapper">
+          <div class="avatar-preview" id="settingsAvatarPreview">
+            {% if user.picture %}
+              <img src="{{ user.picture }}" id="avatarImg" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">
+            {% else %}
+              {{ (user.name or user.username or 'U')[0].upper() }}
+            {% endif %}
+          </div>
+          <label for="avatarInput" class="upload-label" title="Thay đổi ảnh đại diện">
+            <i class="fas fa-camera"></i>
+          </label>
+          <input type="file" id="avatarInput" accept="image/*" style="display: none;" onchange="uploadAvatar(this)">
+        </div>
+        <div class="avatar-info">
+          <h3>Ảnh đại diện</h3>
+          <p>Nhấp vào biểu tượng máy ảnh để tải lên ảnh mới. <br>Định dạng hỗ trợ: JPG, PNG (Tối đa 2MB).</p>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h2>Thông tin đăng nhập</h2>
+        <div class="form-group">
+          <label>Email đại diện</label>
+          <input type="email" value="{{ user.email }}" disabled style="background: #f8fafc; cursor: not-allowed;">
+        </div>
+        <div class="form-group">
+          <label>Tên người dùng</label>
+          <input type="text" value="{{ user.username or '' }}" disabled style="background: #f8fafc; cursor: not-allowed;">
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h2>Đổi mật khẩu</h2>
+        <form>
+          <div class="form-group">
+            <label>Mật khẩu hiện tại</label>
+            <input type="password" placeholder="••••••••">
+          </div>
+          <div class="form-group">
+            <label>Mật khẩu mới</label>
+            <input type="password" placeholder="Tối thiểu 8 ký tự">
+          </div>
+          <div class="form-group">
+            <label>Xác nhận mật khẩu mới</label>
+            <input type="password" placeholder="Nhập lại mật khẩu mới">
+          </div>
+          <button type="button" class="btn-save" onclick="alert('Tính năng đổi mật khẩu đang được phát triển!')">Cập nhật mật khẩu</button>
+        </form>
+      </div>
+
+      <div class="settings-section" style="border-top: 1px solid #fee2e2; padding-top: 24px; margin-top: 40px;">
+        <h2 style="color: #ef4444; border-bottom: none;">Vùng nguy hiểm</h2>
+        <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px;">Xóa tài khoản sẽ gỡ bỏ toàn bộ dữ liệu CV và thông tin cá nhân của bạn. Hành động này không thể hoàn tác.</p>
+        <button type="button" style="padding: 10px 20px; background: transparent; color: #ef4444; border: 1px solid #fecaca; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;" onclick="confirm('Bạn có chắc chắn muốn xóa tài khoản không?')">Xóa tài khoản</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  function toggleUserMenu() {
+    document.getElementById('userDropdownMenu').classList.toggle('show');
+  }
+
+  window.onclick = function(event) {
+    if (!event.target.matches('#userAvatarBtn') && !event.target.closest('#userAvatarBtn')) {
+      const dropdowns = document.getElementsByClassName("dropdown-menu");
+      for (let i = 0; i < dropdowns.length; i++) {
+        const openDropdown = dropdowns[i];
+        if (openDropdown.classList.contains('show')) {
+          openDropdown.classList.remove('show');
+        }
+      }
+    }
+  }
+
+  function uploadAvatar(input) {
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      
+      // Kiểm tra kích thước file (2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        alert('File quá lớn! Vui lòng chọn ảnh dưới 2MB.');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      // Hiệu ứng chờ
+      const preview = document.getElementById('settingsAvatarPreview');
+      const originalHTML = preview.innerHTML;
+      preview.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+      fetch('{{ url_for("settings") }}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Cập nhật ảnh tại trang settings
+          preview.innerHTML = `<img src="${data.picture_url}" id="avatarImg" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+          
+          // Cập nhật ảnh tại header (giả sử có ID hoặc class tương ứng)
+          const headerAvatars = document.querySelectorAll('.avatar img');
+          headerAvatars.forEach(img => {
+            img.src = data.picture_url;
+          });
+          
+          // Nếu không có ảnh trong header (đang hiển thị chữ cái đầu), thay thế bằng thẻ img
+          document.querySelectorAll('.avatar').forEach(div => {
+            if (!div.querySelector('img')) {
+              div.innerHTML = `<img src="${data.picture_url}">`;
+            }
+          });
+
+          // Thông báo thành công
+          const flashContainer = document.querySelector('.flash-messages');
+          flashContainer.innerHTML = '<div class="flash success">Cập nhật ảnh đại diện thành công!</div>';
+          setTimeout(() => { flashContainer.innerHTML = ''; }, 3000);
+        } else {
+          preview.innerHTML = originalHTML;
+          alert('Có lỗi xảy ra khi upload ảnh.');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        preview.innerHTML = originalHTML;
+        alert('Có lỗi kết nối. Vui lòng thử lại.');
+      });
+    }
+  }
+</script>
+</body>
+</html>

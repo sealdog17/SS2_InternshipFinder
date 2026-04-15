@@ -177,12 +177,12 @@
       <a href="{{ url_for('job_list') }}" class="nav-link">Tổng quan</a>
       <a href="{{ url_for('profile') }}" class="nav-link active">Hồ sơ của tôi</a>
       <a href="{{ url_for('client_projects') }}" class="nav-link">Dự án khách hàng</a>
-      <a href="#" class="nav-link">Tài nguyên</a>
+      <a href="{{ url_for('resources') }}" class="nav-link">Tài nguyên</a>
     </div>
 
         <div class="nav-right">
       <div class="icon-btn" title="Thông báo"><i class="far fa-bell" style="font-size: 16px;"></i></div>
-      <a href="{{ url_for('edit_profile') }}" class="icon-btn" title="Cài đặt"><i class="fas fa-cog" style="font-size: 16px;"></i></a>
+      <a href="{{ url_for('settings') }}" class="icon-btn" title="Cài đặt"><i class="fas fa-cog" style="font-size: 16px;"></i></a>
       
       <div class="user-dropdown">
         <div class="avatar" id="userAvatarBtn" onclick="toggleUserMenu()">
@@ -196,7 +196,7 @@
           </div>
           <div class="menu-divider"></div>
           <a href="{{ url_for('profile') }}"><i class="far fa-user"></i> Hồ sơ của tôi</a>
-          <a href="{{ url_for('edit_profile') }}"><i class="fas fa-cog"></i> Cài đặt tài khoản</a>
+          <a href="{{ url_for('settings') }}"><i class="fas fa-cog"></i> Cài đặt tài khoản</a>
           <div class="menu-divider"></div>
           <a href="{{ url_for('logout') }}" style="color: #ef4444;"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
         </div>
@@ -244,7 +244,7 @@
         <div class="cv-aside">
           <div class="cv-avatar-wrap">
             <div class="cv-avatar">
-              {% if session.get('user_picture') %}<img src="{{ session.get('user_picture') }}" crossorigin="anonymous">
+              {% if user.cv_picture %}<img src="{{ user.cv_picture }}" crossorigin="anonymous">
               {% else %}{{ (user.name or 'A')[0].upper() }}{% endif %}
             </div>
             <div class="cv-name">{{ user.name or 'Nguyễn Văn A' }}</div>

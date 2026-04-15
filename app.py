@@ -1,6 +1,6 @@
 import os
 import secrets
-from datetime import timedelta, date
+from datetime import datetime, timedelta, date, timezone
 from io import BytesIO
 
 from flask import Flask, render_template, redirect, url_for, session, request, flash, send_file, jsonify
@@ -33,6 +33,11 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///jobfinder.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
+# ===================== HELPERS =====================
+def get_vietnam_time():
+    """Trả về thời gian hiện tại theo múi giờ Việt Nam (GMT+7)"""
+    return datetime.now(timezone(timedelta(hours=7)))
+
 # ===================== MODELS =====================
 
 class User(db.Model):
@@ -43,8 +48,9 @@ class User(db.Model):
     username = db.Column(db.String(50), unique=True, nullable=True)
     password_hash = db.Column(db.String(200), nullable=True)
     name = db.Column(db.String(100))
-    picture = db.Column(db.String(200))
-    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    picture = db.Column(db.String(200)) # Ảnh tài khoản (Header)
+    cv_picture = db.Column(db.String(200)) # Ảnh trong hồ sơ CV
+    created_at = db.Column(db.DateTime, default=get_vietnam_time)
 
     phone = db.Column(db.String(20))
     address = db.Column(db.String(200))
@@ -74,7 +80,7 @@ class CV(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     version = db.Column(db.Integer, default=1)
     content = db.Column(db.Text)
-    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    created_at = db.Column(db.DateTime, default=get_vietnam_time)
     user = db.relationship('User', back_populates='cvs')
     def __repr__(self):
         return f'<CV user_id={self.user_id} version={self.version}>'
@@ -93,7 +99,7 @@ class Job(db.Model):
     application_deadline = db.Column(db.Date)
     apply_url = db.Column(db.String(500))
     source = db.Column(db.String(50))
-    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    created_at = db.Column(db.DateTime, default=get_vietnam_time)
     def __repr__(self):
         return f'<Job {self.title} at {self.company}>'
 
@@ -252,6 +258,35 @@ def logout():
 def client_projects():
     return render_template('client_projects.html')
 
+# --------------------- RESOURCES & SETTINGS ---------------------
+@app.route('/resources')
+@login_required
+def resources():
+    return redirect(url_for('settings'))
+
+@app.route('/settings', methods=['GET', 'POST'])
+@login_required
+def settings():
+    user = User.query.get(session['user_id'])
+    if request.method == 'POST':
+        # Xử lý upload ảnh đại diện
+        file = request.files.get('avatar')
+        if file and file.filename != '':
+            from werkzeug.utils import secure_filename
+            filename = secure_filename(file.filename)
+            upload_path = os.path.join(app.root_path, 'static', 'uploads')
+            if not os.path.exists(upload_path):
+                os.makedirs(upload_path)
+            file.save(os.path.join(upload_path, filename))
+            user.picture = url_for('static', filename='uploads/' + filename)
+            session['user_picture'] = user.picture # Chỉ cập nhật ảnh tài khoản/header
+            db.session.commit()
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({'success': True, 'picture_url': user.picture})
+            flash('Cập nhật ảnh đại diện thành công!', 'success')
+        return redirect(url_for('settings'))
+    return render_template('settings.html', user=user)
+
 # --------------------- PROFILE & CV ---------------------
 @app.route('/profile')
 @login_required
@@ -273,8 +308,11 @@ def edit_profile():
             if not os.path.exists(upload_path):
                 os.makedirs(upload_path)
             file.save(os.path.join(upload_path, filename))
-            user.picture = url_for('static', filename='uploads/' + filename)
-            # session['user_picture'] = user.picture  # Không cập nhật header bằng ảnh CV
+            user.cv_picture = url_for('static', filename='uploads/' + filename) # Chỉ cập nhật ảnh CV
+            # session['user_picture'] = user.cv_picture  # KHÔNG cập nhật ảnh header
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                db.session.commit()
+                return jsonify({'success': True, 'cv_picture_url': user.cv_picture})
 
         user.name = request.form.get('name') or user.name
         user.phone = request.form.get('phone')
@@ -300,10 +338,10 @@ def edit_profile():
         try:
             data = json.loads(cv.content)
             cv.parsed_title = data.get('job_title') or f"Phiên bản {cv.version}"
-            cv.template_name = "Đương Đại" if data.get('template') == 'contemporary' else "Tối Giản"
+            cv.template_name = "Blue" if data.get('template') in ['blue', 'contemporary'] else "White"
         except:
             cv.parsed_title = f"Phiên bản {cv.version}"
-            cv.template_name = "Tối Giản"
+            cv.template_name = "White"
 
     return render_template('edit_profile.html', user=user, cvs=cvs)
 
@@ -322,7 +360,7 @@ def save_cv():
         'education': request.form.get('education'),
         'experience': request.form.get('experience'),
         'languages': request.form.get('languages'),
-        'template': request.form.get('cv_template', 'minimalist')
+        'template': request.form.get('cv_template', 'white')
     }
     
     cv_id = request.form.get('cv_id')
@@ -331,6 +369,7 @@ def save_cv():
         if cv:
             cv.content = json.dumps(cv_data)
             cv.version += 1
+            cv.created_at = get_vietnam_time()
             db.session.commit()
             return jsonify({'success': True, 'cv_id': cv.id})
     
@@ -361,7 +400,7 @@ def export_pdf():
     
     # Check if exporting a specific CV version or current profile
     cv_id = request.args.get('cv_id')
-    template_type = request.args.get('template', 'minimalist')
+    template_type = request.args.get('template', 'white')
     
     cv_data = {
         'name': user.name,
@@ -405,123 +444,154 @@ def export_pdf():
         font_bold = 'Helvetica-Bold'
 
     buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=A4,
-                            rightMargin=0.3*inch, leftMargin=0.3*inch,
-                            topMargin=0.3*inch, bottomMargin=0.3*inch)
+    # Remove default margins to allow full-bleed sidebar background
+    doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=0, leftMargin=0, topMargin=0, bottomMargin=0)
+    
+    def draw_blue_sidebar(canvas, doc):
+        canvas.saveState()
+        canvas.setFillColor(colors.HexColor('#1964d3'))
+        # Using absolute points for A4 (595.27 x 841.89)
+        canvas.rect(0, 0, 2.8*inch, 842, fill=1, stroke=0)
+        canvas.restoreState()
+
     styles = getSampleStyleSheet()
 
     # Shared Styles using Times New Roman
     style_normal = ParagraphStyle('Normal', parent=styles['Normal'], fontName=font_main, fontSize=10, leading=14, textColor=colors.HexColor('#4b5563'))
-    style_section = ParagraphStyle('Section', parent=styles['Heading2'], fontName=font_bold, fontSize=14, 
-                                   textColor=colors.HexColor('#111827'), spaceAfter=8, spaceBefore=12)
     
     story = []
 
-    if template_type == 'contemporary':
-        # Contemporary: Two-column layout with sidebar
-        # Left column (Blue Sidebar)
-        left_items = []
-        
-        # Profile Picture Placeholder
-        if user.picture:
+    if template_type == 'blue':
+        sidebar_items = []
+        main_items = []
+
+        # Sidebar: Profile Picture
+        pic = user.cv_picture or user.picture
+        if pic:
             try:
-                # Check if it's a relative path from static
-                img_path = user.picture.replace('/static/', 'static/')
+                img_path = pic.replace('/static/', 'static/').split('?')[0]
                 if os.path.exists(img_path):
-                    from reportlab.lib.utils import ImageReader
-                    img = ImageReader(img_path)
-                    left_items.append(Image(img_path, width=1.4*inch, height=1.4*inch)) # Adjusted to match web circle feel
-                    left_items.append(Spacer(1, 0.2*inch))
+                    # Slightly larger image for the PDF sidebar
+                    sidebar_items.append(Image(img_path, width=2.1*inch, height=2.6*inch))
+                    sidebar_items.append(Spacer(1, 0.35*inch))
             except:
                 pass
 
-        name_style = ParagraphStyle('ContempName', fontName=font_bold, fontSize=20, textColor=colors.white, alignment=TA_CENTER)
-        job_style = ParagraphStyle('ContempJob', fontName=font_main, fontSize=11, textColor=colors.HexColor('#93c5fd'), alignment=TA_CENTER, spaceAfter=20)
+        name_style = ParagraphStyle('PdfBlueName', fontName=font_bold, fontSize=24, textColor=colors.white, alignment=TA_CENTER, leading=28)
+        job_style = ParagraphStyle('PdfBlueJob', fontName=font_main, fontSize=12, textColor=colors.HexColor('#bfdbfe'), alignment=TA_CENTER, spaceAfter=40, letterSpacing=2)
         
-        left_items.append(Paragraph(cv_data['name'], name_style))
-        left_items.append(Paragraph(cv_data['job_title'] or 'Ứng viên', job_style))
+        sidebar_items.append(Paragraph(cv_data['name'].upper(), name_style))
+        sidebar_items.append(Paragraph((cv_data['job_title'] or 'Ứng viên').upper(), job_style))
         
-        sidebar_section = ParagraphStyle('SideSection', fontName=font_bold, fontSize=11, textColor=colors.white, spaceBefore=15, spaceAfter=8)
-        sidebar_text = ParagraphStyle('SideText', fontName=font_main, fontSize=9, textColor=colors.HexColor('#bfdbfe'), leading=12)
+        from reportlab.platypus import HRFlowable
+        def get_divider():
+            return HRFlowable(width="100%", thickness=1, color=colors.HexColor('#60a5fa'), spaceAfter=15)
+
+        side_section_style = ParagraphStyle('PdfSideSec', fontName=font_bold, fontSize=13, textColor=colors.white, spaceBefore=25, spaceAfter=8)
+        side_text_style = ParagraphStyle('PdfSideText', fontName=font_main, fontSize=10.5, textColor=colors.HexColor('#eff6ff'), leading=18)
         
-        left_items.append(Paragraph("LIÊN HỆ", sidebar_section))
-        left_items.append(Paragraph(f"<b>Email:</b><br/>{cv_data['email']}", sidebar_text))
+        sidebar_items.append(Paragraph("LIÊN HỆ", side_section_style))
+        sidebar_items.append(get_divider())
+        sidebar_items.append(Paragraph(f"<b>Email:</b><br/>{cv_data['email']}", side_text_style))
         if cv_data['phone']:
-            left_items.append(Paragraph(f"<b>Số điện thoại:</b><br/>{cv_data['phone']}", sidebar_text))
+            sidebar_items.append(Paragraph(f"<b>Điện thoại:</b><br/>{cv_data['phone']}", side_text_style))
         if cv_data['address']:
-            left_items.append(Paragraph(f"<b>Địa chỉ:</b><br/>{cv_data['address']}", sidebar_text))
+            sidebar_items.append(Paragraph(f"<b>Địa chỉ:</b><br/>{cv_data['address']}", side_text_style))
         
         if cv_data['skills']:
-            left_items.append(Paragraph("KỸ NĂNG", sidebar_section))
+            sidebar_items.append(Paragraph("KỸ NĂNG", side_section_style))
+            sidebar_items.append(get_divider())
             for s in cv_data['skills'].split(','):
                 if s.strip():
-                    left_items.append(Paragraph(f"• {s.strip()}", sidebar_text))
+                    sidebar_items.append(Paragraph(f"• {s.strip()}", side_text_style))
         
         if cv_data['education']:
-            left_items.append(Paragraph("HỌC VẤN", sidebar_section))
-            left_items.append(Paragraph(cv_data['education'], sidebar_text))
+            sidebar_items.append(Paragraph("HỌC VẤN", side_section_style))
+            sidebar_items.append(get_divider())
+            sidebar_items.append(Paragraph(cv_data['education'], side_text_style))
 
-        # Right column (Main Area)
-        right_items = []
-        main_section = ParagraphStyle('MainSection', fontName=font_bold, fontSize=13, textColor=colors.HexColor('#1d4ed8'), spaceBefore=10, spaceAfter=10)
+        # Main Column items
+        main_section_style = ParagraphStyle('PdfMainSec', fontName=font_bold, fontSize=16, textColor=colors.HexColor('#1e40af'), spaceBefore=25, spaceAfter=15)
+        
+        def get_main_divider():
+            # Matches the border-bottom / divider effect in the web view
+            return HRFlowable(width="100%", thickness=1, color=colors.HexColor('#e5e7eb'), spaceAfter=15, spaceBefore=-10)
+
+        main_text_style = ParagraphStyle('PdfMainText', fontName=font_main, fontSize=12.5, textColor=colors.HexColor('#1f2937'), leading=22)
         
         if cv_data['bio']:
-            right_items.append(Paragraph("GIỚI THIỆU BẢN THÂN", main_section))
-            right_items.append(Paragraph(cv_data['bio'], style_normal))
-            right_items.append(Spacer(1, 0.15*inch))
+            main_items.append(Paragraph("GIỚI THIỆU", main_section_style))
+            main_items.append(get_main_divider())
+            main_items.append(Paragraph(cv_data['bio'], main_text_style))
         
         if cv_data['experience']:
-            right_items.append(Paragraph("KINH NGHIỆM LÀM VIỆC", main_section))
+            main_items.append(Paragraph("KINH NGHIỆM", main_section_style))
+            main_items.append(get_main_divider())
             for exp in cv_data['experience'].split('\n'):
                 if exp.strip():
-                    right_items.append(Paragraph(exp.strip(), style_normal))
+                    main_items.append(Paragraph(exp.strip(), main_text_style))
 
         if cv_data['languages']:
-            right_items.append(Paragraph("NGÔN NGỮ", main_section))
-            right_items.append(Paragraph(cv_data['languages'], style_normal))
+            main_items.append(Paragraph("NGOẠI NGỮ", main_section_style))
+            main_items.append(get_main_divider())
+            main_items.append(Paragraph(cv_data['languages'], main_text_style))
 
-        # Table for Sidebar Layout
-        table_data = [[left_items, right_items]]
-        col_widths = [doc.width * 0.35, doc.width * 0.65]
-        table = Table(table_data, colWidths=col_widths)
-        table.setStyle(TableStyle([
-            ('BACKGROUND', (0,0), (0,0), colors.HexColor('#1964d3')),
+        data = [[sidebar_items, main_items]]
+        # Sidebar 3 inch, Main 5.27 inch (Total A4 width is 8.27 inch)
+        t = Table(data, colWidths=[3*inch, 5.27*inch])
+        t.setStyle(TableStyle([
             ('VALIGN', (0,0), (-1,-1), 'TOP'),
-            ('LEFTPADDING', (0,0), (0,0), 20),
-            ('RIGHTPADDING', (0,0), (0,0), 15),
-            ('TOPPADDING', (0,0), (-1,-1), 25),
-            ('BOTTOMPADDING', (0,0), (-1,-1), 25),
-            # Ensure the table expands to full height if possible (approximate)
+            ('LEFTPADDING', (0,0), (0,0), 30),
+            ('RIGHTPADDING', (0,0), (0,0), 30),
+            ('LEFTPADDING', (1,0), (1,0), 45),
+            ('RIGHTPADDING', (1,0), (1,0), 45),
+            ('TOPPADDING', (0,0), (-1,-1), 40), # Reduced to align with sidebar content
         ]))
-        story.append(table)
+        story.append(t)
+        
+        doc.build(story, onFirstPage=draw_blue_sidebar, onLaterPages=draw_blue_sidebar)
     else:
-        # Minimalist Layout (Existing or similar)
-        style_name = ParagraphStyle('Name', fontName=font_bold, fontSize=28, textColor=colors.HexColor('#111827'), alignment=TA_CENTER, spaceAfter=4)
-        style_job = ParagraphStyle('Job', fontName=font_main, fontSize=14, textColor=colors.HexColor('#3b82f6'), alignment=TA_CENTER, spaceAfter=20)
+        # White Layout (Centered & Elegant) - Fine-tuned for visual parity
+        doc.topMargin = 0.7*inch
+        doc.leftMargin = 0.8*inch
+        doc.rightMargin = 0.8*inch
         
-        story.append(Paragraph(cv_data['name'], style_name))
-        story.append(Paragraph((cv_data['job_title'] or 'Ứng viên').upper(), style_job))
+        # Name Header - Increased spaceAfter for better separation
+        style_white_name = ParagraphStyle('WhiteName', fontName=font_bold, fontSize=22, textColor=colors.HexColor('#111827'), alignment=TA_CENTER, letterSpacing=4, spaceAfter=18)
+        story.append(Paragraph(cv_data['name'].upper(), style_white_name))
         
-        contact_line = f"{cv_data['email']}  |  {cv_data['phone'] or ''}  |  {cv_data['address'] or ''}"
-        story.append(Paragraph(contact_line, ParagraphStyle('Contact', fontName=font_main, alignment=TA_CENTER, fontSize=9, textColor=colors.grey)))
+        # Contact line - More spaced from name and divider
+        contact_parts = []
+        if cv_data['address']: contact_parts.append(cv_data['address'].upper())
+        contact_parts.append(cv_data['email'].upper())
+        if cv_data['phone']: contact_parts.append(cv_data['phone'].upper())
+        
+        style_white_contact = ParagraphStyle('WhiteContact', fontName=font_main, fontSize=8.5, textColor=colors.HexColor('#6b7280'), alignment=TA_CENTER, letterSpacing=1.5, spaceAfter=30)
+        story.append(Paragraph("  •  ".join(contact_parts), style_white_contact))
+        
+        # Thinner Main Divider for elegance
         from reportlab.platypus import HRFlowable
-        story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor('#e5e7eb'), spaceBefore=15, spaceAfter=15))
+        story.append(HRFlowable(width="100%", thickness=1.5, color=colors.HexColor('#111827'), spaceAfter=40))
+        
+        # Section Styles - Increased spaceBefore for "breathable" layout
+        white_section_style = ParagraphStyle('WhiteSec', fontName=font_bold, fontSize=12, textColor=colors.HexColor('#111827'), spaceBefore=35, spaceAfter=12, letterSpacing=2)
+        white_text_style = ParagraphStyle('WhiteText', fontName=font_main, fontSize=11, textColor=colors.HexColor('#374151'), leading=20)
+        
+        def add_white_section(title, content):
+            if content:
+                story.append(Paragraph(title.upper(), white_section_style))
+                # Very thin section divider
+                story.append(HRFlowable(width="100%", thickness=0.8, color=colors.HexColor('#e5e7eb'), spaceAfter=15, spaceBefore=-8))
+                story.append(Paragraph(content.replace('\n', '<br/>'), white_text_style))
 
-        if cv_data['bio']:
-            story.append(Paragraph("MỤC TIÊU NGHỀ NGHIỆP", style_section))
-            story.append(Paragraph(cv_data['bio'], style_normal))
+        add_white_section("GIỚI THIỆU", cv_data['bio'])
+        add_white_section("KINH NGHIỆM", cv_data['experience'])
+        add_white_section("HỌC VẤN", cv_data['education'])
+        add_white_section("KỸ NĂNG", cv_data['skills'])
+        add_white_section("NGOẠI NGỮ", cv_data['languages'])
 
-        if cv_data['experience']:
-            story.append(Paragraph("KINH NGHIỆM LÀM VIỆC", style_section))
-            for line in cv_data['experience'].split('\n'):
-                if line.strip():
-                    story.append(Paragraph(f"• {line.strip()}", style_normal))
+        doc.build(story)
 
-        if cv_data['education']:
-            story.append(Paragraph("HỌC VẤN", style_section))
-            story.append(Paragraph(cv_data['education'], style_normal))
-
-    doc.build(story)
     buffer.seek(0)
     return send_file(buffer, as_attachment=True, download_name=f"CV_{user.name}.pdf", mimetype='application/pdf')
 
@@ -557,7 +627,14 @@ def job_detail(job_id):
 # ===================== TẠO DATABASE & DỮ LIỆU MẪU =====================
 with app.app_context():
     db.create_all()
-    print("[SUCCESS] Database created successfully!")
+    # Tự động thêm cột cv_picture nếu chưa tồn tại (cho SQLite)
+    try:
+        from sqlalchemy import text
+        db.session.execute(text('ALTER TABLE users ADD COLUMN cv_picture VARCHAR(200)'))
+        db.session.commit()
+    except:
+        db.session.rollback()
+    print("[SUCCESS] Database created/updated successfully!")
 
     if Job.query.count() == 0:
         sample_jobs = [
