@@ -516,12 +516,14 @@ def export_pdf():
         def add_main_section(title, content):
             if content:
                 # Table-based header to achieve "Text ———" effect (matches Web flex)
-                header_table = Table([[Paragraph(title.upper(), main_section_style), ""]], colWidths=[None, 3.5*inch])
+                # Fixed widths prevent word-wrap/collapse issues seen in previous version
+                header_table = Table([[Paragraph(title.upper(), main_section_style), ""]], colWidths=[1.8*inch, 3.2*inch])
                 header_table.setStyle(TableStyle([
                     ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
-                    ('LINEBELOW', (1,0), (1,0), 1, colors.HexColor('#e2e8f0')), # The horizontal line after text
+                    ('LINEBELOW', (1,0), (1,0), 1, colors.HexColor('#94a3b8')), # Sharper line color
                     ('LEFTPADDING', (0,0), (-1,-1), 0),
-                    ('BOTTOMPADDING', (0,0), (-1,-1), 15),
+                    ('RIGHTPADDING', (0,0), (-1,-1), 0),
+                    ('BOTTOMPADDING', (0,0), (-1,-1), 8),
                 ]))
                 main_items.append(Spacer(1, 0.3*inch))
                 main_items.append(header_table)
