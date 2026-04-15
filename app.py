@@ -14,6 +14,7 @@ from reportlab.lib import colors
 from reportlab.lib.units import inch
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from werkzeug.security import generate_password_hash, check_password_hash
+import json
 
 load_dotenv()
 
@@ -295,7 +296,6 @@ def edit_profile():
         return redirect(url_for('edit_profile'))
     
     cvs = CV.query.filter_by(user_id=user.id).order_by(CV.created_at.desc()).all()
-    import json
     for cv in cvs:
         try:
             data = json.loads(cv.content)
@@ -310,7 +310,6 @@ def edit_profile():
 @app.route('/profile/cv/save', methods=['POST'])
 @login_required
 def save_cv():
-    import json
     user_id = session['user_id']
     cv_data = {
         'name': request.form.get('name'),
@@ -351,7 +350,6 @@ def delete_cv(cv_id):
 @app.route('/profile/cv/load/<int:cv_id>')
 @login_required
 def load_cv(cv_id):
-    import json
     cv = CV.query.filter_by(id=cv_id, user_id=session['user_id']).first_or_404()
     data = json.loads(cv.content)
     return jsonify(data)
@@ -359,7 +357,6 @@ def load_cv(cv_id):
 @app.route('/profile/export-pdf')
 @login_required
 def export_pdf():
-    import json
     user = User.query.get(session['user_id'])
     
     # Check if exporting a specific CV version or current profile
@@ -383,7 +380,6 @@ def export_pdf():
     if cv_id and cv_id.isdigit():
         cv = CV.query.filter_by(id=int(cv_id), user_id=user.id).first()
         if cv:
-            import json
             saved_data = json.loads(cv.content)
             cv_data.update(saved_data)
             if 'template' in saved_data:
