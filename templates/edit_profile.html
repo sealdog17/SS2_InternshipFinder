@@ -231,21 +231,44 @@
     }
     #fullscreen-content .cv-paper { box-shadow: none; border: none; margin: 0; }
  
-    /* Dropdown Styles for Download Button */
+    /* Specific Styles for Download Button Dropdown */
     .download-dropdown { position: relative; flex: 1; display: flex; }
-    .dropdown-menu {
-        position: absolute; bottom: 100%; right: 0; margin-bottom: 10px;
+    .download-menu {
+        position: absolute; top: 100%; right: 0; margin-top: 8px;
         background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-        display: none; flex-direction: column; min-width: 130px; z-index: 1000;
+        display: none; flex-direction: column; min-width: 140px; z-index: 1000;
         overflow: hidden; border: 1px solid #f1f5f9;
+        animation: slideIn 0.2s ease;
     }
-    .download-dropdown:hover .dropdown-menu { display: flex; }
+    .download-menu.show { display: flex; }
     .dropdown-item {
         padding: 12px 16px; font-size: 13px; font-weight: 600; color: #475569;
         display: flex; align-items: center; gap: 10px; transition: 0.2s; cursor: pointer;
     }
     .dropdown-item:hover { background: #f8fafc; color: var(--primary); }
     .dropdown-item i { width: 16px; text-align: center; }
+    /* Buttons UI */
+    .btn {
+      padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; 
+      cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+      border: 1px solid transparent; text-decoration: none; font-family: inherit;
+    }
+    .btn:active { transform: scale(0.97); }
+    
+    .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(25, 100, 211, 0.2); }
+    .btn-primary:hover { background: var(--primary-hover); box-shadow: 0 6px 20px rgba(25, 100, 211, 0.3); transform: translateY(-1px); }
+    
+    .btn-outline { background: white; border-color: var(--border); color: #4b5563; }
+    .btn-outline:hover { background: #f8fafc; border-color: #cbd5e1; color: #1e293b; }
+    
+    .btn-light { background: #f1f5f9; color: #4b5563; }
+    .btn-light:hover { background: #e2e8f0; color: #1e293b; }
+
+    .bottom-actions {
+      display: flex; justify-content: flex-end; gap: 16px; margin-top: 40px; 
+      padding-top: 30px; border-top: 1px solid var(--border);
+    }
   </style>
 </head>
 <body>
@@ -337,7 +360,7 @@
           
           <div class="cv-list-grid" id="cv-items-container">
                {% for cv in cvs %}
-               <div class="form-card" style="padding:0; overflow:hidden;" id="cv-card-{{ cv.id }}">
+               <div class="form-card" style="padding:0; position:relative;" id="cv-card-{{ cv.id }}">
                     <div class="cv-card-thumb">
                          <i class="fas fa-file-alt cv-card-icon"></i>
                     </div>
@@ -348,8 +371,8 @@
                          <div style="display:flex; gap:8px; margin-top:20px;">
                              <button type="button" class="btn btn-primary flex-1" onclick="loadCv('{{ cv.id }}')">Sửa</button>
                              <div class="download-dropdown">
-                                 <button type="button" class="btn btn-outline flex-1"><i class="fas fa-download"></i></button>
-                                 <div class="dropdown-menu">
+                                 <button type="button" class="btn btn-outline flex-1" onclick="toggleDownloadMenu(event, '{{ cv.id }}')"><i class="fas fa-download"></i></button>
+                                 <div class="download-menu" id="download-menu-{{ cv.id }}">
                                      <div class="dropdown-item" onclick="exportPdfSpecific('{{ cv.id }}')"><i class="fas fa-file-pdf" style="color:#ef4444;"></i> Tải PDF</div>
                                      <div class="dropdown-item" onclick="handleExportImageFromList('{{ cv.id }}')"><i class="fas fa-image" style="color:#3b82f6;"></i> Tải PNG</div>
                                  </div>
@@ -402,7 +425,7 @@
             </div>
             <div class="bottom-actions">
               <button type="button" class="btn btn-outline" onclick="showStep('list_cvs')">Hủy bỏ</button>
-              <button type="button" class="btn btn-primary" onclick="showStep(2)">Tiếp học văn <i class="fas fa-arrow-right"></i></button>
+              <button type="button" class="btn btn-primary" onclick="showStep(2)">Tiếp tục: Học vấn <i class="fas fa-arrow-right"></i></button>
             </div>
         </div>
 
@@ -419,7 +442,7 @@
             </div>
             <div class="bottom-actions">
               <button type="button" class="btn btn-outline" onclick="showStep(1)"><i class="fas fa-arrow-left"></i> Quay lại</button>
-              <button type="button" class="btn btn-primary" onclick="showStep(3)">Tiếp kinh nghiệm <i class="fas fa-arrow-right"></i></button>
+              <button type="button" class="btn btn-primary" onclick="showStep(3)">Tiếp tục: Kinh nghiệm <i class="fas fa-arrow-right"></i></button>
             </div>
         </div>
 
@@ -433,7 +456,7 @@
             </div>
             <div class="bottom-actions">
               <button type="button" class="btn btn-outline" onclick="showStep(2)"><i class="fas fa-arrow-left"></i> Quay lại</button>
-              <button type="button" class="btn btn-primary" onclick="showStep(5)">Tiếp chọn mẫu <i class="fas fa-arrow-right"></i></button>
+              <button type="button" class="btn btn-primary" onclick="showStep(5)">Tiếp tục: Chọn mẫu <i class="fas fa-arrow-right"></i></button>
             </div>
         </div>
 
@@ -540,15 +563,6 @@
                     </div>
                   </div>
               </div>
-              <div class="ai-optimizer">
-                  <div class="opt-header"><i class="fas fa-magic"></i> Tối ưu hóa CV</div>
-                  <div class="opt-card yellow"><div class="opt-title">Mẹo AI</div><div class="opt-desc">Kinh nghiệm nên thêm các con số đo lường hiệu quả (VD: Tăng 20% doanh thu).</div></div>
-                  <div class="score-card">
-                      <div class="score-label">Điểm CV</div>
-                      <div class="score-num">85<span class="score-small">/100</span></div>
-                      <div class="score-bar"><div class="score-inner score-fill"></div></div>
-                  </div>
-              </div>
           </div>
         </div>
       </form>
@@ -573,17 +587,22 @@
     document.getElementById('userDropdownMenu').classList.toggle('show');
   }
 
-  // Close dropdown when clicking outside
+  // Close dropdowns when clicking outside
   window.onclick = function(event) {
     if (!event.target.matches('#userAvatarBtn') && !event.target.closest('#userAvatarBtn')) {
-      const dropdowns = document.getElementsByClassName("dropdown-menu");
-      for (let i = 0; i < dropdowns.length; i++) {
-        const openDropdown = dropdowns[i];
-        if (openDropdown.classList.contains('show')) {
-          openDropdown.classList.remove('show');
-        }
-      }
+      document.querySelectorAll('.user-dropdown .dropdown-menu').forEach(el => el.classList.remove('show'));
     }
+    if (!event.target.closest('.download-dropdown')) {
+      document.querySelectorAll('.download-menu').forEach(el => el.classList.remove('show'));
+    }
+  }
+
+  function toggleDownloadMenu(event, cvId) {
+    event.stopPropagation();
+    const menu = document.getElementById('download-menu-' + cvId);
+    const isOpen = menu.classList.contains('show');
+    document.querySelectorAll('.download-menu').forEach(el => el.classList.remove('show'));
+    if (!isOpen) menu.classList.add('show');
   }
 
   function toggleCreateCvMenu() {
@@ -768,17 +787,36 @@
    }
 
   function handleExportImageFromList(cvId) {
+      // Show loading indicator or message if needed
       fetch('/profile/cv/load/' + cvId)
       .then(r => r.json())
       .then(data => {
-          if (data.success) {
-              const newTpl = data.cv.template_name === 'minimalist' ? 'white' : data.cv.template_name.toLowerCase();
-              selectedTemplate = newTpl;
-              syncPreview(data.cv);
+          // In load_cv, data is the CV content object directly
+          const tpl = data.template || 'white';
+          selectedTemplate = (tpl === 'minimalist' ? 'white' : tpl);
+          
+          // Sync all fields to preview
+          syncPreview(data);
+          
+          // Brief show of preview area for capture (it's hidden in step_6)
+          const step6 = document.getElementById('step_6');
+          const originalDisplay = step6.style.display;
+          const originalPadding = step6.style.padding;
+          
+          // Move off-screen to avoid flickering
+          step6.style.position = 'fixed';
+          step6.style.left = '-9999px';
+          step6.style.display = 'block';
+          
+          setTimeout(() => {
+              handleExportImage();
+              // Restore
               setTimeout(() => {
-                  handleExportImage();
-              }, 800);
-          }
+                  step6.style.display = originalDisplay;
+                  step6.style.position = '';
+                  step6.style.left = '';
+              }, 500);
+          }, 500);
       });
   }
 
