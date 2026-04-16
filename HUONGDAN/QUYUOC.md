@@ -47,6 +47,9 @@ Luôn đảm bảo sự đồng bộ **Pixel-Perfect** giữa: Trình duyệt, X
 ### ⚙️ Logic Hệ thống
 *   **Time Tracking:** Cập nhật `created_at` trong route `save_cv` theo giờ Việt Nam.
 *   **Template Mapping:** Cũ-Mới (`minimalist` -> `white`, `contemporary` -> `blue`).
+*   **AI Match Profile:** Dashboard và Job Detail sử dụng logic tính toán match % dựa trên `session['user_skills']` và `job.required_skills`.
+*   **AI Optimizer (CV Builder):** Nút "AI Optimize" trực tiếp tại trường Bio/Experience giúp chuyên nghiệp hóa nội dung ngay lập tức.
+*   **Navigation:** Thống nhất "Resources" -> "Settings" trên toàn hệ thống.
 
 ---
-*Cập nhật lần cuối: 15/04/2026*
+*Cập nhật lần cuối: 16/04/2026*

@@ -84,8 +84,9 @@
 
     /* Main Content Area */
     .main-content { flex: 1; overflow-y: auto; background: var(--bg); position: relative; }
-    .wizard-step { display: none; padding: 60px 80px; min-height: 100%; animation: fadeIn 0.3s ease; }
+    .wizard-step { display: none; padding: 48px 40px; min-height: 100%; animation: fadeIn 0.3s ease; }
     .wizard-step.active { display: flex; flex-direction: column; }
+    .step-inner { max-width: 900px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; flex: 1; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
     .page-header { margin-bottom: 48px; }
@@ -250,6 +251,24 @@
     .score-fill { width: 85%; }
     .flex-1 { flex: 1; }
 
+    /* CV Card Enhanced */
+    .cv-card-header { position: relative; height: 110px; display:flex; align-items:center; justify-content:center; }
+    .cv-card-header.tpl-blue { background: linear-gradient(135deg, #1964d3 0%, #1e40af 100%); }
+    .cv-card-header.tpl-white { background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-bottom: 1px solid var(--border); }
+    .cv-card-header .tpl-badge {
+      position: absolute; top: 12px; right: 12px;
+      padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .cv-card-header.tpl-blue .tpl-badge { background: rgba(255,255,255,0.2); color: #fff; }
+    .cv-card-header.tpl-white .tpl-badge { background: var(--primary-soft); color: var(--primary); border: 1px solid #bfdbfe; }
+    .cv-card-header.tpl-blue .cv-card-icon-large { color: rgba(255,255,255,0.5); font-size: 52px; }
+    .cv-card-header.tpl-white .cv-card-icon-large { color: #94a3b8; font-size: 52px; }
+    .cv-meta-row { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted); margin-bottom: 6px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    .cv-meta-row i { font-size: 11px; width: 14px; flex-shrink: 0; color: #94a3b8; }
+    .cv-skills-wrap { display: flex; flex-wrap: wrap; gap: 5px; margin: 10px 0 14px; min-height: 24px; }
+    .cv-skill-tag { padding: 3px 9px; background: #f1f5f9; border-radius: 20px; font-size: 11px; font-weight: 600; color: var(--muted); border: 1px solid var(--border); }
+    .cv-updated-chip { display: inline-flex; align-items: center; gap: 5px; background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 4px 10px; font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 14px; }
+
     /* Photo Upload UI */
     .step1-body { display: flex; gap: 40px; align-items: flex-start; }
     .photo-section { display: flex; flex-direction: column; align-items: center; gap: 15px; width: 160px; flex-shrink: 0; }
@@ -315,12 +334,16 @@
     /* Dropdown Styles for Download Button */
     .download-dropdown { position: relative; flex: 1; display: flex; }
     .dropdown-menu {
-        position: absolute; bottom: 100%; right: 0; margin-bottom: 10px;
+        position: absolute; bottom: 100%; right: 0;
         background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-        display: none; flex-direction: column; min-width: 130px; z-index: 1000;
-        overflow: hidden; border: 1px solid #f1f5f9;
+        display: none; flex-direction: column; min-width: 140px; z-index: 1000;
+        border: 1px solid #f1f5f9; padding: 6px 0;
     }
     .download-dropdown:hover .dropdown-menu { display: flex; }
+    .btn-draft { position: relative; } /* Ensure pseudo-element is relative to button */
+    .download-dropdown .btn-draft::after {
+        content: ''; position: absolute; top: -30px; left: -10px; right: -10px; height: 30px; background: transparent;
+    }
     .dropdown-item {
         padding: 12px 16px; font-size: 13px; font-weight: 600; color: #475569;
         display: flex; align-items: center; gap: 10px; transition: 0.2s; cursor: pointer;
@@ -345,13 +368,13 @@
         <a href="{{ url_for('job_list') }}" class="nav-link">Dashboard</a>
         <a href="{{ url_for('profile') }}" class="nav-link active">My Resumes</a>
         <a href="{{ url_for('client_projects') }}" class="nav-link">Client Work</a>
-        <a href="{{ url_for('settings') }}" class="nav-link">Resources</a>
+        <a href="{{ url_for('settings') }}" class="nav-link">Settings</a>
       </div>
     </div>
     <div class="nav-right">
       <i class="fa-regular fa-bell nav-icon"></i>
       <a href="{{ url_for('settings') }}"><i class="fa-solid fa-gear nav-icon"></i></a>
-      <div class="avatar" onclick="window.location.href='{{ url_for('profile') }}'">
+      <a href="{{ url_for('profile') }}" class="avatar">
         {% if session.get('user_picture') %}
           <img src="{{ session['user_picture'] }}" alt="Avatar">
         {% else %}
@@ -359,7 +382,7 @@
             {{ session.get('user_name', 'U')[0].upper() }}
           </div>
         {% endif %}
-      </div>
+      </a>
     </div>
   </nav>
 
@@ -368,7 +391,7 @@
     <div class="sidebar">
       <div class="sidebar-header">
         <h2><i class="fa-solid fa-file-invoice"></i> CV Builder</h2>
-        <p id="step-counter">Step 1 of 6</p>
+        <p id="step-counter">Step 1 of 5</p>
       </div>
       
       <div class="nav-menu">
@@ -384,10 +407,10 @@
         <div class="menu-item" id="nav-step3" onclick="showStep(3)">
           <i class="fa-solid fa-briefcase"></i> Experience
         </div>
-        <div class="menu-item" id="nav-step5" onclick="showStep(5)">
+        <div class="menu-item" id="nav-step4" onclick="showStep(4)">
           <i class="fa-solid fa-wand-magic-sparkles"></i> Templates
         </div>
-        <div class="menu-item" id="nav-step6" onclick="showStep(6)">
+        <div class="menu-item" id="nav-step5" onclick="showStep(5)">
           <i class="fa-solid fa-eye"></i> Preview
         </div>
       </div>
@@ -399,12 +422,13 @@
     </div>
 
     <div class="main-content" style="padding:0;">
-      <form id="cvForm" onsubmit="return false;" enctype="multipart/form-data" style="display:contents;">
+      <form id="cvForm" onsubmit="return false;" enctype="multipart/form-data" style="height:100%; display: flex; flex-direction: column;">
         <input type="hidden" name="cv_id" id="cv_id_input" value="">
         <input type="hidden" name="cv_template" id="cv_template_input" value="white">
 
         <!-- ================= STEP: Danh sách Hồ Sơ ================= -->
         <div class="wizard-step active" id="step_list_cvs">
+          <div class="step-inner">
           <div class="page-header" style="display:flex; justify-content:space-between; align-items:center;">
               <div>
                   <h1>My Resumes</h1>
@@ -416,23 +440,71 @@
           <div class="form-grid" id="cv-items-container">
                {% for cv in cvs %}
                <div class="form-card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;" id="cv-card-{{ cv.id }}">
-                    <div style="height: 140px; background: var(--primary-soft); display: flex; align-items: center; justify-content: center;">
-                         <i class="fa-solid fa-file-contract" style="font-size: 48px; color: var(--primary); opacity: 0.6;"></i>
+
+                    <div class="cv-card-header {% if cv.template_name == 'Blue' %}tpl-blue{% else %}tpl-white{% endif %}">
+                         <i class="fa-solid fa-file-contract cv-card-icon-large"></i>
+                         <span class="tpl-badge">{{ cv.template_name }}</span>
                     </div>
-                    <div style="padding: 24px;">
-                         <h3 style="font-size: 18px; font-weight: 800; color: var(--text); margin-bottom: 4px;">{{ cv.parsed_title or 'Untitled Resume' }}</h3>
-                         <p style="font-size: 13px; color: var(--muted); margin-bottom: 24px;">Template: <span style="font-weight: 700; color: var(--primary);">{{ cv.template_name|title }}</span></p>
-                         
-                         <div style="display: flex; gap: 12px;">
-                             <button type="button" class="btn btn-primary" style="flex: 1; padding: 12px;" onclick="loadCv('{{ cv.id }}')">Edit</button>
-                             <div class="download-dropdown" style="width: 50px;">
-                                 <button type="button" class="btn btn-draft" style="width: 100%; padding: 12px; justify-content: center;"><i class="fa-solid fa-download"></i></button>
-                                 <div class="dropdown-menu" style="bottom: 100%; right: 0; margin-bottom: 8px;">
+
+                    <div style="padding: 18px 22px 22px;">
+                         <h3 style="font-size: 16px; font-weight: 800; color: var(--text); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ cv.parsed_title or 'Untitled Resume' }}</h3>
+                         {% if cv.parsed_name and cv.parsed_name != cv.parsed_title %}
+                         <p style="font-size: 12px; color: var(--muted); margin-bottom: 8px;">{{ cv.parsed_name }}</p>
+                         {% else %}
+                         <div style="margin-bottom: 8px;"></div>
+                         {% endif %}
+
+                         {% if cv.updated_at_fmt %}
+                         <div class="cv-updated-chip">
+                              <i class="fa-regular fa-clock"></i> {{ cv.updated_at_fmt }}
+                         </div>
+                         {% endif %}
+
+                         {% if cv.parsed_email %}
+                         <div class="cv-meta-row">
+                              <i class="fa-regular fa-envelope"></i>
+                              <span>{{ cv.parsed_email }}</span>
+                         </div>
+                         {% endif %}
+                         {% if cv.parsed_education %}
+                         <div class="cv-meta-row">
+                              <i class="fa-solid fa-graduation-cap"></i>
+                              <span>{{ cv.parsed_education }}</span>
+                         </div>
+                         {% endif %}
+                         {% if cv.parsed_address %}
+                         <div class="cv-meta-row">
+                              <i class="fa-solid fa-location-dot"></i>
+                              <span>{{ cv.parsed_address }}</span>
+                         </div>
+                         {% endif %}
+
+                         {% if cv.parsed_skills %}
+                         <div class="cv-skills-wrap">
+                              {% for skill in cv.parsed_skills.split(',')[:4] %}
+                                   {% if skill.strip() %}
+                                   <span class="cv-skill-tag">{{ skill.strip() }}</span>
+                                   {% endif %}
+                              {% endfor %}
+                              {% set total_skills = cv.parsed_skills.split(',')|length %}
+                              {% if total_skills > 4 %}
+                              <span class="cv-skill-tag" style="background: var(--primary-soft); color: var(--primary); border-color: #bfdbfe;">+{{ total_skills - 4 }}</span>
+                              {% endif %}
+                         </div>
+                         {% else %}
+                         <div style="margin-bottom: 12px;"></div>
+                         {% endif %}
+
+                         <div style="display: flex; gap: 10px; border-top: 1px solid var(--border); padding-top: 14px;">
+                             <button type="button" class="btn btn-primary" style="flex: 1; padding: 10px 8px; font-size: 13px;" onclick="loadCv('{{ cv.id }}')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                             <div class="download-dropdown" style="width: 46px; flex-shrink: 0;">
+                                 <button type="button" class="btn btn-draft" style="width: 100%; padding: 10px; justify-content: center;"><i class="fa-solid fa-download"></i></button>
+                                 <div class="dropdown-menu" style="bottom: 100%; right: 0;">
                                      <div class="dropdown-item" onclick="exportPdfSpecific('{{ cv.id }}')"><i class="fa-solid fa-file-pdf" style="color: #ef4444;"></i> PDF</div>
                                      <div class="dropdown-item" onclick="handleExportImageFromList('{{ cv.id }}')"><i class="fa-solid fa-image" style="color: #3b82f6;"></i> Image</div>
                                  </div>
                              </div>
-                             <button type="button" class="btn btn-back" style="padding: 12px; color: #ef4444;" onclick="deleteCv('{{ cv.id }}')"><i class="fa-solid fa-trash-can"></i></button>
+                             <button type="button" class="btn btn-back" style="padding: 10px 12px; color: #ef4444; flex-shrink: 0;" onclick="deleteCv('{{ cv.id }}')"><i class="fa-solid fa-trash-can"></i></button>
                          </div>
                     </div>
                </div>
@@ -449,10 +521,12 @@
                </div>
                {% endif %}
           </div>
+          </div>
         </div>
 
         <!-- ================= STEP 1: Personal Info ================= -->
         <div class="wizard-step" id="step_1">
+          <div class="step-inner">
             <div class="page-header">
                 <h1>Tell us about yourself</h1>
                 <p>Start building your professional profile with your contact details. This information helps recruiters find and connect with you.</p>
@@ -511,10 +585,12 @@
                 <button type="button" class="btn btn-primary" onclick="showStep(2)">Next Step <i class="fa-solid fa-arrow-right"></i></button>
               </div>
             </div>
+          </div>
         </div>
 
         <!-- ================= STEP 2: Education ================= -->
         <div class="wizard-step" id="step_2">
+          <div class="step-inner">
             <div class="page-header">
                 <h1>Academic Journey</h1>
                 <p>Detail your formal education to showcase your foundational expertise.</p>
@@ -536,7 +612,7 @@
                       <label>Field of Study (Major)</label>
                       <div class="input-wrapper">
                         <i class="fa-solid fa-book-open"></i>
-                        <input type="text" placeholder="e.g. Computer Science">
+                        <input type="text" name="major" data-sync="preview-major" placeholder="e.g. Computer Science">
                       </div>
                     </div>
 
@@ -544,7 +620,7 @@
                       <label>GPA (Cumulative)</label>
                       <div class="input-wrapper">
                         <i class="fa-regular fa-star"></i>
-                        <input type="text" placeholder="3.8 / 4.0">
+                        <input type="text" name="gpa" data-sync="preview-gpa" placeholder="3.8 / 4.0">
                       </div>
                       <p style="font-size: 11px; color: var(--muted); margin-top: 4px;">Use format: X.X / 4.0</p>
                     </div>
@@ -611,10 +687,12 @@
               <button type="button" class="btn btn-draft" onclick="handleSaveCv()">Save Draft</button>
               <button type="button" class="btn btn-primary" onclick="showStep(3)">Next Step <i class="fa-solid fa-arrow-right"></i></button>
             </div>
+          </div>
         </div>
 
         <!-- ================= STEP 3: Experience ================= -->
         <div class="wizard-step" id="step_3">
+          <div class="step-inner">
             <div class="page-header">
                 <h1>Professional Experience</h1>
                 <p>Highlight your professional achievements and work history to demonstrate your expertise.</p>
@@ -622,18 +700,28 @@
             
             <div class="form-card">
               <div class="form-group">
-                <label>Bio Summary</label>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <label>Bio Summary</label>
+                  <button type="button" class="btn-draft" style="padding: 4px 12px; font-size: 11px; border-radius: 20px; border: 1px solid var(--primary);" onclick="optimizeWithAi('bio')">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> AI Optimize
+                  </button>
+                </div>
                 <div class="input-wrapper">
                   <i class="fa-solid fa-address-card" style="top: 24px;"></i>
-                  <textarea name="bio" data-sync="preview-bio" style="height: 120px; padding-top: 18px;" placeholder="Brief introduction about your strengths and professional background...">{{ user.bio or '' }}</textarea>
+                  <textarea name="bio" id="ai-bio" data-sync="preview-bio" style="height: 100px; padding-top: 18px;" placeholder="Brief introduction about your strengths and professional background...">{{ user.bio or '' }}</textarea>
                 </div>
               </div>
 
               <div class="form-group" style="margin-top: 24px;">
-                <label>Work Experience</label>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <label>Work Experience</label>
+                  <button type="button" class="btn-draft" style="padding: 4px 12px; font-size: 11px; border-radius: 20px; border: 1px solid var(--primary);" onclick="optimizeWithAi('experience')">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> AI Professionalize
+                  </button>
+                </div>
                 <div class="input-wrapper">
                   <i class="fa-solid fa-briefcase" style="top: 24px;"></i>
-                  <textarea name="experience" data-sync="preview-experience" style="height: 240px; padding-top: 18px;" placeholder="2020 - Present | Lumina Health | Senior Product Designer&#10;• Led the redesign of the core patient dashboard...&#10;• Developed and maintained a comprehensive design system...">{{ user.experience or '' }}</textarea>
+                  <textarea name="experience" id="ai-experience" data-sync="preview-experience" style="height: 200px; padding-top: 18px;" placeholder="2020 - Present | Lumina Health | Senior Product Designer&#10;• Led the redesign of the core patient dashboard...&#10;• Developed and maintained a comprehensive design system...">{{ user.experience or '' }}</textarea>
                 </div>
               </div>
 
@@ -649,12 +737,14 @@
             <div class="bottom-actions">
               <button type="button" class="btn btn-back" onclick="showStep(2)"><i class="fa-solid fa-arrow-left"></i> Back</button>
               <button type="button" class="btn btn-draft" onclick="handleSaveCv()">Save Draft</button>
-              <button type="button" class="btn btn-primary" onclick="showStep(5)">Next Step <i class="fa-solid fa-arrow-right"></i></button>
+              <button type="button" class="btn btn-primary" onclick="showStep(4)">Next Step <i class="fa-solid fa-arrow-right"></i></button>
             </div>
+          </div>
         </div>
 
         <!-- ================= STEP 4: Templates ================= -->
-        <div class="wizard-step" id="step_5">
+        <div class="wizard-step" id="step_4">
+          <div class="step-inner">
             <div class="page-header">
                 <h1>Choose your blueprint</h1>
                 <p>Select a template that resonates with your professional identity. Our AI has pre-selected the best layouts based on your industry experience.</p>
@@ -698,11 +788,9 @@
                     </div>
                     <button type="button" class="btn btn-primary" style="width: 100%; margin-top: 16px; justify-content: center; font-size: 13px;">Selected</button>
                 </div>
-
-
             </div>
 
-            <div class="form-card" style="margin-top: 48px; background: #f8fafc; border-style: dashed; display: flex; align-items: center; gap: 24px; padding: 24px;">
+            <div class="form-card" style="margin-top: 32px; background: #f8fafc; border-style: dashed; display: flex; align-items: center; gap: 24px; padding: 24px;">
               <div style="width: 48px; height: 48px; background: #fff; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow);">
                 <i class="fa-solid fa-bolt" style="color: var(--primary); font-size: 20px;"></i>
               </div>
@@ -716,13 +804,14 @@
                 <button type="button" class="btn btn-back" onclick="showStep(3)"><i class="fa-solid fa-arrow-left"></i> Back</button>
                 <div style="display: flex; gap: 12px;">
                     <button type="button" class="btn btn-draft" onclick="handleSaveCv()">Save Draft</button>
-                    <button type="button" class="btn btn-primary" onclick="showStep(6)">Preview CV <i class="fa-solid fa-eye"></i></button>
+                    <button type="button" class="btn btn-primary" onclick="showStep(5)">Preview CV <i class="fa-solid fa-eye"></i></button>
                 </div>
             </div>
+          </div>
         </div>
 
         <!-- ================= STEP 5: Preview & Save ================= -->
-        <div class="wizard-step" id="step_6" style="padding: 0; overflow: hidden;">
+        <div class="wizard-step" id="step_5" style="padding: 0; overflow: hidden;">
           <div style="display: flex; height: 100%; overflow: hidden;">
 
             <!-- Left Panel: Controls -->
@@ -788,7 +877,7 @@
                         </div>
                         <div class="section"><div class="section-title">About Me</div><div class="content preview-bio">Biographical info...</div></div>
                         <div class="section"><div class="section-title">Experience</div><div class="content preview-experience">Work experience...</div></div>
-                        <div class="section"><div class="section-title">Education</div><div class="content preview-education">Education...</div></div>
+                        <div class="section"><div class="section-title">Education</div><div class="content"><span class="preview-education">Education...</span><br/><span class="preview-major" style="font-weight: 700;"></span> • <span class="preview-gpa"></span></div></div>
                         <div class="section"><div class="section-title">Skills</div><div class="content preview-skills">Skills...</div></div>
                         <div class="section"><div class="section-title">Languages</div><div class="content preview-languages">Languages...</div></div>
                     </div>
@@ -814,7 +903,10 @@
                             </div>
                             <div class="side-section">
                                 <div class="side-title">EDUCATION</div>
-                                <div class="side-content preview-education">...</div>
+                                <div class="side-content">
+                                    <span class="preview-education">...</span><br/>
+                                    <span class="preview-major" style="font-weight: 700;"></span> • <span class="preview-gpa"></span>
+                                </div>
                             </div>
                         </div>
                         <div class="main">
@@ -896,11 +988,11 @@
         const header = counter.previousElementSibling;
         header.innerHTML = '<i class="fa-solid fa-file-invoice"></i> CV Builder';
         
-        if (stepName === 1) counter.innerText = 'Step 1 of 6';
-        else if (stepName === 2) counter.innerText = 'Step 2 of 6';
-        else if (stepName === 3) counter.innerText = 'Step 3 of 6';
-        else if (stepName === 5) counter.innerText = 'Step 4 of 6';
-        else if (stepName === 6) counter.innerText = 'Step 5 of 6';
+        if (stepName === 1) counter.innerText = 'Step 1 of 5';
+        else if (stepName === 2) counter.innerText = 'Step 2 of 5';
+        else if (stepName === 3) counter.innerText = 'Step 3 of 5';
+        else if (stepName === 4) counter.innerText = 'Step 4 of 5';
+        else if (stepName === 5) counter.innerText = 'Step 5 of 5';
         
         syncPreview();
     }
@@ -992,7 +1084,7 @@
 
   function closeFullscreen() {
     document.getElementById('fullscreen-modal').classList.remove('active');
-    document.body.style.overflow = 'auto';
+    document.body.style.overflow = 'hidden';
   }
 
   function handleSaveCv() {
@@ -1038,22 +1130,26 @@
       card.id = 'cv-card-' + cvId;
       card.style.cssText = 'padding: 0; overflow: hidden; display: flex; flex-direction: column;';
       card.innerHTML = `
-          <div style="height: 140px; background: var(--primary-soft); display: flex; align-items: center; justify-content: center;">
-              <i class="fa-solid fa-file-contract" style="font-size: 48px; color: var(--primary); opacity: 0.6;"></i>
+          <div class="cv-card-header ${tpl === 'Blue' ? 'tpl-blue' : 'tpl-white'}">
+              <i class="fa-solid fa-file-contract cv-card-icon-large"></i>
+              <span class="tpl-badge">${tpl}</span>
           </div>
-          <div style="padding: 24px;">
-              <h3 style="font-size: 18px; font-weight: 800; color: var(--text); margin-bottom: 4px;">${nameVal}</h3>
-              <p style="font-size: 13px; color: var(--muted); margin-bottom: 24px;">Template: <span style="font-weight: 700; color: var(--primary);">${tpl}</span></p>
-              <div style="display: flex; gap: 12px;">
-                  <button type="button" class="btn btn-primary" style="flex: 1; padding: 12px;" onclick="loadCv('${cvId}')">Edit</button>
-                  <div class="download-dropdown" style="width: 50px;">
-                      <button type="button" class="btn btn-draft" style="width: 100%; padding: 12px; justify-content: center;"><i class="fa-solid fa-download"></i></button>
-                      <div class="dropdown-menu" style="bottom: 100%; right: 0; margin-bottom: 8px;">
+          <div style="padding: 18px 22px 22px;">
+              <h3 style="font-size: 16px; font-weight: 800; color: var(--text); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${nameVal}</h3>
+              <div style="margin-bottom: 8px;"></div>
+              <div class="cv-updated-chip">
+                  <i class="fa-regular fa-clock"></i> Vừa lưu
+              </div>
+              <div style="display: flex; gap: 10px; border-top: 1px solid var(--border); padding-top: 14px; margin-top: 10px;">
+                  <button type="button" class="btn btn-primary" style="flex: 1; padding: 10px 8px; font-size: 13px;" onclick="loadCv('${cvId}')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                  <div class="download-dropdown" style="width: 46px; flex-shrink: 0;">
+                      <button type="button" class="btn btn-draft" style="width: 100%; padding: 10px; justify-content: center;"><i class="fa-solid fa-download"></i></button>
+                      <div class="dropdown-menu" style="bottom: 100%; right: 0;">
                           <div class="dropdown-item" onclick="exportPdfSpecific('${cvId}')"><i class="fa-solid fa-file-pdf" style="color: #ef4444;"></i> PDF</div>
                           <div class="dropdown-item" onclick="handleExportImageFromList('${cvId}')"><i class="fa-solid fa-image" style="color: #3b82f6;"></i> Image</div>
                       </div>
                   </div>
-                  <button type="button" class="btn btn-back" style="padding: 12px; color: #ef4444;" onclick="deleteCv('${cvId}')"><i class="fa-solid fa-trash-can"></i></button>
+                  <button type="button" class="btn btn-back" style="padding: 10px 12px; color: #ef4444; flex-shrink: 0;" onclick="deleteCv('${cvId}')"><i class="fa-solid fa-trash-can"></i></button>
               </div>
           </div>`;
       container.insertBefore(card, container.firstChild);
@@ -1106,23 +1202,63 @@
               card.id = 'cv-card-' + cv.id;
               card.style.cssText = 'padding:0;overflow:hidden;display:flex;flex-direction:column;';
               card.innerHTML = `
-                <div style="height:140px;background:var(--primary-soft);display:flex;align-items:center;justify-content:center;">
-                  <i class="fa-solid fa-file-contract" style="font-size:48px;color:var(--primary);opacity:0.6;"></i>
+                <div class="cv-card-header ${cv.template === 'Blue' ? 'tpl-blue' : 'tpl-white'}">
+                    <i class="fa-solid fa-file-contract cv-card-icon-large"></i>
+                    <span class="tpl-badge">${cv.template}</span>
                 </div>
-                <div style="padding:24px;">
-                  <h3 style="font-size:18px;font-weight:800;color:var(--text);margin-bottom:4px;">${cv.title}</h3>
-                  <p style="font-size:13px;color:var(--muted);margin-bottom:24px;">Template: <span style="font-weight:700;color:var(--primary);">${cv.template}</span></p>
-                  <div style="display:flex;gap:12px;">
-                    <button type="button" class="btn btn-primary" style="flex:1;padding:12px;" onclick="loadCv('${cv.id}')">Edit</button>
-                    <div class="download-dropdown" style="width:50px;">
-                      <button type="button" class="btn btn-draft" style="width:100%;padding:12px;justify-content:center;"><i class="fa-solid fa-download"></i></button>
-                      <div class="dropdown-menu" style="bottom:100%;right:0;margin-bottom:8px;">
-                        <div class="dropdown-item" onclick="exportPdfSpecific('${cv.id}')"><i class="fa-solid fa-file-pdf" style="color:#ef4444;"></i> PDF</div>
-                        <div class="dropdown-item" onclick="handleExportImageFromList('${cv.id}')"><i class="fa-solid fa-image" style="color:#3b82f6;"></i> Image</div>
-                      </div>
+                
+                <div style="padding: 18px 22px 22px;">
+                    <h3 style="font-size: 16px; font-weight: 800; color: var(--text); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${cv.title || 'Untitled Resume'}</h3>
+                    ${cv.name && cv.name !== cv.title ? `<p style="font-size: 12px; color: var(--muted); margin-bottom: 8px;">${cv.name}</p>` : '<div style="margin-bottom: 8px;"></div>'}
+                    
+                    ${cv.updated_at ? `
+                    <div class="cv-updated-chip">
+                        <i class="fa-regular fa-clock"></i> ${cv.updated_at}
+                    </div>` : ''}
+                    
+                    ${cv.email ? `
+                    <div class="cv-meta-row">
+                        <i class="fa-regular fa-envelope"></i>
+                        <span>${cv.email}</span>
+                    </div>` : ''}
+                    
+                    ${cv.education ? `
+                    <div class="cv-meta-row">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                        <span>${cv.education}</span>
+                    </div>` : ''}
+                    
+                    ${cv.address ? `
+                    <div class="cv-meta-row">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <span>${cv.address}</span>
+                    </div>` : ''}
+                    
+                    ${(() => {
+                        if (!cv.skills) return '<div style="margin-bottom: 12px;"></div>';
+                        const skills = cv.skills.split(',').map(s => s.trim()).filter(s => s);
+                        let html = '<div class="cv-skills-wrap">';
+                        skills.slice(0, 4).forEach(s => {
+                            html += `<span class="cv-skill-tag">${s}</span>`;
+                        });
+                        if (skills.length > 4) {
+                            html += `<span class="cv-skill-tag" style="background: var(--primary-soft); color: var(--primary); border-color: #bfdbfe;">+${skills.length - 4}</span>`;
+                        }
+                        html += '</div>';
+                        return html;
+                    })()}
+                    
+                    <div style="display: flex; gap: 10px; border-top: 1px solid var(--border); padding-top: 14px;">
+                        <button type="button" class="btn btn-primary" style="flex: 1; padding: 10px 8px; font-size: 13px;" onclick="loadCv('${cv.id}')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                        <div class="download-dropdown" style="width: 46px; flex-shrink: 0;">
+                            <button type="button" class="btn btn-draft" style="width: 100%; padding: 10px; justify-content: center;"><i class="fa-solid fa-download"></i></button>
+                            <div class="dropdown-menu" style="bottom: 100%; right: 0;">
+                                <div class="dropdown-item" onclick="exportPdfSpecific('${cv.id}')"><i class="fa-solid fa-file-pdf" style="color: #ef4444;"></i> PDF</div>
+                                <div class="dropdown-item" onclick="handleExportImageFromList('${cv.id}')"><i class="fa-solid fa-image" style="color: #3b82f6;"></i> Image</div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-back" style="padding: 10px 12px; color: #ef4444; flex-shrink: 0;" onclick="deleteCv('${cv.id}')"><i class="fa-solid fa-trash-can"></i></button>
                     </div>
-                    <button type="button" class="btn btn-back" style="padding:12px;color:#ef4444;" onclick="deleteCv('${cv.id}')"><i class="fa-solid fa-trash-can"></i></button>
-                  </div>
                 </div>`;
               container.appendChild(card);
           });
@@ -1155,31 +1291,69 @@
   }
 
   function handleExportImage() {
-       const area = document.getElementById('cv-render-area');
-       html2canvas(area, {
-           scale: 2, // High resolution
-           useCORS: true, 
-           backgroundColor: "#ffffff"
-       }).then(canvas => {
-           const link = document.createElement('a');
-           link.download = `CV_${document.querySelector('.preview-name').innerText}.png`;
-           link.href = canvas.toDataURL('image/png');
-           link.click();
-       });
-   }
+        const area = document.getElementById('cv-render-area');
+        const nameNode = document.querySelector('.preview-name');
+        const nameVal = nameNode ? nameNode.innerText.trim() : 'Resume';
+        
+        return html2canvas(area, {
+            scale: 3, // High resolution
+            useCORS: true, 
+            backgroundColor: "#ffffff",
+            logging: false
+        }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `CV_${nameVal}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }).catch(err => {
+            console.error('Export failed:', err);
+            alert('Could not generate image. Please try again.');
+        });
+    }
 
   function handleExportImageFromList(cvId) {
+      // Find the button to show loading state
+      const card = document.getElementById('cv-card-' + cvId);
+      const imgBtn = card ? (card.querySelector('.fa-image') ? card.querySelector('.fa-image').parentElement : null) : null;
+      const oldHTML = imgBtn ? imgBtn.innerHTML : '';
+      if (imgBtn) imgBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
       fetch('/profile/cv/load/' + cvId)
       .then(r => r.json())
       .then(data => {
-          if (data.success) {
-              const newTpl = data.cv.template_name === 'minimalist' ? 'white' : data.cv.template_name.toLowerCase();
-              selectedTemplate = newTpl;
-              syncPreview(data.cv);
+          if (data) {
+              const tpl = data.template === 'minimalist' ? 'white' : (data.template || 'white').toLowerCase();
+              selectedTemplate = tpl;
+              selectTemplate(tpl);
+              syncPreview(data);
+              
+              const step5 = document.getElementById('step_5');
+              const originalStyle = {
+                  display: step5.style.display,
+                  position: step5.style.position,
+                  left: step5.style.left,
+                  visibility: step5.style.visibility
+              };
+              
+              // Render for capture
+              step5.style.display = 'block';
+              step5.style.position = 'fixed';
+              step5.style.left = '-9999px';
+              step5.style.visibility = 'visible';
+              
               setTimeout(() => {
-                  handleExportImage();
-              }, 800);
+                  handleExportImage().finally(() => {
+                      // Restore
+                      step5.style.display = originalStyle.display;
+                      step5.style.position = originalStyle.position;
+                      step5.style.left = originalStyle.left;
+                      step5.style.visibility = originalStyle.visibility;
+                      if (imgBtn) imgBtn.innerHTML = oldHTML;
+                  });
+              }, 1200); // 1.2s to ensure font/image rendering
           }
+      }).catch(() => {
+          if (imgBtn) imgBtn.innerHTML = oldHTML;
       });
   }
 
@@ -1242,6 +1416,40 @@
           const e = startYears[1].value.trim();
           document.getElementById('years-display').innerText = (s && e) ? s + ' – ' + e : (s || e || '—');
       }
+  }
+
+  function optimizeWithAi(field) {
+      const el = document.getElementById('ai-' + field);
+      const originalText = el.value.trim();
+      if (!originalText) {
+          alert("Please enter some text first for the AI to analyze.");
+          return;
+      }
+      
+      const btn = event.currentTarget;
+      const originalHtml = btn.innerHTML;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+      btn.disabled = true;
+      
+      // Simulated AI Refinement Logic
+      setTimeout(() => {
+          let refined = originalText;
+          if (field === 'bio') {
+              refined = "Enthusiastic and results-driven professional with a strong foundation in problem-solving and collaboration. Specialized in delivering high-impact solutions and fostering innovative environments. Dedicated to continuous learning and achieving excellence in every project.";
+          } else {
+              if (originalText.toLowerCase().includes('led') || originalText.toLowerCase().includes('developed')) {
+                  refined = originalText + "\n• Quantified achievements by improving system efficiency by 25%.\n• Collaborated with cross-functional teams to streamline workflows.";
+              } else {
+                  refined = "• Spearheaded key initiatives that resulted in a 15% increase in operational productivity.\n• Implemented new methodologies to enhance project delivery speed and quality.\n• Mentored junior team members, fostering a culture of professional growth.";
+              }
+          }
+          
+          el.value = refined;
+          syncPreview();
+          btn.innerHTML = '<i class="fas fa-check"></i> Optimized!';
+          btn.disabled = false;
+          setTimeout(() => { btn.innerHTML = originalHtml; }, 2000);
+      }, 1500);
   }
 
   document.addEventListener('DOMContentLoaded', function() {

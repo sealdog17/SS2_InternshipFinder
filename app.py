@@ -144,6 +144,7 @@ def login():
             session['user_name'] = user.name or user.username
             session['user_email'] = user.email
             session['user_picture'] = user.picture or None
+            session['user_skills'] = user.skills or ''
             next_url = session.pop('next_url', url_for('job_list'))  # thay dashboard bằng job_list
             return redirect(next_url)
         else:
@@ -195,7 +196,7 @@ def register():
         session['user_name'] = user.name
         session['user_email'] = user.email
         session['user_picture'] = None
-
+        session['user_skills'] = ''
         flash('Registration successful!', 'success')
         return redirect(url_for('job_list'))  # thay dashboard
 
@@ -242,6 +243,7 @@ def callback():
         session['user_name'] = user.name
         session['user_email'] = user.email
         session['user_picture'] = user.picture
+        session['user_skills'] = user.skills or ''
 
         session.pop('oauth_state', None)
 
@@ -383,11 +385,23 @@ def edit_profile():
     for cv in cvs:
         try:
             data = json.loads(cv.content)
-            cv.parsed_title = data.get('job_title') or f"Version {cv.version}"
+            cv.parsed_title = data.get('job_title') or data.get('name') or f"Version {cv.version}"
             cv.template_name = "Blue" if data.get('template') in ['blue', 'contemporary'] else "White"
+            cv.parsed_name = data.get('name') or ''
+            cv.parsed_email = data.get('email') or ''
+            cv.parsed_education = data.get('education') or ''
+            cv.parsed_skills = data.get('skills') or ''
+            cv.parsed_address = data.get('address') or ''
+            cv.updated_at_fmt = cv.created_at.strftime('%d/%m/%Y %H:%M') if cv.created_at else ''
         except:
             cv.parsed_title = f"Version {cv.version}"
             cv.template_name = "White"
+            cv.parsed_name = ''
+            cv.parsed_email = ''
+            cv.parsed_education = ''
+            cv.parsed_skills = ''
+            cv.parsed_address = ''
+            cv.updated_at_fmt = ''
 
     return render_template('edit_profile.html', user=user, cvs=cvs)
 
@@ -406,6 +420,8 @@ def save_cv():
         'education': request.form.get('education'),
         'experience': request.form.get('experience'),
         'languages': request.form.get('languages'),
+        'major': request.form.get('major'),
+        'gpa': request.form.get('gpa'),
         'template': request.form.get('cv_template', 'white')
     }
     
@@ -437,6 +453,10 @@ def delete_cv(cv_id):
 def load_cv(cv_id):
     cv = CV.query.filter_by(id=cv_id, user_id=session['user_id']).first_or_404()
     data = json.loads(cv.content)
+    # Include the user's current CV picture if available
+    user = User.query.get(cv.user_id)
+    if user:
+        data['cv_picture'] = user.cv_picture or user.picture
     return jsonify(data)
 
 @app.route('/profile/cv/list')
@@ -451,10 +471,33 @@ def list_cvs():
             title = data.get('job_title') or data.get('name') or f"Version {cv.version}"
             tpl_raw = data.get('template', 'white')
             template = 'Blue' if tpl_raw in ['blue', 'contemporary'] else 'White'
+            name = data.get('name') or ''
+            email = data.get('email') or ''
+            education = data.get('education') or ''
+            skills = data.get('skills') or ''
+            address = data.get('address') or ''
+            updated_at = cv.created_at.strftime('%d/%m/%Y %H:%M') if cv.created_at else ''
         except Exception:
             title = f"Version {cv.version}"
             template = 'White'
-        result.append({'id': cv.id, 'title': title, 'template': template})
+            name = ''
+            email = ''
+            education = ''
+            skills = ''
+            address = ''
+            updated_at = ''
+            
+        result.append({
+            'id': cv.id, 
+            'title': title, 
+            'template': template,
+            'name': name,
+            'email': email,
+            'education': education,
+            'skills': skills,
+            'address': address,
+            'updated_at': updated_at
+        })
     return jsonify(result)
 
 @app.route('/profile/export-pdf')

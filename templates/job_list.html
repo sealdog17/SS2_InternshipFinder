@@ -29,7 +29,8 @@
       z-index: 1000;
     }
     .nav-left { display: flex; align-items: center; gap: 40px; }
-    .nav-logo img { height: 44px; display: block; }
+    .nav-logo img { height: 44px; display: block; transition: transform 0.3s ease; }
+    .nav-logo img:hover { transform: scale(1.05); }
     .nav-center { display: flex; gap: 32px; }
     .nav-link { 
       text-decoration: none; color: var(--muted); font-size: 14px; font-weight: 500; 
@@ -151,7 +152,7 @@
         <a href="{{ url_for('job_list') }}" class="nav-link active">Dashboard</a>
         <a href="{{ url_for('profile') }}" class="nav-link">My Resumes</a>
         <a href="{{ url_for('client_projects') }}" class="nav-link">Client Work</a>
-        <a href="{{ url_for('settings') }}" class="nav-link">Resources</a>
+        <a href="{{ url_for('settings') }}" class="nav-link">Settings</a>
       </div>
     </div>
     <div class="nav-right">
@@ -259,8 +260,8 @@
             </div>
             
             <div class="tag-group">
-              {% if job.skills %}
-                {% for tag in job.skills.split(',')[:3] %}
+              {% if job.required_skills %}
+                {% for tag in job.required_skills.split(',')[:3] %}
                   <span class="tag">{{ tag.strip() }}</span>
                 {% endfor %}
               {% else %}

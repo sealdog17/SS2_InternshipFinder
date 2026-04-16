@@ -233,7 +233,7 @@
         <a href="{{ url_for('job_list') }}" class="nav-link">Dashboard</a>
         <a href="{{ url_for('profile') }}" class="nav-link">My Resumes</a>
         <a href="{{ url_for('client_projects') }}" class="nav-link">Client Work</a>
-        <a href="{{ url_for('settings') }}" class="nav-link active">Resources</a>
+        <a href="{{ url_for('settings') }}" class="nav-link active">Resource</a>
       </div>
     </div>
     <div class="nav-right">
@@ -251,10 +251,21 @@
     </div>
   </nav>
 
-  <div class="main-container" style="padding-top: 40px;">
+  <div class="app-layout">
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <span class="sidebar-label">GENERAL</span>
+        <a href="{{ url_for('settings') }}" class="sidebar-link active">
+          <i class="fa-solid fa-user-gear"></i> Account Setting
+        </a>
+      </div>
+    </div>
     
-    <div class="page-header">
-      <h1>Account Settings</h1>
+    <div class="main-content" style="padding-top: 20px;">
+      <div class="main-container" style="padding-top: 0;">
+        
+        <div class="page-header">
+          <h1>Account Settings</h1>
       <p>Manage your account preferences and professional profile details.</p>
     </div>
 
@@ -327,6 +338,7 @@
         </form>
       </div>
     </div>
+  </div>
   </div>
 </div>
 

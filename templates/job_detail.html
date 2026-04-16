@@ -190,13 +190,13 @@
       <a href="{{ url_for('job_list') }}" class="nav-link active">Dashboard</a>
       <a href="{{ url_for('profile') }}" class="nav-link">My Resumes</a>
       <a href="{{ url_for('client_projects') }}" class="nav-link">Client Work</a>
-      <a href="{{ url_for('settings') }}" class="nav-link">Resources</a>
+      <a href="{{ url_for('settings') }}" class="nav-link">Settings</a>
     </div>
   </div>
   <div class="nav-right">
     <i class="fa-regular fa-bell nav-icon"></i>
     <a href="{{ url_for('settings') }}"><i class="fa-solid fa-gear nav-icon"></i></a>
-    <div class="avatar" onclick="window.location.href='{{ url_for('profile') }}'">
+    <a href="{{ url_for('profile') }}" class="avatar">
       {% if session.get('user_picture') %}
         <img src="{{ session['user_picture'] }}" alt="Avatar">
       {% else %}
@@ -204,7 +204,7 @@
           {{ session.get('user_name', 'U')[0].upper() }}
         </div>
       {% endif %}
-    </div>
+    </a>
   </div>
 </nav>
 
@@ -389,11 +389,12 @@
           <div class="ai-match-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
         </div>
         <div class="ai-score-row">
-          <div class="ai-score-circle"><span>92%</span></div>
-          <div class="ai-score-desc">This opportunity matches your profile perfectly.</div>
+          <div class="ai-score-circle"><span id="ai-match-score">--%</span></div>
+          <div class="ai-score-desc" id="ai-match-desc">Analyzing your profile against this job...</div>
         </div>
-        <div class="ai-check-item"><i class="fa-solid fa-circle-check" style="color:#60a5fa;"></i> Skills match: 9/10</div>
-        <div class="ai-check-item"><i class="fa-solid fa-circle-check" style="color:#60a5fa;"></i> Experience: Expert level</div>
+        <div id="ai-match-details">
+          <div class="ai-check-item"><i class="fa-solid fa-spinner fa-spin"></i> Loading analysis...</div>
+        </div>
       </div>
       
       <!-- Quick Info Card -->
@@ -428,6 +429,53 @@
   </div>
 </div>
 
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Simulated AI Match Calculation
+    const jobSkills = "{{ job.required_skills or '' }}".toLowerCase().split(',').map(s => s.trim());
+    const userSkillsStr = "{{ session.get('user_skills', '') }}".toLowerCase();
+    
+    setTimeout(() => {
+      let score = 0;
+      let matched = [];
+      
+      if (!userSkillsStr) {
+          score = 45; // Default score if profile is incomplete
+      } else {
+          const userSkills = userSkillsStr.split(',').map(s => s.trim());
+          matched = jobSkills.filter(js => userSkills.some(us => us.includes(js) || js.includes(us)));
+          
+          if (jobSkills.length > 0) {
+              score = Math.min(98, Math.round((matched.length / jobSkills.length) * 100) + 40);
+          } else {
+              score = 85;
+          }
+      }
+
+      const scoreEl = document.getElementById('ai-match-score');
+      const descEl = document.getElementById('ai-match-desc');
+      const detailsEl = document.getElementById('ai-match-details');
+
+      scoreEl.innerText = score + '%';
+      
+      if (score > 80) {
+          descEl.innerText = "Excellent match! Your skills align very well with this role.";
+      } else if (score > 60) {
+          descEl.innerText = "Good match. You have several key skills required for this position.";
+      } else {
+          descEl.innerText = "Partial match. Consider highlighting related experiences in your CV.";
+      }
+
+      let detailsHtml = '';
+      if (matched.length > 0) {
+          detailsHtml += `<div class="ai-check-item"><i class="fa-solid fa-circle-check" style="color:#60a5fa;"></i> Skills matched: ${matched.length}/${jobSkills.length}</div>`;
+          detailsHtml += `<div class="ai-check-item"><i class="fa-solid fa-circle-check" style="color:#60a5fa;"></i> Top Match: ${matched[0].toUpperCase()}</div>`;
+      } else {
+          detailsHtml += `<div class="ai-check-item"><i class="fa-solid fa-circle-info" style="color:#fbbf24;"></i> Match pending: Complete your profile for better analysis.</div>`;
+      }
+      detailsEl.innerHTML = detailsHtml;
+    }, 1200);
+  });
 </script>
 </body>
 </html>
