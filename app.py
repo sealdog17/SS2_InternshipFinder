@@ -17,7 +17,27 @@ from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from werkzeug.security import generate_password_hash, check_password_hash
 import json
 
-load_dotenv()
+import os
+# Ensure directory check for .env loading
+basedir = os.path.abspath(os.path.dirname(__file__))
+load_dotenv(os.path.join(basedir, '.env'))
+
+client_id = os.environ.get('GOOGLE_CLIENT_ID')
+client_secret = os.environ.get('GOOGLE_CLIENT_SECRET')
+
+if not client_id or not client_secret:
+    # Try to read directly from .env if load_dotenv failed
+    try:
+        with open(os.path.join(basedir, '.env'), 'r') as f:
+            for line in f:
+                if line.startswith('GOOGLE_CLIENT_ID='):
+                    client_id = line.split('=', 1)[1].strip()
+                    os.environ['GOOGLE_CLIENT_ID'] = client_id
+                if line.startswith('GOOGLE_CLIENT_SECRET='):
+                    client_secret = line.split('=', 1)[1].strip()
+                    os.environ['GOOGLE_CLIENT_SECRET'] = client_secret
+    except:
+        pass
 
 app = Flask(__name__)
 
@@ -119,8 +139,8 @@ class SavedJob(db.Model):
 oauth = OAuth(app)
 google = oauth.register(
     name='google',
-    client_id=os.environ.get('GOOGLE_CLIENT_ID'),
-    client_secret=os.environ.get('GOOGLE_CLIENT_SECRET'),
+    client_id=client_id,
+    client_secret=client_secret,
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
     client_kwargs={'scope': 'openid email profile', 'prompt': 'select_account'}
 )
@@ -524,7 +544,9 @@ def export_pdf():
     
     # Check if exporting a specific CV version or current profile
     cv_id = request.args.get('cv_id')
-    template_type = request.args.get('template', 'white')
+    # URL 'template' param is set explicitly by frontend and always takes priority
+    url_template_explicit = request.args.get('template')  # None if not passed
+    template_type = url_template_explicit or 'white'
     
     cv_data = {
         'name': user.name,
@@ -536,7 +558,8 @@ def export_pdf():
         'skills': user.skills,
         'education': user.education,
         'experience': user.experience,
-        'languages': user.languages
+        'languages': user.languages,
+        'cv_picture': None  # Only show photo if user explicitly uploaded one for this CV
     }
 
     # Override with specific CV data if requested
@@ -545,7 +568,8 @@ def export_pdf():
         if cv:
             saved_data = json.loads(cv.content)
             cv_data.update(saved_data)
-            if 'template' in saved_data:
+            # Only use DB template if frontend didn't explicitly pass one
+            if not url_template_explicit and 'template' in saved_data:
                 template_type = saved_data['template']
 
     from reportlab.pdfbase import pdfmetrics
@@ -558,14 +582,18 @@ def export_pdf():
         if os.path.exists(font_path):
             pdfmetrics.registerFont(TTFont('TimesNewRoman', font_path))
             pdfmetrics.registerFont(TTFont('TimesNewRoman-Bold', font_path_bold))
-            font_main = 'TimesNewRoman'
-            font_bold = 'TimesNewRoman-Bold'
+            font_serif = 'TimesNewRoman'
+            font_serif_bold = 'TimesNewRoman-Bold'
         else:
-            font_main = 'Helvetica'
-            font_bold = 'Helvetica-Bold'
+            font_serif = 'Times-Roman'
+            font_serif_bold = 'Times-Bold'
     except:
-        font_main = 'Helvetica'
-        font_bold = 'Helvetica-Bold'
+        font_serif = 'Times-Roman'
+        font_serif_bold = 'Times-Bold'
+
+    # Standard Sans-Serif fonts
+    font_sans = 'Helvetica'
+    font_sans_bold = 'Helvetica-Bold'
 
     buffer = BytesIO()
     # Remove default margins to allow full-bleed sidebar background
@@ -574,44 +602,53 @@ def export_pdf():
     def draw_blue_sidebar(canvas, doc):
         canvas.saveState()
         canvas.setFillColor(colors.HexColor('#1964d3'))
-        # Using absolute points for A4 (595.27 x 841.89)
-        canvas.rect(0, 0, 2.8*inch, 842, fill=1, stroke=0)
+        # 33% sidebar width (approx 2.73 inches)
+        sidebar_width = 2.73 * inch
+        canvas.rect(0, 0, sidebar_width, 842, fill=1, stroke=0)
         canvas.restoreState()
 
     styles = getSampleStyleSheet()
-
-    # Shared Styles using Times New Roman
-    style_normal = ParagraphStyle('Normal', parent=styles['Normal'], fontName=font_main, fontSize=10, leading=14, textColor=colors.HexColor('#4b5563'))
-    
     story = []
 
     if template_type == 'blue':
+        # Contemporary / Blue uses Sans-Serif
+        font_main = font_sans
+        font_bold = font_sans_bold
+        
         sidebar_items = []
         main_items = []
 
-        # Sidebar: Profile Picture - Increased size to match Web prominence
-        pic = user.cv_picture or user.picture
-        if pic:
+        # Sidebar: Profile Picture
+        # ONLY use cv_picture from CV data — never fallback to account avatar
+        pic = cv_data.get('cv_picture') or user.cv_picture
+        if pic and isinstance(pic, str) and pic.startswith('data:image'):
             try:
-                img_path = pic.replace('/static/', 'static/').split('?')[0]
-                if os.path.exists(img_path):
-                    sidebar_items.append(Image(img_path, width=2.4*inch, height=2.4*inch))
-                    sidebar_items.append(Spacer(1, 0.4*inch))
-            except:
-                pass
+                from reportlab.platypus import Image as RLImage
+                import base64
+                header, b64data = pic.split(',', 1)
+                img_bytes = base64.b64decode(b64data)
+                img_io = BytesIO(img_bytes)
+                sidebar_items.append(Spacer(1, 0.5*inch))
+                sidebar_items.append(RLImage(img_io, width=2.1*inch, height=2.5*inch))
+                sidebar_items.append(Spacer(1, 0.4*inch))
+            except Exception as e:
+                print(f'[WARN] Could not load CV picture: {e}')
+                sidebar_items.append(Spacer(1, 0.9*inch))  # Keep spacing consistent
+        else:
+            sidebar_items.append(Spacer(1, 0.9*inch))  # Consistent top spacing when no photo
 
-        name_style = ParagraphStyle('PdfBlueName', fontName=font_bold, fontSize=24, textColor=colors.white, alignment=TA_CENTER, leading=28)
-        job_style = ParagraphStyle('PdfBlueJob', fontName=font_main, fontSize=12, textColor=colors.HexColor('#bfdbfe'), alignment=TA_CENTER, spaceAfter=40, letterSpacing=2)
+        name_style = ParagraphStyle('PdfBlueName', fontName=font_bold, fontSize=20, textColor=colors.white, alignment=TA_CENTER, leading=24, letterSpacing=1)
+        job_style = ParagraphStyle('PdfBlueJob', fontName=font_main, fontSize=11, textColor=colors.HexColor('#bfdbfe'), alignment=TA_CENTER, spaceAfter=35, letterSpacing=2)
         
         sidebar_items.append(Paragraph(cv_data['name'].upper(), name_style))
         sidebar_items.append(Paragraph((cv_data['job_title'] or 'Candidate').upper(), job_style))
         
         from reportlab.platypus import HRFlowable
         def get_divider():
-            return HRFlowable(width="100%", thickness=1, color=colors.HexColor('#60a5fa'), spaceAfter=15)
+            return HRFlowable(width="100%", thickness=1, color=colors.HexColor('#60a5fa'), spaceAfter=15, spaceBefore=2)
 
-        side_section_style = ParagraphStyle('PdfSideSec', fontName=font_bold, fontSize=13, textColor=colors.white, spaceBefore=25, spaceAfter=8)
-        side_text_style = ParagraphStyle('PdfSideText', fontName=font_main, fontSize=10, textColor=colors.HexColor('#eff6ff'), leading=18)
+        side_section_style = ParagraphStyle('PdfSideSec', fontName=font_bold, fontSize=12, textColor=colors.white, spaceBefore=25, spaceAfter=8, letterSpacing=1.5)
+        side_text_style = ParagraphStyle('PdfSideText', fontName=font_main, fontSize=9.5, textColor=colors.HexColor('#eff6ff'), leading=16)
         
         sidebar_items.append(Paragraph("CONTACT", side_section_style))
         sidebar_items.append(get_divider())
@@ -624,85 +661,87 @@ def export_pdf():
         if cv_data['skills']:
             sidebar_items.append(Paragraph("SKILLS", side_section_style))
             sidebar_items.append(get_divider())
-            for s in cv_data['skills'].split(','):
-                if s.strip():
-                    sidebar_items.append(Paragraph(f"• {s.strip()}", side_text_style))
+            # Group skills into bullets to save space
+            skills_list = [s.strip() for s in cv_data['skills'].split(',') if s.strip()]
+            for s in skills_list:
+                sidebar_items.append(Paragraph(f"• {s}", side_text_style))
         
         if cv_data['education']:
             sidebar_items.append(Paragraph("EDUCATION", side_section_style))
             sidebar_items.append(get_divider())
-            sidebar_items.append(Paragraph(cv_data['education'], side_text_style))
+            sidebar_items.append(Paragraph(cv_data['education'].replace('\n', '<br/>'), side_text_style))
 
         # Main Column items
-        main_section_style = ParagraphStyle('PdfMainSec', fontName=font_bold, fontSize=15, textColor=colors.HexColor('#1e40af'), letterSpacing=1.5)
-        main_text_style = ParagraphStyle('PdfMainText', fontName=font_main, fontSize=12, textColor=colors.HexColor('#1f2937'), leading=20)
+        main_section_style = ParagraphStyle('PdfMainSec', fontName=font_bold, fontSize=14, textColor=colors.HexColor('#1e40af'), letterSpacing=1.5)
+        main_text_style = ParagraphStyle('PdfMainText', fontName=font_main, fontSize=11, textColor=colors.HexColor('#1f2937'), leading=18)
         
         def add_main_section(title, content):
             if content:
-                # Table-based header to achieve "Text ———" effect (matches Web flex)
-                # Fixed widths prevent word-wrap/collapse issues seen in previous version
-                header_table = Table([[Paragraph(title.upper(), main_section_style), ""]], colWidths=[1.8*inch, 3.2*inch])
+                header_table = Table([[Paragraph(title.upper(), main_section_style), ""]], colWidths=[1.8*inch, 3.1*inch])
                 header_table.setStyle(TableStyle([
                     ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
-                    ('LINEBELOW', (1,0), (1,0), 1, colors.HexColor('#94a3b8')), # Sharper line color
+                    ('LINEBELOW', (1,0), (1,0), 1, colors.HexColor('#cbd5e1')),
                     ('LEFTPADDING', (0,0), (-1,-1), 0),
                     ('RIGHTPADDING', (0,0), (-1,-1), 0),
-                    ('BOTTOMPADDING', (0,0), (-1,-1), 8),
+                    ('BOTTOMPADDING', (0,0), (-1,-1), 6),
                 ]))
                 main_items.append(Spacer(1, 0.3*inch))
                 main_items.append(header_table)
+                main_items.append(Spacer(1, 0.1*inch))
                 main_items.append(Paragraph(content.replace('\n', '<br/>'), main_text_style))
 
-        add_main_section("ABOUT ME", cv_data['bio'])
-        add_main_section("EXPERIENCE", cv_data['experience'])
-        add_main_section("LANGUAGES", cv_data['languages'])
+        add_main_section("ABOUT ME", cv_data.get('bio'))
+        add_main_section("EXPERIENCE", cv_data.get('experience'))
+        add_main_section("LANGUAGES", cv_data.get('languages'))
+
+        # Ensure main panel is never empty (avoids blank right column)
+        if not main_items:
+            main_items.append(Spacer(1, 0.5*inch))
 
         data = [[sidebar_items, main_items]]
-        # Sidebar 3 inch, Main 5.27 inch (Total A4 width is 8.27 inch)
-        t = Table(data, colWidths=[3*inch, 5.27*inch])
+        # Sidebar 2.73 inch (33%), Main 5.54 inch (67%)
+        t = Table(data, colWidths=[2.73*inch, 5.54*inch])
         t.setStyle(TableStyle([
             ('VALIGN', (0,0), (-1,-1), 'TOP'),
-            ('LEFTPADDING', (0,0), (0,0), 30),
-            ('RIGHTPADDING', (0,0), (0,0), 30),
-            ('LEFTPADDING', (1,0), (1,0), 45),
-            ('RIGHTPADDING', (1,0), (1,0), 45),
-            ('TOPPADDING', (0,0), (-1,-1), 40), # Reduced to align with sidebar content
+            ('LEFTPADDING', (0,0), (0,0), 25),
+            ('RIGHTPADDING', (0,0), (0,0), 25),
+            ('LEFTPADDING', (1,0), (1,0), 40),
+            ('RIGHTPADDING', (1,0), (1,0), 40),
+            ('TOPPADDING', (0,0), (-1,-1), 35),
         ]))
         story.append(t)
         
         doc.build(story, onFirstPage=draw_blue_sidebar, onLaterPages=draw_blue_sidebar)
     else:
-        # White Layout (Centered & Elegant) - Fine-tuned for visual parity
-        doc.topMargin = 0.7*inch
-        doc.leftMargin = 0.8*inch
-        doc.rightMargin = 0.8*inch
+        # White Layout uses Serif (Times New Roman)
+        font_main = font_serif
+        font_bold = font_serif_bold
+
+        doc.topMargin = 0.6*inch
+        doc.leftMargin = 0.75*inch
+        doc.rightMargin = 0.75*inch
         
-        # Name Header - Increased spaceAfter for better separation
-        style_white_name = ParagraphStyle('WhiteName', fontName=font_bold, fontSize=22, textColor=colors.HexColor('#111827'), alignment=TA_CENTER, letterSpacing=4, spaceAfter=18)
+        style_white_name = ParagraphStyle('WhiteName', fontName=font_bold, fontSize=24, textColor=colors.HexColor('#111827'), alignment=TA_CENTER, letterSpacing=4, spaceAfter=15)
         story.append(Paragraph(cv_data['name'].upper(), style_white_name))
         
-        # Contact line - More spaced from name and divider
         contact_parts = []
         if cv_data['address']: contact_parts.append(cv_data['address'].upper())
         contact_parts.append(cv_data['email'].upper())
         if cv_data['phone']: contact_parts.append(cv_data['phone'].upper())
         
-        style_white_contact = ParagraphStyle('WhiteContact', fontName=font_main, fontSize=8.5, textColor=colors.HexColor('#6b7280'), alignment=TA_CENTER, letterSpacing=1.5, spaceAfter=30)
+        style_white_contact = ParagraphStyle('WhiteContact', fontName=font_main, fontSize=9, textColor=colors.HexColor('#6b7280'), alignment=TA_CENTER, letterSpacing=1.5, spaceAfter=25)
         story.append(Paragraph("  •  ".join(contact_parts), style_white_contact))
         
-        # Thinner Main Divider for elegance
         from reportlab.platypus import HRFlowable
-        story.append(HRFlowable(width="100%", thickness=1.5, color=colors.HexColor('#111827'), spaceAfter=40))
+        story.append(HRFlowable(width="100%", thickness=1.5, color=colors.HexColor('#111827'), spaceAfter=35))
         
-        # Section Styles - Increased spaceBefore for "breathable" layout
-        white_section_style = ParagraphStyle('WhiteSec', fontName=font_bold, fontSize=12, textColor=colors.HexColor('#111827'), spaceBefore=35, spaceAfter=12, letterSpacing=2)
-        white_text_style = ParagraphStyle('WhiteText', fontName=font_main, fontSize=11, textColor=colors.HexColor('#374151'), leading=20)
+        white_section_style = ParagraphStyle('WhiteSec', fontName=font_bold, fontSize=12, textColor=colors.HexColor('#111827'), spaceBefore=25, spaceAfter=10, letterSpacing=2)
+        white_text_style = ParagraphStyle('WhiteText', fontName=font_main, fontSize=10.5, textColor=colors.HexColor('#374151'), leading=18)
         
         def add_white_section(title, content):
             if content:
                 story.append(Paragraph(title.upper(), white_section_style))
-                # Very thin section divider
-                story.append(HRFlowable(width="100%", thickness=0.8, color=colors.HexColor('#e5e7eb'), spaceAfter=15, spaceBefore=-8))
+                story.append(HRFlowable(width="100%", thickness=0.8, color=colors.HexColor('#e5e7eb'), spaceAfter=12, spaceBefore=-6))
                 story.append(Paragraph(content.replace('\n', '<br/>'), white_text_style))
 
         add_white_section("ABOUT ME", cv_data['bio'])
@@ -715,7 +754,6 @@ def export_pdf():
 
     buffer.seek(0)
     return send_file(buffer, as_attachment=True, download_name=f"CV_{user.name}.pdf", mimetype='application/pdf')
-
 
 # --------------------- JOB MANAGEMENT ---------------------
 @app.route('/jobs')

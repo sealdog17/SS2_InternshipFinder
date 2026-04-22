@@ -1054,16 +1054,25 @@
               document.getElementById('preview-avatar').style.backgroundImage = '';
           }
       } else {
-          // Standard sync for text fields
+          // Standard sync — use actual value only (NOT placeholder)
+          // This ensures live preview matches the actual PDF output
           document.querySelectorAll('[data-sync]').forEach(input => {
               const targetClass = input.getAttribute('data-sync');
-              const value = input.value || input.placeholder;
+              const value = input.value.trim();
               document.querySelectorAll('.' + targetClass).forEach(target => {
-                  target.innerText = value;
+                  if (value) {
+                      target.innerText = value;
+                      target.style.color = '';
+                      target.style.fontStyle = '';
+                  } else {
+                      target.innerText = '(not filled)';
+                      target.style.color = '#94a3b8';
+                      target.style.fontStyle = 'italic';
+                  }
               });
           });
 
-          // Sync picture from hidden input
+          // Sync avatar — ONLY show if user explicitly uploaded a CV photo
           const picData = document.getElementById('cv_picture_data_input').value;
           if (picData) {
               document.getElementById('preview-avatar').style.backgroundImage = "url('" + picData + "')";
@@ -1339,7 +1348,16 @@
   }
 
   function exportPdfSpecific(cvId) {
-      window.location.href = '{{ url_for("export_pdf") }}?cv_id=' + cvId;
+      // Load CV data first to get the correct template, then redirect to server export
+      fetch('/profile/cv/load/' + cvId)
+      .then(r => r.json())
+      .then(data => {
+          const tpl = data.template || 'white';
+          window.location.href = '{{ url_for("export_pdf") }}?cv_id=' + cvId + '&template=' + tpl;
+      })
+      .catch(() => {
+          window.location.href = '{{ url_for("export_pdf") }}?cv_id=' + cvId;
+      });
   }
 
   function handleExportImage() {
@@ -1375,9 +1393,33 @@
       .then(data => {
           if (data) {
               const tpl = data.template === 'minimalist' ? 'white' : (data.template || 'white').toLowerCase();
+              
+              // Populate form fields so syncPreview picks up the correct text
+              const form = document.getElementById('cvForm');
+              const fieldMap = {
+                  'name': data.name, 'email': data.email, 'phone': data.phone,
+                  'address': data.address, 'bio': data.bio, 'experience': data.experience,
+                  'education': data.education, 'languages': data.languages,
+                  'skills': data.skills, 'major': data.major, 'gpa': data.gpa
+              };
+              for (const [key, val] of Object.entries(fieldMap)) {
+                  const input = form.querySelector(`[name="${key}"]`);
+                  if (input) input.value = val !== null && val !== undefined ? val : '';
+              }
+
+              // Set avatar
+              const avatarEl = document.getElementById('preview-avatar');
+              if (data.cv_picture) {
+                  document.getElementById('cv_picture_data_input').value = data.cv_picture;
+                  if (avatarEl) avatarEl.style.backgroundImage = `url("${data.cv_picture}")`;
+              } else {
+                  document.getElementById('cv_picture_data_input').value = '';
+                  if (avatarEl) avatarEl.style.backgroundImage = '';
+              }
+
               selectedTemplate = tpl;
               selectTemplate(tpl);
-              syncPreview(data);
+              syncPreview();
               
               const step5 = document.getElementById('step_5');
               const originalStyle = {
