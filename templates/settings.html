@@ -369,54 +369,58 @@
         return;
       }
 
-      const formData = new FormData();
-      formData.append('avatar', file);
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const base64Data = e.target.result;
+        
+        // Loading effect
+        const preview = document.getElementById('settingsAvatarPreview');
+        const originalHTML = preview.innerHTML;
+        preview.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
-      // Loading effect
-      const preview = document.getElementById('settingsAvatarPreview');
-      const originalHTML = preview.innerHTML;
-      preview.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        fetch('{{ url_for("settings") }}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: JSON.stringify({ avatar_data: base64Data })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Cập nhật ảnh tại trang settings
+            preview.innerHTML = `<img src="${data.picture_url}" id="avatarImg" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+            
+            // Cập nhật ảnh tại header
+            const headerAvatars = document.querySelectorAll('.avatar img');
+            headerAvatars.forEach(img => {
+              img.src = data.picture_url;
+            });
+            
+            // Nếu không có ảnh trong header (đang hiển thị chữ cái đầu), thay thế bằng thẻ img
+            document.querySelectorAll('.avatar').forEach(div => {
+              if (!div.querySelector('img')) {
+                div.innerHTML = `<img src="${data.picture_url}" style="width: 100%; height: 100%; object-fit: cover;">`;
+              }
+            });
 
-      fetch('{{ url_for("settings") }}', {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'X-Requested-With': 'XMLHttpRequest'
-        }
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          // Cập nhật ảnh tại trang settings
-          preview.innerHTML = `<img src="${data.picture_url}" id="avatarImg" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
-          
-          // Cập nhật ảnh tại header (giả sử có ID hoặc class tương ứng)
-          const headerAvatars = document.querySelectorAll('.avatar img');
-          headerAvatars.forEach(img => {
-            img.src = data.picture_url;
-          });
-          
-          // Nếu không có ảnh trong header (đang hiển thị chữ cái đầu), thay thế bằng thẻ img
-          document.querySelectorAll('.avatar').forEach(div => {
-            if (!div.querySelector('img')) {
-              div.innerHTML = `<img src="${data.picture_url}">`;
-            }
-          });
-
-          // Success notification
-          const flashContainer = document.querySelector('.flash-messages');
-          flashContainer.innerHTML = '<div class="flash success">Profile picture updated successfully!</div>';
-          setTimeout(() => { flashContainer.innerHTML = ''; }, 3000);
-        } else {
+            // Success notification
+            const flashContainer = document.querySelector('.flash-messages');
+            flashContainer.innerHTML = '<div class="flash success">Profile picture updated successfully!</div>';
+            setTimeout(() => { flashContainer.innerHTML = ''; }, 3000);
+          } else {
+            preview.innerHTML = originalHTML;
+            alert(data.message || 'An error occurred while uploading the image.');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
           preview.innerHTML = originalHTML;
-          alert('An error occurred while uploading the image.');
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        preview.innerHTML = originalHTML;
-        alert('Connection error. Please try again.');
-      });
+          alert('Connection error. Please try again.');
+        });
+      };
+      reader.readAsDataURL(file);
     }
   }
 </script>

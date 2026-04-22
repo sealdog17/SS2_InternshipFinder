@@ -70,6 +70,10 @@ Luôn đảm bảo sự đồng bộ **Pixel-Perfect** giữa: Trình duyệt, X
 *   **Job Images:** Mỗi Job bắt buộc có trường `cover_image` trong DB. Cấm sử dụng chọn ảnh ngẫu nhiên (random) trong Template để đảm bảo một Job luôn hiển thị cùng một ảnh ở mọi trang (Dashboard, Saved list).
 *   **Saved Jobs:** Lưu trữ qua bảng trung gian `saved_jobs`. Trạng thái lưu (Bookmark icon) phải được đồng bộ Real-time giữa Dashboard và Client Work.
 
+### 🔐 Privacy & Security (Quyền riêng tư & Bảo mật)
+*   **Image Storage (Base64):** Cấm lưu trữ ảnh cá nhân (Avatar, CV photo) trực tiếp vào thư mục công khai (`static/uploads`). Toàn bộ ảnh phải được chuyển sang dạng chuỗi **Base64** và lưu trực tiếp vào Database (SQLite). Điều này đảm bảo quyền riêng tư trên môi trường Localhost và tránh việc truy cập trái phép qua URL file.
+*   **Ownership Verification (IDOR Protection):** Tất cả các route tải hoặc thao tác với dữ liệu nhạy cảm (CV, Profile) phải bắt buộc kiểm tra quyền sở hữu bằng cách lọc theo `user_id` từ `session` (Ví dụ: `filter_by(id=cv_id, user_id=session['user_id'])`). Không được phép tin tưởng tuyệt đối vào ID truyền từ Client mà không có bước xác thực này.
+
 ---
-*Cập nhật lần cuối: 22/04/2026*
+*Cập nhật lần cuối: 22/04/2026 (với Security & Privacy Update)*
 

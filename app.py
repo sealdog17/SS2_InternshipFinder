@@ -307,21 +307,18 @@ def resources():
 def settings():
     user = User.query.get(session['user_id'])
     if request.method == 'POST':
-        # Xử lý upload ảnh đại diện
-        file = request.files.get('avatar')
-        if file and file.filename != '':
-            from werkzeug.utils import secure_filename
-            filename = secure_filename(file.filename)
-            upload_path = os.path.join(app.root_path, 'static', 'uploads')
-            if not os.path.exists(upload_path):
-                os.makedirs(upload_path)
-            file.save(os.path.join(upload_path, filename))
-            user.picture = url_for('static', filename='uploads/' + filename)
-            session['user_picture'] = user.picture # Chỉ cập nhật ảnh tài khoản/header
-            db.session.commit()
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        # Xử lý upload ảnh đại diện (Base64 via JSON)
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            data = request.get_json()
+            avatar_data = data.get('avatar_data')
+            if avatar_data:
+                user.picture = avatar_data
+                session['user_picture'] = user.picture
+                db.session.commit()
                 return jsonify({'success': True, 'picture_url': user.picture})
-            flash('Profile picture updated successfully!', 'success')
+            return jsonify({'success': False, 'message': 'No image data'}), 400
+        
+        # Traditional form (if any)
         return redirect(url_for('settings'))
     return render_template('settings.html', user=user)
 
@@ -376,19 +373,12 @@ def profile():
 def edit_profile():
     user = User.query.get(session['user_id'])
     if request.method == 'POST':
-        # Lưu avatar nếu có
-        file = request.files.get('profile_picture')
-        if file and file.filename != '':
-            from werkzeug.utils import secure_filename
-            import os
-            filename = secure_filename(file.filename)
-            upload_path = os.path.join(app.root_path, 'static', 'uploads')
-            if not os.path.exists(upload_path):
-                os.makedirs(upload_path)
-            file.save(os.path.join(upload_path, filename))
-            user.cv_picture = url_for('static', filename='uploads/' + filename) # Chỉ cập nhật ảnh CV
-            # session['user_picture'] = user.cv_picture  # KHÔNG cập nhật ảnh header
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        # AJAX Base64 upload for CV photo
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' and request.is_json:
+            data = request.get_json()
+            cv_picture_data = data.get('cv_picture_data')
+            if cv_picture_data:
+                user.cv_picture = cv_picture_data
                 db.session.commit()
                 return jsonify({'success': True, 'cv_picture_url': user.cv_picture})
 
@@ -452,6 +442,7 @@ def save_cv():
         'languages': request.form.get('languages'),
         'major': request.form.get('major'),
         'gpa': request.form.get('gpa'),
+        'cv_picture': request.form.get('cv_picture_data'),
         'template': request.form.get('cv_template', 'white')
     }
     

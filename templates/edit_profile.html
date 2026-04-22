@@ -425,6 +425,7 @@
       <form id="cvForm" onsubmit="return false;" enctype="multipart/form-data" style="height:100%; display: flex; flex-direction: column;">
         <input type="hidden" name="cv_id" id="cv_id_input" value="">
         <input type="hidden" name="cv_template" id="cv_template_input" value="white">
+        <input type="hidden" name="cv_picture_data" id="cv_picture_data_input" value="">
 
         <!-- ================= STEP: Danh sách Hồ Sơ ================= -->
         <div class="wizard-step active" id="step_list_cvs">
@@ -1039,12 +1040,11 @@
   function syncPreview(data = null) {
       if (data) {
           // Populate fields from data object
-          for (const [key, val] of Object.entries(data)) {
-              const targets = document.querySelectorAll('.preview-' + key);
-              targets.forEach(t => t.innerText = val || '');
+          if (data.cv_picture) {
+              document.getElementById('preview-avatar').style.backgroundImage = "url('" + data.cv_picture + "')";
           }
-          if (data.cv_picture) document.getElementById('preview-avatar').style.backgroundImage = "url('" + data.cv_picture + "')";
       } else {
+          // Standard sync for text fields
           document.querySelectorAll('[data-sync]').forEach(input => {
               const targetClass = input.getAttribute('data-sync');
               const value = input.value || input.placeholder;
@@ -1052,6 +1052,12 @@
                   target.innerText = value;
               });
           });
+
+          // Sync picture from hidden input
+          const picData = document.getElementById('cv_picture_data_input').value;
+          if (picData) {
+              document.getElementById('preview-avatar').style.backgroundImage = "url('" + picData + "')";
+          }
       }
 
       const id = selectedTemplate;
@@ -1064,11 +1070,19 @@
       if (input.files && input.files[0]) {
           const reader = new FileReader();
           reader.onload = function(e) {
-              document.getElementById('avatarPreviewBox').style.backgroundImage = "url('" + e.target.result + "')";
-              document.getElementById('preview-avatar').style.backgroundImage = "url('" + e.target.result + "')";
-              const formData = new FormData();
-              formData.append('profile_picture', input.files[0]);
-              fetch('{{ url_for("edit_profile") }}', { method: 'POST', body: formData, headers: {'X-Requested-With': 'XMLHttpRequest'} });
+              const base64Data = e.target.result;
+              document.getElementById('avatarPreviewBox').style.backgroundImage = "url('" + base64Data + "')";
+              document.getElementById('preview-avatar').style.backgroundImage = "url('" + base64Data + "')";
+              document.getElementById('cv_picture_data_input').value = base64Data;
+              
+              fetch('{{ url_for("edit_profile") }}', { 
+                  method: 'POST', 
+                  headers: {
+                      'Content-Type': 'application/json',
+                      'X-Requested-With': 'XMLHttpRequest'
+                  },
+                  body: JSON.stringify({ cv_picture_data: base64Data }) 
+              });
           }
           reader.readAsDataURL(input.files[0]);
       }
@@ -1176,6 +1190,16 @@
               selectTemplate(data.template === 'minimalist' ? 'white' : data.template);
           } else {
               selectTemplate('white');
+          }
+
+          if (data.cv_picture) {
+              document.getElementById('avatarPreviewBox').style.backgroundImage = `url("${data.cv_picture}")`;
+              document.getElementById('preview-avatar').style.backgroundImage = `url("${data.cv_picture}")`;
+              document.getElementById('cv_picture_data_input').value = data.cv_picture;
+          } else {
+              document.getElementById('avatarPreviewBox').style.backgroundImage = '';
+              document.getElementById('preview-avatar').style.backgroundImage = '';
+              document.getElementById('cv_picture_data_input').value = '';
           }
           
           if (updateUrl) {
