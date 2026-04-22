@@ -474,10 +474,6 @@ def delete_cv(cv_id):
 def load_cv(cv_id):
     cv = CV.query.filter_by(id=cv_id, user_id=session['user_id']).first_or_404()
     data = json.loads(cv.content)
-    # Include the user's current CV picture if available
-    user = User.query.get(cv.user_id)
-    if user:
-        data['cv_picture'] = user.cv_picture or user.picture
     return jsonify(data)
 
 @app.route('/profile/cv/list')

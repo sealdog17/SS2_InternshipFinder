@@ -52,6 +52,12 @@ Luôn đảm bảo sự đồng bộ **Pixel-Perfect** giữa: Trình duyệt, X
 *   **AI Match Profile:** Dashboard và Job Detail sử dụng logic tính toán match % dựa trên `session['user_skills']` và `job.required_skills`.
 *   **AI Optimizer (CV Builder):** Nút "AI Optimize" trực tiếp tại trường Bio/Experience giúp chuyên nghiệp hóa nội dung ngay lập tức.
 *   **Navigation:** Thống nhất "Resources" -> "Settings" trên toàn hệ thống. Avatar tài khoản (top-right) luôn dẫn đến trang Settings.
+*   **CV Quick View:** Thêm nút "View" bên cạnh "Edit" trong danh sách CV để chuyển thẳng đến Step 5 (Preview). Hàm `loadCv` hỗ trợ tham số `targetStep`.
+*   **Back Navigation:** Nút "Back to Templates" trong Preview (Step 5) phải quay lại đúng Step 4.
+*   **State Reset & Photo Sync:** 
+    *   Khi tạo CV mới (`createNewCv`), bắt buộc xóa sạch dữ liệu ảnh và background preview.
+    *   Hàm `syncPreview` phải xóa ảnh preview nếu dữ liệu input trống.
+    *   Route `/profile/cv/load/` trả về đúng dữ liệu ảnh trong JSON của CV, không ghi đè bằng ảnh Profile mặc định.
 *   **URL Persistence (F5 Proof):**
     *   Sử dụng URL Hash (ví dụ `#step-1`, `#view-inbox`) cho các thành phần điều hướng client-side (Tabs, Wizards).
     *   Sử dụng Query Parameters (ví dụ `?cv_id=5`) để định danh dữ liệu đang được xử lý.
@@ -77,5 +83,5 @@ Luôn đảm bảo sự đồng bộ **Pixel-Perfect** giữa: Trình duyệt, X
 *   **Safe JS Attributes:** Hạn chế tối đa việc sử dụng Jinja `{{ ... }}` trực tiếp bên trong các thuộc tính JavaScript như `onclick`. Thay vào đó, hãy lưu dữ liệu vào các thuộc tính `data-*` (Ví dụ: `data-id="{{ item.id }}"`) và truy xuất chúng thông qua `this.getAttribute()` trong hàm xử lý. Điều này giúp tránh lỗi cú pháp trong IDE và làm code tường minh hơn.
 
 ---
-*Cập nhật lần cuối: 22/04/2026 (với Security & Frontend Standards Update)*
+*Cập nhật lần cuối: 22/04/2026 (với CV Builder Navigation & Photo Handling Fixes)*
 

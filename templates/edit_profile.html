@@ -497,6 +497,7 @@
                          {% endif %}
 
                          <div style="display: flex; gap: 10px; border-top: 1px solid var(--border); padding-top: 14px;">
+                             <button type="button" class="btn btn-draft" style="flex: 1; padding: 10px 8px; font-size: 13px;" data-cv-id="{{ cv.id }}" onclick="loadCv(this.getAttribute('data-cv-id'), true, 5)"><i class="fa-solid fa-eye"></i> View</button>
                              <button type="button" class="btn btn-primary" style="flex: 1; padding: 10px 8px; font-size: 13px;" data-cv-id="{{ cv.id }}" onclick="loadCv(this.getAttribute('data-cv-id'))"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
                              <div class="download-dropdown" style="width: 46px; flex-shrink: 0;">
                                  <button type="button" class="btn btn-draft" style="width: 100%; padding: 10px; justify-content: center;"><i class="fa-solid fa-download"></i></button>
@@ -817,7 +818,7 @@
 
             <!-- Left Panel: Controls -->
             <div style="width: 300px; min-width: 300px; background: #fff; border-right: 1px solid var(--border); padding: 40px 28px; display: flex; flex-direction: column; gap: 28px; overflow-y: auto;">
-              <a href="javascript:void(0)" onclick="showStep(5)" style="color: var(--primary); text-decoration: none; font-size: 14px; font-weight: 700; display:flex; align-items:center; gap:6px;">
+              <a href="javascript:void(0)" onclick="showStep(4)" style="color: var(--primary); text-decoration: none; font-size: 14px; font-weight: 700; display:flex; align-items:center; gap:6px;">
                 <i class="fa-solid fa-arrow-left"></i> Back to Templates
               </a>
 
@@ -1009,6 +1010,13 @@
   function createNewCv() {
       document.getElementById('cvForm').reset();
       document.getElementById('cv_id_input').value = '';
+      document.getElementById('cv_picture_data_input').value = '';
+      
+      const avatarBox = document.getElementById('avatarPreviewBox');
+      if (avatarBox) avatarBox.style.backgroundImage = '';
+      const previewAvatar = document.getElementById('preview-avatar');
+      if (previewAvatar) previewAvatar.style.backgroundImage = '';
+
       selectedTemplate = 'white';
       document.getElementById('cv_template_input').value = 'white';
       document.querySelectorAll('.tpl-card').forEach(c => c.classList.remove('selected'));
@@ -1042,6 +1050,8 @@
           // Populate fields from data object
           if (data.cv_picture) {
               document.getElementById('preview-avatar').style.backgroundImage = "url('" + data.cv_picture + "')";
+          } else {
+              document.getElementById('preview-avatar').style.backgroundImage = '';
           }
       } else {
           // Standard sync for text fields
@@ -1057,6 +1067,8 @@
           const picData = document.getElementById('cv_picture_data_input').value;
           if (picData) {
               document.getElementById('preview-avatar').style.backgroundImage = "url('" + picData + "')";
+          } else {
+              document.getElementById('preview-avatar').style.backgroundImage = '';
           }
       }
 
@@ -1162,6 +1174,7 @@
                   <i class="fa-regular fa-clock"></i> Vừa lưu
               </div>
               <div style="display: flex; gap: 10px; border-top: 1px solid var(--border); padding-top: 14px; margin-top: 10px;">
+                  <button type="button" class="btn btn-draft" style="flex: 1; padding: 10px 8px; font-size: 13px;" onclick="loadCv('${cvId}', true, 5)"><i class="fa-solid fa-eye"></i> View</button>
                   <button type="button" class="btn btn-primary" style="flex: 1; padding: 10px 8px; font-size: 13px;" onclick="loadCv('${cvId}')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
                   <div class="download-dropdown" style="width: 46px; flex-shrink: 0;">
                       <button type="button" class="btn btn-draft" style="width: 100%; padding: 10px; justify-content: center;"><i class="fa-solid fa-download"></i></button>
@@ -1176,7 +1189,7 @@
       container.insertBefore(card, container.firstChild);
   }
 
-  function loadCv(cvId, updateUrl = true) {
+  function loadCv(cvId, updateUrl = true, targetStep = 1) {
       fetch('/profile/cv/load/' + cvId)
       .then(r => r.json())
       .then(data => {
@@ -1208,7 +1221,7 @@
               window.history.pushState({}, '', url);
           }
           
-          showStep(1);
+          showStep(targetStep);
       });
   }
 
@@ -1287,6 +1300,7 @@
                     })()}
                     
                     <div style="display: flex; gap: 10px; border-top: 1px solid var(--border); padding-top: 14px;">
+                        <button type="button" class="btn btn-draft" style="flex: 1; padding: 10px 8px; font-size: 13px;" onclick="loadCv('${cv.id}', true, 5)"><i class="fa-solid fa-eye"></i> View</button>
                         <button type="button" class="btn btn-primary" style="flex: 1; padding: 10px 8px; font-size: 13px;" onclick="loadCv('${cv.id}')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
                         <div class="download-dropdown" style="width: 46px; flex-shrink: 0;">
                             <button type="button" class="btn btn-draft" style="width: 100%; padding: 10px; justify-content: center;"><i class="fa-solid fa-download"></i></button>
