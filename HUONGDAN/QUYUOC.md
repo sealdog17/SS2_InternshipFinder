@@ -73,7 +73,8 @@ Luôn đảm bảo sự đồng bộ **Pixel-Perfect** giữa: Trình duyệt, X
 ### 🔐 Privacy & Security (Quyền riêng tư & Bảo mật)
 *   **Image Storage (Base64):** Cấm lưu trữ ảnh cá nhân (Avatar, CV photo) trực tiếp vào thư mục công khai (`static/uploads`). Toàn bộ ảnh phải được chuyển sang dạng chuỗi **Base64** và lưu trực tiếp vào Database (SQLite). Điều này đảm bảo quyền riêng tư trên môi trường Localhost và tránh việc truy cập trái phép qua URL file.
 *   **Ownership Verification (IDOR Protection):** Tất cả các route tải hoặc thao tác với dữ liệu nhạy cảm (CV, Profile) phải bắt buộc kiểm tra quyền sở hữu bằng cách lọc theo `user_id` từ `session` (Ví dụ: `filter_by(id=cv_id, user_id=session['user_id'])`). Không được phép tin tưởng tuyệt đối vào ID truyền từ Client mà không có bước xác thực này.
+*   **Safe JS Attributes:** Hạn chế tối đa việc sử dụng Jinja `{{ ... }}` trực tiếp bên trong các thuộc tính JavaScript như `onclick`. Thay vào đó, hãy lưu dữ liệu vào các thuộc tính `data-*` (Ví dụ: `data-id="{{ item.id }}"`) và truy xuất chúng thông qua `this.getAttribute()` trong hàm xử lý. Điều này giúp tránh lỗi cú pháp trong IDE và làm code tường minh hơn.
 
 ---
-*Cập nhật lần cuối: 22/04/2026 (với Security & Privacy Update)*
+*Cập nhật lần cuối: 22/04/2026 (với Security & Frontend Standards Update)*
 

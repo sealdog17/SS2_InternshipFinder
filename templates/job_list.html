@@ -237,7 +237,8 @@
             <div class="title-row">
               <a href="{{ url_for('job_detail', job_id=job.id) }}" class="job-title">{{ job.title }}</a>
               <i class="{% if job.id in saved_job_ids %}fa-solid{% else %}fa-regular{% endif %} fa-bookmark bookmark-btn" 
-                 onclick="toggleSaveJob(this, {{ job.id }})" 
+                 data-job-id="{{ job.id }}"
+                 onclick="toggleSaveJob(this, this.getAttribute('data-job-id'))" 
                  title="Save this job"></i>
             </div>
             <a href="#" class="company-name">{{ job.company }}</a>

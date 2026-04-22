@@ -304,7 +304,7 @@
                     <span class="opp-badge">{{ job.job_type or 'INTERNSHIP' }}</span>
                     <span class="opp-badge blue">SAVED</span>
                   </div>
-                  <div class="opp-save" onclick="toggleSaveJob(this, {{ job.id }})"><i class="fa-solid fa-bookmark"></i></div>
+                  <div class="opp-save" data-job-id="{{ job.id }}" onclick="toggleSaveJob(this, this.getAttribute('data-job-id'))"><i class="fa-solid fa-bookmark"></i></div>
                   <div class="opp-logo" style="background: var(--primary); display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 18px;">
                     {{ (job.company or 'C')[0].upper() }}
                   </div>
