@@ -7,6 +7,7 @@ File này là **Nguồn Sự Thật Duy Nhất** (Single Source of Truth) dành 
 ## 📌 1. QUY ƯỚC LÀM VIỆC CỐ ĐỊNH (MANDATORY)
 *   **Đọc và Ghi nhớ:** AI phải luôn đọc file này khi bắt đầu phiên làm việc mới để nắm bắt lịch sử và không lặp lại lỗi cũ.
 *   **Cập nhật bắt buộc (Crucial):** AI phải tự động cập nhật file này (`HUONGDAN/QUYUOC.md`) ngay lập tức khi phát sinh bất kỳ quy ước mới, thay đổi thiết kế, hoặc logic hệ thống nào. Đây là "Bộ não ngoài" của dự án.
+*   **Quy ước DB:** Không commit file SQLite (`instance/jobfinder.db`) lên repository. Thêm `instance/` hoặc `*.db` vào `.gitignore`. Cung cấp script seed (ví dụ `scratch/seed_demo_data.py`) để tạo DB và dữ liệu mẫu khi clone dự án mới.
 *   **Tự động triển khai:** Bỏ qua bước tạo Kế hoạch (Implementation Plan) và xin phép. Thực thi ngay lập tức khi được giao việc.
 *   **Ngôn ngữ:** Giao tiếp ngắn gọn, trực tiếp bằng tiếng Việt.
 *   **Lưu trữ:** Không tạo file rác ở thư mục gốc. Sử dụng `scratch/` cho file nháp.
