@@ -100,9 +100,20 @@ class Job(db.Model):
     application_deadline = db.Column(db.Date)
     apply_url = db.Column(db.String(500))
     source = db.Column(db.String(50))
+    cover_image = db.Column(db.String(500))
     created_at = db.Column(db.DateTime, default=get_vietnam_time)
     def __repr__(self):
         return f'<Job {self.title} at {self.company}>'
+
+class SavedJob(db.Model):
+    __tablename__ = 'saved_jobs'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    job_id = db.Column(db.Integer, db.ForeignKey('jobs.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=get_vietnam_time)
+
+    user = db.relationship('User', backref=db.backref('saved_jobs', lazy=True))
+    job = db.relationship('Job', backref=db.backref('saved_by_users', lazy=True))
 
 # ===================== OAUTH =====================
 oauth = OAuth(app)
@@ -264,7 +275,26 @@ def logout():
 @app.route('/client-projects')
 @login_required
 def client_projects():
-    return render_template('client_projects.html')
+    user_id = session['user_id']
+    saved_items = SavedJob.query.filter_by(user_id=user_id).order_by(SavedJob.created_at.desc()).all()
+    saved_jobs = [item.job for item in saved_items if item.job is not None]
+    return render_template('client_projects.html', saved_jobs=saved_jobs)
+
+@app.route('/save_job/<int:job_id>', methods=['POST'])
+@login_required
+def save_job(job_id):
+    user_id = session['user_id']
+    existing = SavedJob.query.filter_by(user_id=user_id, job_id=job_id).first()
+    
+    if existing:
+        db.session.delete(existing)
+        db.session.commit()
+        return jsonify({'success': True, 'action': 'unsaved'})
+    else:
+        new_save = SavedJob(user_id=user_id, job_id=job_id)
+        db.session.add(new_save)
+        db.session.commit()
+        return jsonify({'success': True, 'action': 'saved'})
 
 # --------------------- RESOURCES & SETTINGS ---------------------
 @app.route('/resources')
@@ -719,8 +749,22 @@ def job_list():
         query = query.filter(Job.location.contains(location))
     if job_type:
         query = query.filter_by(job_type=job_type)
-    jobs = query.order_by(Job.created_at.desc()).all()
-    return render_template('job_list.html', jobs=jobs, keyword=keyword, location=location, job_type=job_type)
+    page = request.args.get('page', 1, type=int)
+    per_page = 6
+    pagination = query.order_by(Job.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
+    jobs = pagination.items
+    
+    saved_job_ids = []
+    if 'user_id' in session:
+        saved_job_ids = [s.job_id for s in SavedJob.query.filter_by(user_id=session['user_id']).all()]
+        
+    return render_template('job_list.html', 
+                           jobs=jobs, 
+                           pagination=pagination,
+                           keyword=keyword, 
+                           location=location, 
+                           job_type=job_type, 
+                           saved_job_ids=saved_job_ids)
 
 @app.route('/jobs/<int:job_id>')
 @login_required
@@ -731,10 +775,16 @@ def job_detail(job_id):
 # ===================== CREATE DATABASE & SAMPLE DATA =====================
 with app.app_context():
     db.create_all()
-    # Automatically add cv_picture column if not exists (for SQLite)
+    # Automatically add columns if not exists (for SQLite migration)
+    from sqlalchemy import text
     try:
-        from sqlalchemy import text
         db.session.execute(text('ALTER TABLE users ADD COLUMN cv_picture VARCHAR(200)'))
+        db.session.commit()
+    except:
+        db.session.rollback()
+        
+    try:
+        db.session.execute(text('ALTER TABLE jobs ADD COLUMN cover_image VARCHAR(500)'))
         db.session.commit()
     except:
         db.session.rollback()
@@ -751,6 +801,7 @@ with app.app_context():
                 location="Hanoi",
                 job_type="internship",
                 industry="IT",
+                cover_image="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=480&h=200&fit=crop&auto=format&q=85",
                 application_deadline=date(2025, 12, 31),
                 apply_url="https://www.vietnamworks.com/vi/tim-viec-lam/all-jobs",
                 source="VietnamWorks"
@@ -764,6 +815,7 @@ with app.app_context():
                 location="Ho Chi Minh City",
                 job_type="part-time",
                 industry="Marketing",
+                cover_image="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=480&h=200&fit=crop&auto=format&q=85",
                 application_deadline=date(2025, 12, 15),
                 apply_url="https://topdev.vn/it-jobs",
                 source="TopDev"
@@ -777,6 +829,7 @@ with app.app_context():
                 location="Da Nang",
                 job_type="internship",
                 industry="IT",
+                cover_image="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=480&h=200&fit=crop&auto=format&q=85",
                 application_deadline=date(2025, 12, 20),
                 apply_url="https://itviec.com/it-jobs",
                 source="ITviec"
@@ -784,7 +837,7 @@ with app.app_context():
         ]
         db.session.add_all(sample_jobs)
         db.session.commit()
-        print("✅ Added 3 sample jobs.")
+        print("[SUCCESS] Added 3 sample jobs with covers.")
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

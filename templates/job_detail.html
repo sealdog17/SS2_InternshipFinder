@@ -196,7 +196,7 @@
   <div class="nav-right">
     <i class="fa-regular fa-bell nav-icon"></i>
     <a href="{{ url_for('settings') }}"><i class="fa-solid fa-gear nav-icon"></i></a>
-    <a href="{{ url_for('profile') }}" class="avatar">
+    <a href="{{ url_for('settings') }}" class="avatar">
       {% if session.get('user_picture') %}
         <img src="{{ session['user_picture'] }}" alt="Avatar">
       {% else %}

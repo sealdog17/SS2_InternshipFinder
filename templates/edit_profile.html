@@ -374,7 +374,7 @@
     <div class="nav-right">
       <i class="fa-regular fa-bell nav-icon"></i>
       <a href="{{ url_for('settings') }}"><i class="fa-solid fa-gear nav-icon"></i></a>
-      <a href="{{ url_for('profile') }}" class="avatar">
+      <a href="{{ url_for('settings') }}" class="avatar">
         {% if session.get('user_picture') %}
           <img src="{{ session['user_picture'] }}" alt="Avatar">
         {% else %}
@@ -966,7 +966,7 @@
   }
 
 
-  function showStep(stepName) {
+  function showStep(stepName, updateHash = true) {
     document.querySelectorAll('.wizard-step').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
     
@@ -975,25 +975,32 @@
       document.getElementById('nav-step-list').classList.add('active');
       document.getElementById('step-counter').innerText = 'MY PROFILE';
       refreshCvList(); // always reload from server to show latest CVs
+      if (updateHash) window.location.hash = 'list';
       return;
     }
 
-    if (typeof stepName === 'number') {
-        const targetId = 'step_' + stepName;
-        document.getElementById(targetId).classList.add('active');
-        document.getElementById('nav-step' + stepName).classList.add('active');
+    if (typeof stepName === 'number' || !isNaN(stepName)) {
+        const stepNum = parseInt(stepName);
+        const targetId = 'step_' + stepNum;
+        const targetEl = document.getElementById(targetId);
+        if (!targetEl) return;
+
+        targetEl.classList.add('active');
+        const navItem = document.getElementById('nav-step' + stepNum);
+        if (navItem) navItem.classList.add('active');
         
         // Update Step Counter
         const counter = document.getElementById('step-counter');
         const header = counter.previousElementSibling;
         header.innerHTML = '<i class="fa-solid fa-file-invoice"></i> CV Builder';
         
-        if (stepName === 1) counter.innerText = 'Step 1 of 5';
-        else if (stepName === 2) counter.innerText = 'Step 2 of 5';
-        else if (stepName === 3) counter.innerText = 'Step 3 of 5';
-        else if (stepName === 4) counter.innerText = 'Step 4 of 5';
-        else if (stepName === 5) counter.innerText = 'Step 5 of 5';
+        if (stepNum === 1) counter.innerText = 'Step 1 of 5';
+        else if (stepNum === 2) counter.innerText = 'Step 2 of 5';
+        else if (stepNum === 3) counter.innerText = 'Step 3 of 5';
+        else if (stepNum === 4) counter.innerText = 'Step 4 of 5';
+        else if (stepNum === 5) counter.innerText = 'Step 5 of 5';
         
+        if (updateHash) window.location.hash = 'step-' + stepNum;
         syncPreview();
     }
   }
@@ -1155,7 +1162,7 @@
       container.insertBefore(card, container.firstChild);
   }
 
-  function loadCv(cvId) {
+  function loadCv(cvId, updateUrl = true) {
       fetch('/profile/cv/load/' + cvId)
       .then(r => r.json())
       .then(data => {
@@ -1170,6 +1177,13 @@
           } else {
               selectTemplate('white');
           }
+          
+          if (updateUrl) {
+              const url = new URL(window.location);
+              url.searchParams.set('cv_id', cvId);
+              window.history.pushState({}, '', url);
+          }
+          
           showStep(1);
       });
   }
@@ -1452,6 +1466,20 @@
       }, 1500);
   }
 
+  function handleHashStep() {
+      const hash = window.location.hash;
+      if (hash === '#list') {
+          showStep('list_cvs', false);
+      } else if (hash.startsWith('#step-')) {
+          const stepNum = parseInt(hash.replace('#step-', ''));
+          if (!isNaN(stepNum)) {
+              showStep(stepNum, false);
+          }
+      } else {
+          showStep('list_cvs', false);
+      }
+  }
+
   document.addEventListener('DOMContentLoaded', function() {
       // Initialize dynamic background images from data-bg to avoid linter issues
       document.querySelectorAll('[data-bg]').forEach(el => {
@@ -1466,7 +1494,19 @@
           inp.addEventListener('input', updateSkillsSnapshot);
       });
 
-      showStep('list_cvs');
+      // Handle step from URL hash
+      const urlParams = new URLSearchParams(window.location.search);
+      const cvId = urlParams.get('cv_id');
+      
+      if (cvId) {
+          loadCv(cvId, false);
+          // showStep will be called inside loadCv, then hash might override it
+          setTimeout(handleHashStep, 100); 
+      } else {
+          handleHashStep();
+      }
+      
+      window.addEventListener('hashchange', handleHashStep);
   });
 
   document.querySelectorAll('[data-sync]').forEach(input => {

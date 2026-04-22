@@ -50,7 +50,26 @@ Luôn đảm bảo sự đồng bộ **Pixel-Perfect** giữa: Trình duyệt, X
 *   **Template Mapping:** Cũ-Mới (`minimalist` -> `white`, `contemporary` -> `blue`).
 *   **AI Match Profile:** Dashboard và Job Detail sử dụng logic tính toán match % dựa trên `session['user_skills']` và `job.required_skills`.
 *   **AI Optimizer (CV Builder):** Nút "AI Optimize" trực tiếp tại trường Bio/Experience giúp chuyên nghiệp hóa nội dung ngay lập tức.
-*   **Navigation:** Thống nhất "Resources" -> "Settings" trên toàn hệ thống.
+*   **Navigation:** Thống nhất "Resources" -> "Settings" trên toàn hệ thống. Avatar tài khoản (top-right) luôn dẫn đến trang Settings.
+*   **URL Persistence (F5 Proof):**
+    *   Sử dụng URL Hash (ví dụ `#step-1`, `#view-inbox`) cho các thành phần điều hướng client-side (Tabs, Wizards).
+    *   Sử dụng Query Parameters (ví dụ `?cv_id=5`) để định danh dữ liệu đang được xử lý.
+    *   Luôn kiểm tra và phục hồi trạng thái từ URL trong sự kiện `DOMContentLoaded` và `hashchange`.
+
+### 💼 Client Work Structure
+*   **Layout:** Sử dụng Local Sidebar (Home, My Jobs, Inbox).
+*   **Home:** Chứa Workspace Overview và thẻ quản lý Availability.
+*   **My Jobs:** Danh sách công việc với thanh trạng thái màu bên trái (Upcoming: Gray, In Progress: Blue, Done: Green).
+*   **Inbox:** Giao diện chat 2 cột đồng bộ với thiết kế đã thống nhất.
+*   **Saved Opportunities:** 
+    *   Mặc định hiển thị tối đa 2 thẻ công việc gần nhất.
+    *   Sử dụng nút "View all" (không kèm số lượng) để mở rộng toàn bộ danh sách.
+    *   Hủy lưu trực tiếp trên thẻ bằng AJAX và xóa phần tử khỏi DOM kèm hiệu ứng (opacity/scale).
+
+### 🖼️ Visual Consistency (Đồng bộ thị giác)
+*   **Job Images:** Mỗi Job bắt buộc có trường `cover_image` trong DB. Cấm sử dụng chọn ảnh ngẫu nhiên (random) trong Template để đảm bảo một Job luôn hiển thị cùng một ảnh ở mọi trang (Dashboard, Saved list).
+*   **Saved Jobs:** Lưu trữ qua bảng trung gian `saved_jobs`. Trạng thái lưu (Bookmark icon) phải được đồng bộ Real-time giữa Dashboard và Client Work.
 
 ---
-*Cập nhật lần cuối: 16/04/2026*
+*Cập nhật lần cuối: 22/04/2026*
+
