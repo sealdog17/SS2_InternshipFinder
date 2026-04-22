@@ -12,6 +12,7 @@ File này là **Nguồn Sự Thật Duy Nhất** (Single Source of Truth) dành 
 *   **Ngôn ngữ:** Giao tiếp ngắn gọn, trực tiếp bằng tiếng Việt.
 *   **Lưu trữ:** Không tạo file rác ở thư mục gốc. Sử dụng `scratch/` cho file nháp.
 *   **Git:** Chỉ thực hiện `pull` và `push` trên nhánh `master` của repository [InternshipFinder](https://github.com/sealdog17/SS2_InternshipFinder).
+*   **File Môi trường (.env):** Chấp nhận commit file `.env` lên GitHub để đảm bảo các thành viên khác khi pull code có thể chạy ngay mà không cần cấu hình lại (giữ nguyên không thay đổi).
 
 ---
 

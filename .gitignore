@@ -20,7 +20,6 @@ Desktop.ini
 
 # Project Specific
 instance/
-.env
 scratch/
 static/uploads/
 *.db
