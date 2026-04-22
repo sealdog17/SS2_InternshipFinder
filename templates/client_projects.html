@@ -214,7 +214,7 @@
     <div class="nav-right">
       <i class="fa-regular fa-bell nav-icon"></i>
       <a href="{{ url_for('settings') }}"><i class="fa-solid fa-gear nav-icon"></i></a>
-      <div class="avatar" onclick="window.location.href='{{ url_for('settings') }}'">
+      <a href="{{ url_for('settings') }}" class="avatar">
         {% if session.get('user_picture') %}
           <img src="{{ session['user_picture'] }}" alt="Avatar">
         {% else %}
@@ -222,7 +222,7 @@
             {{ session.get('user_name', 'U')[0].upper() }}
           </div>
         {% endif %}
-      </div>
+      </a>
     </div>
   </nav>
 
@@ -325,7 +325,7 @@
                       <span class="opp-tag">Skills</span>
                     {% endif %}
                   </div>
-                  <button class="btn btn-primary" style="width: 100%; background: #f1f5f9; color: var(--primary); border: none;" onclick="window.location.href='{{ url_for('job_detail', job_id=job.id) }}'">View Details</button>
+                  <a href="{{ url_for('job_detail', job_id=job.id) }}" class="btn btn-primary" style="width: 100%; background: #f1f5f9; color: var(--primary); border: none; text-decoration: none; justify-content: center; display: flex; align-items: center;">View Details</a>
                 </div>
               </div>
             {% endfor %}
